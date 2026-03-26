@@ -819,10 +819,19 @@
         updateUI();
     }
 
+    function calMoney(money){
+        return Math.round(money * 100) / 100;
+        //return Number((money).toFixed(2));
+    }
+
+    function calMoney2(money){
+        return money;
+    }
+
     function calculate() {
         const salary = +document.getElementById("salary").value || 0;
-        const hourly = salary / 30 / 8;
-        const daily = hourly * 8;
+        const hourly = calMoney(salary / 30 / 7);   
+        const daily = calMoney(hourly * 7);
 
         document.getElementById("sumDaily").innerText = fm(daily);
         document.getElementById("sum1").innerText = fm(hourly);
@@ -855,16 +864,31 @@
                 }
             }
 
-            const dayVal = (h1 * hourly) + (h15 * hourly * 1.5) + (h3 * hourly * 3);
-            const total = dayVal * dayCount;
+            const prHrly1 = hourly;
+            const prHrly15 = calMoney(hourly * 1.5);
+            const prHrly3 = calMoney(hourly * 3);
+
+            let hhh1 = calMoney(h1 * hourly);
+            if(h1 >= 7){
+                hhh1 = calMoney(3.5 * hourly) + calMoney(
+                    (h1-3.5) * hourly) ;
+            }
+
+            const hhh15 = calMoney(h15 * prHrly15);
+            const hhh3 = calMoney(h3 * prHrly3);
+
+            const dayValRaw = calMoney(hhh1 + hhh15 + hhh3); //452.3666666666667
+            const dayVal = calMoney(dayValRaw);//Math.round(dayValRaw * 100) / 100; //452.37 but i want //452.38
+            const total = calMoney(dayVal * dayCount);
             grandTotal += total;
+            grandTotal = calMoney(grandTotal);
 
             // Update header amount in item
             item.querySelector(".item-amount").innerText = `${dayCount} วัน x ${dayVal} = ฿${fm(total)}`;
 
-            const c1 = h1 > 0 ? `<span class="hours-chip x1">${fh(h1)}h × 1.0 = ${fm(h1 * hourly)}</span>` : '';
-            const c15 = h15 > 0 ? `<span class="hours-chip x15">${fh(h15)}h × 1.5 = ${fm(h15 * hourly * 1.5)}</span>` : '';
-            const c3 = h3 > 0 ? `<span class="hours-chip x3">${fh(h3)}h × 3.0 = ${fm(h3 * hourly * 3)}</span>` : '';
+            const c1 = h1 > 0 ? `<span class="hours-chip x1">${fh(h1)}h × 1.0 = ${fm(hhh1)}</span>` : '';
+            const c15 = h15 > 0 ? `<span class="hours-chip x15">${fh(h15)}h × 1.5 = ${fm(hhh15)}</span>` : '';
+            const c3 = h3 > 0 ? `<span class="hours-chip x3">${fh(h3)}h × 3.0 = ${fm(hhh3)}</span>` : '';
 
             rows += `
             <tr>
