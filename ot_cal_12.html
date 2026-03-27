@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OT Builder Pro | Premium Calculator</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #08090b;
+            --surface: #111318;
+            --surface-hover: #181a21;
+            --card-inner: #1c1f26;
+            --border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #fbbf24;
+            --accent-glow: rgba(251, 191, 36, 0.15);
+            --success: #10b981;
+            --danger: #ef4444;
+            --blue: #3b82f6;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 100px;
+        }
+
+        /* --- Glass Header --- */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(8, 9, 11, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-icon { 
+            background: linear-gradient(135deg, var(--accent), #f59e0b);
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: #000; font-size: 1.2rem; font-weight: bold;
+        }
+
+        .total-display {
+            text-align: right;
+        }
+        .total-display .label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .total-display .amount { font-family: var(--font-mono); font-size: 1.4rem; color: var(--accent); font-weight: 600; }
+
+        /* --- Layout --- */
+        .container { max-width: 1000px; margin: 32px auto; padding: 0 20px; }
+
+        .glass-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+        }
+
+        /* --- Salary Section --- */
+        .salary-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 32px;
+            align-items: center;
+        }
+        @media (max-width: 768px) { .salary-grid { grid-template-columns: 1fr; } }
+
+        .input-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+        .input-wrapper input {
+            width: 100%;
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            padding: 14px 14px 14px 40px;
+            font-size: 1.2rem;
+            font-family: var(--font-mono);
+            transition: all 0.3s;
+        }
+        .input-wrapper input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        @media (max-width: 500px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+        
+        .stat-item {
+            background: var(--card-inner);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .stat-item .s-label { font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+        .stat-item .s-value { font-family: var(--font-mono); font-size: 1rem; color: var(--text-primary); }
+
+        /* --- OT Items --- */
+        .item-list { margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .ot-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ot-item.active { border-color: var(--accent); background: var(--surface-hover); }
+
+        .ot-item-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+        }
+        .drag-handle { color: var(--text-secondary); cursor: grab; font-size: 1.2rem; }
+        .type-indicator { width: 10px; height: 10px; border-radius: 50%; }
+        .ot-title-text { flex: 1; font-weight: 600; font-size: 0.95rem; }
+        .ot-price-tag { font-family: var(--font-mono); color: var(--accent); font-weight: 600; }
+
+        .ot-item-body {
+            display: none;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
+            animation: fadeIn 0.3s ease;
+        }
+        .ot-item.active .ot-item-body { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Form Elements --- */
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+        
+        select, .ot-item input {
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 10px 12px;
+            width: 100%;
+        }
+
+        .btn-add {
+            width: 100%;
+            background: transparent;
+            border: 2px dashed var(--border);
+            color: var(--text-secondary);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-bottom: 32px;
+        }
+        .btn-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+        .btn-delete {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+        .btn-delete:hover { background: var(--danger); color: white; }
+
+        /* --- Table --- */
+        .table-container { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 0.85rem; }
+        th { background: var(--card-inner); color: var(--text-secondary); text-align: left; padding: 12px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; }
+        td { padding: 14px 12px; border-bottom: 1px solid var(--border); }
+        tr:last-child td { border-bottom: none; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
+        .bg-wd { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .bg-hd { background: rgba(251, 191, 36, 0.1); color: var(--accent); }
+
+        .hours-tag { font-family: var(--font-mono); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div class="brand">
+        <div class="brand-icon">OT</div>
+        <div>
+            <h1 style="font-size: 1rem; line-height: 1;">Builder Pro</h1>
+            <span style="font-size: 0.7rem; color: var(--text-secondary);">Premium OT Calculator</span>
+        </div>
+    </div>
+    <div class="total-display">
+        <div class="label">Total Amount</div>
+        <div class="amount" id="headerTotal">฿0.00</div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="glass-card">
+        <div class="salary-grid">
+            <div class="input-group">
+                <label>Monthly Salary (บาท)</label>
+                <div class="input-wrapper">
+                    <i>฿</i>
+                    <input id="salary" type="number" value="20380" placeholder="Enter salary...">
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="s-label">Daily</div>
+                    <div class="s-value" id="sumDaily">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="s-label">1.0x / Hr</div>
+                    <div class="s-value" id="sum1">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="s-label">1.5x / Hr</div>
+                    <div class="s-value" id="sum15">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="s-label">3.0x / Hr</div>
+                    <div class="s-value" id="sum3">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary);">Your OT Logs</h2>
+        <span id="logCount" style="font-size: 0.75rem; color: var(--accent);">0 entries</span>
+    </div>
+
+    <div id="items-container" class="item-list"></div>
+
+    <button class="btn-add" onclick="addNewOT()">+ Add New OT Log</button>
+
+    <h2 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 16px;">Summary Report</h2>
+    <div class="glass-card" style="padding: 0;">
+        <div class="table-container" id="result-table"></div>
+    </div>
+</div>
+
+<script>
+    // --- Data Persistence ---
+    const STORAGE_KEY = 'OT_BUILDER_PRO_DATA';
+
+    function saveData() {
+        const data = {
+            salary: document.getElementById('salary').value,
+            items: []
+        };
+        document.querySelectorAll('.ot-item').forEach(el => {
+            data.items.push({
+                id: el.dataset.id,
+                type: el.querySelector('.type').value,
+                start: el.querySelector('.start').value,
+                end: el.querySelector('.end').value,
+                days: el.querySelector('.days').value,
+                name: el.querySelector('.name').value,
+                edited: el.querySelector('.name').dataset.edited
+            });
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) {
+            addNewOT(); // Load one by default
+            return;
+        }
+        const data = JSON.parse(saved);
+        document.getElementById('salary').value = data.salary;
+        data.items.forEach(item => addNewOT(item));
+        calculate();
+    }
+
+    // --- Core Logic ---
+    const toHour = t => {
+        if (!t) return 0;
+        const [h, m] = t.split(":").map(Number);
+        return h + m / 60;
+    };
+    const fm = n => n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fh = n => (n % 1 === 0 ? n : +n.toFixed(2));
+
+    function addNewOT(savedItem = null) {
+        // Collapse others
+        document.querySelectorAll(".ot-item").forEach(i => i.classList.remove("active"));
+        
+        const id = savedItem ? savedItem.id : Date.now();
+        const html = `
+        <div class="ot-item active" data-id="${id}">
+            <div class="ot-item-header" onclick="this.closest('.ot-item').classList.toggle('active')">
+                <span class="drag-handle">⠿</span>
+                <div class="type-indicator ${ (savedItem?.type || 'weekday') === 'weekday' ? 'bg-wd' : 'bg-hd' }" style="width:10px; height:10px; background:currentColor;"></div>
+                <span class="ot-title-text">${savedItem?.name || 'New OT Entry'}</span>
+                <span class="ot-price-tag">฿0.00</span>
+            </div>
+            <div class="ot-item-body">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Day Type</label>
+                        <select class="type">
+                            <option value="weekday" ${savedItem?.type === 'weekday' ? 'selected' : ''}>Weekday (1.5x)</option>
+                            <option value="holiday" ${savedItem?.type === 'holiday' ? 'selected' : ''}>Holiday (1.0x / 3.0x)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Start Time</label>
+                        <input class="start" value="${savedItem?.start || ''}">
+                    </div>
+                    <div class="input-group">
+                        <label>End Time</label>
+                        <input class="end" value="${savedItem?.end || ''}">
+                    </div>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 100px 1fr;">
+                    <div class="input-group">
+                        <label>Days</label>
+                        <input type="number" class="days" value="${savedItem?.days || 1}">
+                    </div>
+                    <div class="input-group">
+                        <label>Entry Description</label>
+                        <input class="name" placeholder="e.g. Weekend Project" value="${savedItem?.name || ''}" data-edited="${savedItem?.edited || ''}">
+                    </div>
+                </div>
+                <div style="display:flex; justify-content: space-between; align-items: center;">
+                    <div class="calc-info" style="font-size: 0.75rem; color: var(--text-secondary);"></div>
+                    <button class="btn-delete" onclick="this.closest('.ot-item').remove(); calculate();">Remove</button>
+                </div>
+            </div>
+        </div>`;
+
+        document.getElementById("items-container").insertAdjacentHTML("beforeend", html);
+        const el = document.querySelector(`[data-id="${id}"]`);
+
+        // Initialize pickers
+        flatpickr(el.querySelector(".start"), { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, onChange: () => updateUI(el) });
+        flatpickr(el.querySelector(".end"), { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, onChange: () => updateUI(el) });
+
+        // Event Listeners
+        el.querySelector(".type").onchange = () => updateUI(el);
+        el.querySelector(".days").oninput = () => calculate();
+        el.querySelector(".name").oninput = (e) => {
+            e.target.dataset.edited = "1";
+            el.querySelector(".ot-title-text").innerText = e.target.value;
+            calculate();
+        };
+
+        if(!savedItem) updateUI(el);
+        calculate();
+    }
+
+    function updateUI(el) {
+        const startVal = el.querySelector(".start").value;
+        const endVal = el.querySelector(".end").value;
+        const type = el.querySelector(".type").value;
+        const nameInput = el.querySelector(".name");
+        
+        if (!nameInput.dataset.edited) {
+            nameInput.value = `OT ${type === 'weekday' ? 'WD' : 'HD'} ${startVal}-${endVal}`;
+            el.querySelector(".ot-title-text").innerText = nameInput.value;
+        }
+
+        const indicator = el.querySelector(".type-indicator");
+        indicator.className = `type-indicator ${type === 'weekday' ? 'bg-wd' : 'bg-hd'}`;
+        
+        calculate();
+    }
+
+    function calculate() {
+        const salary = +document.getElementById("salary").value || 0;
+        const hourly = salary / 30 / 8;
+        const daily = hourly * 8;
+
+        document.getElementById("sumDaily").innerText = fm(daily);
+        document.getElementById("sum1").innerText = fm(hourly);
+        document.getElementById("sum15").innerText = fm(hourly * 1.5);
+        document.getElementById("sum3").innerText = fm(hourly * 3);
+
+        let grandTotal = 0;
+        let rows = "";
+        const items = document.querySelectorAll('.ot-item');
+
+        items.forEach(el => {
+            const type = el.querySelector(".type").value;
+            const start = toHour(el.querySelector(".start").value);
+            let end = toHour(el.querySelector(".end").value);
+            const days = +el.querySelector(".days").value || 0;
+            const name = el.querySelector(".name").value;
+
+            if (end <= start && start > 0) end += 24;
+
+            let h1 = 0, h15 = 0, h3 = 0;
+            for (let h = start; h < end; h += 0.5) {
+                let x = h >= 24 ? h - 24 : h;
+                if (type === "weekday") {
+                    if (x >= 8.5 && x < 17.5) continue; // Skip shift
+                    h15 += 0.5;
+                } else {
+                    if (x >= 8.5 && x < 17.5) {
+                        if (x >= 12 && x < 13) continue; // Lunch
+                        h1 += 0.5;
+                    } else {
+                        h3 += 0.5;
+                    }
+                }
+            }
+
+            const dayVal = (h1 * hourly) + (h15 * hourly * 1.5) + (h3 * hourly * 3);
+            const total = dayVal * days;
+            grandTotal += total;
+
+            el.querySelector(".ot-price-tag").innerText = `฿${fm(total)}`;
+            el.querySelector(".calc-info").innerText = `Summary: ${fh(h1+h15+h3)} hrs per day`;
+
+            rows += `
+                <tr>
+                    <td><span class="badge ${type === 'weekday' ? 'bg-wd' : 'bg-hd'}">${type === 'weekday' ? 'WD' : 'HD'}</span> ${name}</td>
+                    <td style="font-family:var(--font-mono)">${el.querySelector(".start").value}-${el.querySelector(".end").value}</td>
+                    <td>
+                        ${h1 > 0 ? `<span class="hours-tag">1.0x: ${fh(h1)}h</span>` : ''}
+                        ${h15 > 0 ? `<span class="hours-tag">1.5x: ${fh(h15)}h</span>` : ''}
+                        ${h3 > 0 ? `<span class="hours-tag">3.0x: ${fh(h3)}h</span>` : ''}
+                    </td>
+                    <td style="text-align:center">${days}</td>
+                    <td style="text-align:right; font-family:var(--font-mono); font-weight:600; color:var(--accent)">฿${fm(total)}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById("headerTotal").innerText = `฿${fm(grandTotal)}`;
+        document.getElementById("logCount").innerText = `${items.length} entries`;
+
+        document.getElementById("result-table").innerHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Entry</th>
+                        <th>Period</th>
+                        <th>Hours Break-down</th>
+                        <th style="text-align:center">Days</th>
+                        <th style="text-align:right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows || '<tr><td colspan="5" style="text-align:center; padding: 40px; color: var(--text-secondary)">No logs found. Add your first OT entry above.</td></tr>'}
+                </tbody>
+            </table>
+        `;
+
+        saveData();
+    }
+
+    // --- Init ---
+    new Sortable(document.getElementById("items-container"), { 
+        handle: '.drag-handle', 
+        animation: 200, 
+        onEnd: () => { calculate(); saveData(); } 
+    });
+
+    document.getElementById("salary").oninput = calculate;
+    
+    // Load existing or default
+    loadData();
+
+</script>
+</body>
+</html>

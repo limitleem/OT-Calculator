@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OT Builder Pro | เครื่องมือคำนวณโอที</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Sarabun:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        body {
+            font-family: 'Inter', 'Sarabun', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container { max-width: 1100px; margin: auto; }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 { margin: 0; font-size: 1.5rem; color: var(--primary); }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
+        }
+
+        /* Salary Section */
+        .salary-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        @media (max-width: 600px) { .salary-grid { grid-template-columns: 1fr; } }
+
+        .summary-pills {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .pill {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .pill span { display: block; font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; font-weight: 600; }
+        .pill b { font-size: 1.1rem; color: var(--primary); }
+
+        /* Inputs */
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: var(--text-sub); }
+        input, select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border 0.2s;
+        }
+        input:focus { outline: none; border-color: var(--primary); ring: 2px solid #6366f133; }
+
+        /* OT Items */
+        .item { border-left: 4px solid var(--primary); transition: all 0.2s; }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .item-title { font-weight: 700; font-size: 1rem; }
+        
+        .item-body { 
+            display: none; 
+            margin-top: 15px; 
+            padding-top: 15px; 
+            border-top: 1px solid var(--border); 
+        }
+        .item.active .item-body { display: block; }
+
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        
+        /* Buttons */
+        .btn {
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: opacity 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            padding: 14px;
+            width: 100%;
+            font-size: 1rem;
+            margin-bottom: 24px;
+        }
+        .btn-del { background: #fee2e2; color: var(--danger); padding: 8px; margin-top: 10px; }
+        .btn:hover { opacity: 0.9; }
+
+        /* Badges */
+        .badge {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .bg-wk { background: #dcfce7; color: #166534; }
+        .bg-hd { background: #fef9c3; color: #854d0e; }
+        .bg-hr { background: #e0e7ff; color: #3730a3; }
+
+        /* Table Responsive */
+        .table-wrapper { overflow-x: auto; margin-top: 20px; border-radius: 12px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; font-size: 0.9rem; }
+        th { background: #f8fafc; color: var(--text-sub); text-align: left; padding: 12px; border-bottom: 2px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid var(--border); }
+        tr.total-row { background: #f1f5f9; font-weight: 700; font-size: 1rem; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        .info-text { font-size: 0.8rem; color: var(--primary); margin-bottom: 10px; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>OT Builder Pro</h1>
+        <p style="color:var(--text-sub); font-size: 0.9rem;">คำนวณค่าล่วงเวลาแม่นยำ แยกประเภทวันหยุดและวันธรรมดา</p>
+    </header>
+
+    <div class="card">
+        <div class="salary-grid">
+            <div>
+                <label>เงินเดือนพื้นฐาน (บาท)</label>
+                <input id="salary" type="number" value="20380" placeholder="ระบุเงินเดือน">
+            </div>
+            <div class="summary-pills">
+                <div class="pill"><span>ค่าแรงรายวัน</span><b id="sumDaily">-</b></div>
+                <div class="pill"><span>1 เท่า/ชม.</span><b id="sum1">-</b></div>
+                <div class="pill"><span>1.5 เท่า/ชม.</span><b id="sum15">-</b></div>
+                <div class="pill"><span>3 เท่า/ชม.</span><b id="sum3">-</b></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="items-container"></div>
+
+    <button class="btn btn-add" onclick="addItem()">+ เพิ่มรายการโอที</button>
+
+    <div class="card">
+        <label>สรุปผลรายการ</label>
+        <div class="table-wrapper" id="result-table">
+            </div>
+    </div>
+</div>
+
+<script>
+    const toHour = t => {
+        if(!t) return 0;
+        const [h,m] = t.split(":").map(Number);
+        return h + m/60;
+    };
+
+    const fm = n => n ? n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) : "0.00";
+    const fh = n => n ? (n % 1 === 0 ? n : n.toFixed(2)) : "0";
+
+    function addItem() {
+        // Collapse others
+        document.querySelectorAll(".item").forEach(i => i.classList.remove("active"));
+        
+        const id = Date.now();
+        const html = `
+        <div class="card item active" data-id="${id}">
+            <div class="item-header" onclick="this.parentElement.classList.toggle('active')">
+                <span class="item-title">รายการใหม่</span>
+                <span style="font-size:0.8rem; color:var(--primary)">แก้ไข &#9662;</span>
+            </div>
+
+            <div class="item-body">
+                <div class="grid-3">
+                    <div>
+                        <label>ประเภทวัน</label>
+                        <select class="type">
+                            <option value="weekday">วันธรรมดา</option>
+                            <option value="holiday">วันหยุด (ส-อา/นักขัต)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>เริ่ม</label>
+                        <input class="start">
+                    </div>
+                    <div>
+                        <label>สิ้นสุด</label>
+                        <input class="end">
+                    </div>
+                </div>
+
+                <div class="grid-3" style="grid-template-columns: 1fr 2fr;">
+                    <div>
+                        <label>จำนวนวัน</label>
+                        <input class="days" type="number" value="1">
+                    </div>
+                    <div>
+                        <label>ชื่อรายการ / บันทึก</label>
+                        <input class="name" placeholder="เช่น โอทีปิดงบ">
+                    </div>
+                </div>
+
+                <div class="info-text"></div>
+                <button class="btn btn-del" onclick="this.closest('.item').remove(); calculate()">ลบรายการนี้</button>
+            </div>
+        </div>`;
+
+        document.getElementById("items-container").insertAdjacentHTML("beforeend", html);
+        const el = document.querySelector(`[data-id="${id}"]`);
+        
+        // Setup Logic
+        const type = el.querySelector(".type");
+        const start = el.querySelector(".start");
+        const end = el.querySelector(".end");
+        const days = el.querySelector(".days");
+        const name = el.querySelector(".name");
+        const info = el.querySelector(".info-text");
+
+        const fp1 = flatpickr(start, {enableTime:true, noCalendar:true, dateFormat:"H:i", time_24hr:true});
+        const fp2 = flatpickr(end, {enableTime:true, noCalendar:true, dateFormat:"H:i", time_24hr:true});
+
+        const updateUI = () => {
+            let s = toHour(start.value);
+            let e = toHour(end.value);
+            let total = 0, breakTime = 0;
+
+            for(let h=s; h<e; h+=0.5){
+                let x = h >= 24 ? h-24 : h;
+                if(type.value === "weekday") {
+                    if(x >= 8.5 && x < 16.5) continue;
+                    total += 0.5;
+                } else {
+                    if(x >= 8.5 && x < 16.5) {
+                        if(x >= 12 && x < 13) { breakTime += 0.5; continue; }
+                    }
+                    total += 0.5;
+                }
+            }
+            info.innerText = `คำนวณได้: ${fh(total)} ชม. ${breakTime > 0 ? `(หักพัก ${fh(breakTime)} ชม.)` : ""}`;
+            if(!name.dataset.edited) {
+                name.value = `${type.value === "weekday" ? "OT ธรรมดา" : "OT วันหยุด"} (${start.value}-${end.value})`;
+            }
+            el.querySelector(".item-title").innerText = name.value;
+            calculate();
+        };
+
+        name.oninput = () => { name.dataset.edited = true; el.querySelector(".item-title").innerText = name.value; };
+        type.onchange = () => {
+            if(type.value === "weekday") { fp1.setDate("17:00"); fp2.setDate("21:00"); }
+            else { fp1.setDate("08:30"); fp2.setDate("17:00"); }
+            updateUI();
+        };
+        [start, end, days].forEach(input => input.onchange = updateUI);
+        
+        type.dispatchEvent(new Event("change"));
+    }
+
+    function calculate() {
+        const salary = +document.getElementById("salary").value || 0;
+        const hourly = salary / 30 / 8; // Assuming 8-hour workday
+        const daily = hourly * 8;
+
+        document.getElementById("sumDaily").innerText = fm(daily);
+        document.getElementById("sum1").innerText = fm(hourly);
+        document.getElementById("sum15").innerText = fm(hourly * 1.5);
+        document.getElementById("sum3").innerText = fm(hourly * 3);
+
+        let rows = "", grandTotal = 0;
+
+        document.querySelectorAll(".item").forEach(item => {
+            const type = item.querySelector(".type").value;
+            const name = item.querySelector(".name").value;
+            const dayCount = +item.querySelector(".days").value || 0;
+            const s = toHour(item.querySelector(".start").value);
+            const e = toHour(item.querySelector(".end").value);
+
+            let h1=0, h15=0, h3=0;
+
+            for(let h=s; h<e; h+=0.5){
+                let x = h >= 24 ? h-24 : h;
+                if(type === "weekday") {
+                    if(x >= 8.5 && x < 16.5) continue;
+                    h15 += 0.5;
+                } else {
+                    if(x >= 8.5 && x < 16.5) {
+                        if(x >= 12 && x < 13) continue;
+                        h1 += 0.5;
+                    } else {
+                        h3 += 0.5;
+                    }
+                }
+            }
+
+            const dayVal = (h1*hourly) + (h15*hourly*1.5) + (h3*hourly*3);
+            const total = dayVal * dayCount;
+            grandTotal += total;
+
+            let hs1 = '';
+            let hhs1 = '';
+            if(h1>0){
+              hs1 = `<span class="badge bg-hr">🕒 ${fh(h1)}</span>`;
+              hhs1 = ` ${fm(h1*hourly)}`;
+            }
+
+            let hs15 = '';
+            let hhs15 = '';
+            if(h15>0){
+              hs15 = `<span class="badge bg-hr">🕒 ${fh(h15)}</span>`;
+              hhs15 = ` ${fm(h15*hourly*1.5)}`;
+            }
+
+            let hs3 = '';
+            let hhs3 = '';
+            if(h3>0){
+              hs3 = `<span class="badge bg-hr">🕒 ${fh(h3)}</span>`;
+              hhs3 = ` ${fm(h3*hourly*3)}`;
+            }
+
+            rows += `
+            <tr>
+                <td>
+                    <span class="badge ${type==='weekday'?'bg-wk':'bg-hd'}">${type==='weekday'?'WD':'HD'}</span>
+                    <span style="font-weight:600">${name}</span>
+                </td>
+                <td class="text-center">${item.querySelector(".start").value}-${item.querySelector(".end").value}</td>
+                <td class="text-right">${hs1}${hhs1}</td>
+              <td class="text-right">${hs15}${hhs15}</td>
+              <td class="text-right">${hs3}${hhs3}</td>
+                <td class="text-center">${dayCount}</td>
+                <td class="text-right" style="font-weight:700; color:var(--primary)">${fm(total)}</td>
+            </tr>`;
+        });
+
+        document.getElementById("result-table").innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>รายการ</th>
+                    <th class="text-center">เวลา</th>
+                    <th class="text-right">1.0x (ชม./บาท)</th>
+                    <th class="text-right">1.5x (ชม./บาท)</th>
+                    <th class="text-right">3.0x (ชม./บาท)</th>
+                    <th class="text-center">วัน</th>
+                    <th class="text-right">รวมสุทธิ</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows || '<tr><td colspan="7" class="text-center">ยังไม่มีข้อมูล</td></tr>'}
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td colspan="6" class="text-right">รวมเงินโอทีทั้งหมด</td>
+                    <td class="text-right" style="color:var(--primary)">฿${fm(grandTotal)}</td>
+                </tr>
+            </tfoot>
+        </table>`;
+    }
+
+    new Sortable(document.getElementById("items-container"), { animation: 150, onEnd: calculate });
+    document.getElementById("salary").oninput = calculate;
+    
+    // Start with one item
+    addItem();
+</script>
+</body>
+</html>

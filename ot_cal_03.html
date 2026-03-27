@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>OT Builder Pro</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<style>
+:root { --primary:#6366f1; }
+
+body{
+  font-family:'Segoe UI';
+  background:linear-gradient(135deg,#eef2ff,#f8fafc);
+  margin:0;padding:16px;
+}
+
+.container{max-width:1000px;margin:auto;animation:fadeIn .5s;}
+
+.card{
+  background:rgba(255,255,255,0.9);
+  backdrop-filter:blur(10px);
+  padding:18px;border-radius:16px;
+  margin-bottom:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.header{
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;
+}
+
+input{
+  width:100%;padding:10px;border-radius:10px;
+  border:1px solid #ddd;background:#f9fafb;
+  margin-top:6px;margin-bottom:10px;
+}
+
+.row{display:flex;gap:10px;}
+
+button{
+  padding:12px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;cursor:pointer;
+  box-shadow:0 6px 15px rgba(99,102,241,0.3);
+}
+
+.small{padding:6px 10px;font-size:12px;}
+.danger{background:#ef4444;}
+
+.drag{cursor:grab;font-size:12px;color:#888;margin-bottom:6px;}
+
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+th{
+  background:#f1f5f9;
+  padding:10px;
+  font-size:13px;
+}
+
+td{padding:10px;text-align:center;}
+
+tr:nth-child(even) td{background:#fafafa;}
+tr:hover td{background:#eef2ff;}
+
+.total{
+  background:linear-gradient(90deg,#eef2ff,#e0e7ff);
+  font-weight:bold;
+}
+
+.highlight{color:#4f46e5;font-weight:bold;}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card header">
+  <h2 style="margin:0;">💰 OT Builder Pro</h2>
+  <div style="font-size:13px;opacity:0.9;">Flexible + Professional</div>
+</div>
+
+<div class="card">
+  <label>เงินเดือน</label>
+  <input id="salary" value="20380">
+</div>
+
+<div class="card">
+  <div class="row" style="flex-wrap:wrap;">
+    <button onclick="addPresetWeekday()">+ วันธรรมดา</button>
+    <button onclick="addPresetHoliday()">+ วันหยุด</button>
+    <button onclick="addItem()">+ เพิ่มเอง</button>
+  </div>
+</div>
+
+<div id="items"></div>
+
+<button onclick="calculate()">คำนวณ</button>
+
+<div class="card" id="result"></div>
+
+</div>
+
+<script>
+
+// ===== utils =====
+const toHour=t=>{
+  if(!t) return 0;
+  const [h,m]=t.split(":").map(Number);
+  return h+m/60;
+};
+
+const fm=n=>!n?"":n.toLocaleString(undefined,{maximumFractionDigits:2});
+const fh=n=>!n?"":(n%1===0?n:n.toFixed(2));
+
+// ===== add item =====
+function addItem(data={}){
+  const id=Date.now();
+
+  const html=`
+  <div class="card item" data-id="${id}">
+    <div class="drag">☰ ลากเรียง</div>
+
+    <input class="name" placeholder="ชื่อรายการ" value="${data.name||''}">
+    <input type="number" class="days" value="${data.days||1}">
+
+    <div class="row">
+      <input class="start">
+      <input class="end">
+    </div>
+
+    <button class="danger small" onclick="removeItem(${id})">ลบ</button>
+  </div>
+  `;
+
+  document.getElementById("items").insertAdjacentHTML("beforeend",html);
+
+  const el=document.querySelector(`[data-id="${id}"]`);
+
+  flatpickr(el.querySelector(".start"),{enableTime:true,noCalendar:true,dateFormat:"H:i",defaultDate:data.start||"17:00"});
+  flatpickr(el.querySelector(".end"),{enableTime:true,noCalendar:true,dateFormat:"H:i",defaultDate:data.end||"21:00"});
+}
+
+// ===== presets =====
+function addPresetWeekday(){
+  addItem({
+    name:"OT วันธรรมดา",
+    start:"17:00",
+    end:"21:00",
+    days:1
+  });
+}
+
+function addPresetHoliday(){
+  addItem({
+    name:"OT วันหยุด",
+    start:"08:30",
+    end:"21:00",
+    days:1
+  });
+}
+
+// ===== remove =====
+function removeItem(id){
+  document.querySelector(`[data-id="${id}"]`).remove();
+}
+
+// ===== drag =====
+new Sortable(document.getElementById("items"),{
+  animation:150,
+  handle:".drag"
+});
+
+// ===== calculate =====
+function calculate(){
+
+  const salary = +document.getElementById("salary").value || 0;
+  const hourly=salary/30/7;
+
+  let rows="";
+  let grand=0;
+
+  document.querySelectorAll(".item").forEach(item=>{
+
+    const name=item.querySelector(".name").value||"-";
+    const days=+item.querySelector(".days").value||0;
+
+    const s=toHour(item.querySelector(".start").value);
+    const e=toHour(item.querySelector(".end").value);
+
+    let h1=0,h15=0,h3=0;
+
+    for(let h=s;h<e;h+=0.5){
+      let x=h>=24?h-24:h;
+
+      if(x>=8.5&&x<16.5){
+        if(x>=12&&x<13) continue;
+        h1+=0.5;
+      }else{
+        h3+=0.5;
+      }
+    }
+
+    const dayTotal=(h1*hourly)+(h3*hourly*3);
+    const total=dayTotal*days;
+
+    grand+=total;
+
+    rows+=`
+    <tr>
+      <td>${name}</td>
+      <td>${item.querySelector(".start").value}-${item.querySelector(".end").value}</td>
+
+      <td>${fh(h1)}</td><td>${fm(h1*hourly)}</td>
+      <td></td><td></td>
+      <td>${fh(h3)}</td><td>${fm(h3*hourly*3)}</td>
+
+      <td class="highlight">${fm(dayTotal)}</td>
+      <td>${days||""}</td>
+      <td>${fm(total)}</td>
+    </tr>
+    `;
+  });
+
+  document.getElementById("result").innerHTML =`
+  <table>
+    <tr>
+      <th>รายการ</th>
+      <th>เวลา</th>
+      <th colspan="2">1x</th>
+      <th colspan="2">1.5x</th>
+      <th colspan="2">3x</th>
+      <th>รวม/วัน</th>
+      <th>วัน</th>
+      <th>รวมเงิน</th>
+    </tr>
+
+    ${rows}
+
+    <tr class="total">
+      <td colspan="10">รวมทั้งหมด</td>
+      <td>${fm(grand)}</td>
+    </tr>
+  </table>
+  `;
+}
+
+// default
+addPresetWeekday();
+
+</script>
+
+</body>
+</html>

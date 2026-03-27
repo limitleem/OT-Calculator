@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>OT Builder Pro</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<style>
+:root { --primary:#6366f1; }
+
+body{
+  font-family:'Segoe UI';
+  background:linear-gradient(135deg,#eef2ff,#f8fafc);
+  margin:0;padding:16px;
+}
+
+.container{max-width:1000px;margin:auto;}
+
+.card{
+  background:white;
+  padding:16px;
+  border-radius:16px;
+  margin-bottom:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.header{
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;
+}
+
+/* summary inline */
+.summary{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  margin-top:10px;
+  font-size:14px;
+}
+.summary div{
+  background:#f3f4f6;
+  padding:8px;
+  border-radius:10px;
+}
+
+/* input */
+input,select{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  margin-top:6px;margin-bottom:10px;
+}
+
+.row{display:flex;gap:10px;}
+
+button{
+  width:100%;
+  padding:14px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;border:none;
+  border-radius:12px;
+}
+
+.drag{font-size:12px;color:#888;cursor:grab;}
+
+.info{font-size:13px;color:#555;}
+
+.badge{
+  padding:4px 8px;
+  border-radius:8px;
+  font-size:12px;
+}
+.weekday{background:#dcfce7;color:#166534;}
+.holiday{background:#ede9fe;color:#5b21b6;}
+
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+th{background:#f3f4f6;padding:10px;}
+td{padding:10px;text-align:center;}
+
+tr:nth-child(even) td{background:#fafafa;}
+tr:hover td{background:#eef2ff;}
+
+.total{
+  background:#eef2ff;
+  font-weight:bold;
+}
+
+.highlight{
+  color:#4f46e5;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card header">
+  <h2>💰 OT Builder</h2>
+</div>
+
+<div class="card">
+  <label>เงินเดือน</label>
+  <input id="salary" value="20380">
+
+  <div class="summary">
+    <div>ค่าแรง/วัน: <b id="sumDaily">-</b></div>
+    <div>1x/ชม: <b id="sum1">-</b></div>
+    <div>1.5x/ชม: <b id="sum15">-</b></div>
+    <div>3x/ชม: <b id="sum3">-</b></div>
+  </div>
+</div>
+
+<button onclick="addItem()">+ เพิ่มโอที</button>
+
+<div id="items"></div>
+
+<div class="card" id="result"></div>
+
+</div>
+
+<script>
+
+const toHour=t=>{
+  if(!t) return 0;
+  const [h,m]=t.split(":").map(Number);
+  return h+m/60;
+};
+
+const fm=n=>!n?"":n.toLocaleString(undefined,{maximumFractionDigits:2});
+const fh=n=>!n?"":(n%1===0?n:n.toFixed(2));
+
+function addItem(){
+  const id=Date.now();
+
+  const html=`
+  <div class="card item" data-id="${id}">
+    <div class="drag">☰ ลากเรียง</div>
+
+    <label>ประเภท</label>
+    <select class="type">
+      <option value="weekday">วันธรรมดา</option>
+      <option value="holiday">วันหยุด</option>
+    </select>
+
+    <label>จำนวนวัน</label>
+    <input class="days" type="number" value="1">
+
+    <label>เวลา</label>
+    <div class="row">
+      <input class="start">
+      <input class="end">
+    </div>
+
+    <div class="info"></div>
+
+    <label>ชื่อรายการ</label>
+    <input class="name">
+
+    <button onclick="this.closest('.item').remove(); calculate();" style="background:#ef4444;">ลบ</button>
+  </div>
+  `;
+
+  items.insertAdjacentHTML("beforeend",html);
+
+  const el=document.querySelector(`[data-id="${id}"]`);
+
+  const type=el.querySelector(".type");
+  const start=el.querySelector(".start");
+  const end=el.querySelector(".end");
+  const info=el.querySelector(".info");
+  const name=el.querySelector(".name");
+  const days=el.querySelector(".days");
+
+  const fp1=flatpickr(start,{enableTime:true,noCalendar:true,dateFormat:"H:i"});
+  const fp2=flatpickr(end,{enableTime:true,noCalendar:true,dateFormat:"H:i"});
+
+  let initialized=false;
+
+  function update(){
+    let s=toHour(start.value);
+    let e=toHour(end.value);
+
+    let total=0,cut=0;
+
+    for(let h=s;h<e;h+=0.5){
+      let x=h>=24?h-24:h;
+
+      if(type.value==="weekday"){
+        total+=0.5;
+      } else {
+        if(x>=8.5&&x<16.5){
+          if(x>=12&&x<13){cut+=0.5;continue;}
+        }
+        total+=0.5;
+      }
+    }
+
+    info.innerText =
+      type.value==="weekday"
+      ? `รวม ${fh(total)} ชม. (1.5x)`
+      : `รวม ${fh(total)} ชม. (พัก ${fh(cut)} ชม.)`;
+
+    if(!name.dataset.edited){
+      name.value = `OT ${type.value==="weekday"?"วันธรรมดา":"วันหยุด"} ${start.value}-${end.value}`;
+    }
+
+    calculate();
+  }
+
+  name.oninput=()=> name.dataset.edited=true;
+
+  type.onchange=()=>{
+    if(!initialized){
+      if(type.value==="weekday"){
+        fp1.setDate("17:00");
+        fp2.setDate("21:00");
+      } else {
+        fp1.setDate("08:30");
+        fp2.setDate("21:00");
+      }
+      initialized=true;
+    }
+    update();
+  };
+
+  start.onchange=update;
+  end.onchange=update;
+  days.oninput=calculate;
+
+  type.dispatchEvent(new Event("change"));
+}
+
+// drag
+new Sortable(items,{animation:150,handle:".drag",onEnd:calculate});
+
+// calculate
+function calculate(){
+  const salary=+document.getElementById("salary").value||0;
+  const hourly=salary/30/7;
+  const daily=hourly*7;
+
+  sumDaily.innerText=fm(daily);
+  sum1.innerText=fm(hourly);
+  sum15.innerText=fm(hourly*1.5);
+  sum3.innerText=fm(hourly*3);
+
+  let rows="",grand=0;
+
+  document.querySelectorAll(".item").forEach(item=>{
+
+    const type=item.querySelector(".type").value;
+    const name=item.querySelector(".name").value||"-";
+    const days=+item.querySelector(".days").value||0;
+
+    const s=toHour(item.querySelector(".start").value);
+    const e=toHour(item.querySelector(".end").value);
+
+    let h1=0,h15=0,h3=0;
+
+    for(let h=s;h<e;h+=0.5){
+      let x=h>=24?h-24:h;
+
+      if(type==="weekday"){
+        h15+=0.5;
+      } else {
+        if(x>=8.5&&x<16.5){
+          if(x>=12&&x<13) continue;
+          h1+=0.5;
+        } else {
+          h3+=0.5;
+        }
+      }
+    }
+
+    const dayTotal = (h1*hourly)+(h15*hourly*1.5)+(h3*hourly*3);
+    const total=dayTotal*days;
+    grand+=total;
+
+    const badgeClass = type==="weekday" ? "weekday" : "holiday";
+
+    rows+=`
+    <tr>
+      <td><span class="badge ${badgeClass}">${name}</span></td>
+      <td>${item.querySelector(".start").value}-${item.querySelector(".end").value}</td>
+
+      <td>${fh(h1)}</td><td>${fm(h1*hourly)}</td>
+      <td>${fh(h15)}</td><td>${fm(h15*hourly*1.5)}</td>
+      <td>${fh(h3)}</td><td>${fm(h3*hourly*3)}</td>
+
+      <td class="highlight">${fm(dayTotal)}</td>
+      <td>${days||""}</td>
+      <td>${fm(total)}</td>
+    </tr>
+    `;
+  });
+
+  result.innerHTML=`
+  <table>
+    <tr>
+      <th>รายการ</th>
+      <th>เวลา</th>
+      <th colspan="2">1x</th>
+      <th colspan="2">1.5x</th>
+      <th colspan="2">3x</th>
+      <th>รวม/วัน</th>
+      <th>วัน</th>
+      <th>รวมเงิน</th>
+    </tr>
+    ${rows}
+    <tr class="total">
+      <td colspan="10">รวมทั้งหมด</td>
+      <td>${fm(grand)}</td>
+    </tr>
+  </table>
+  `;
+}
+
+// auto recalc
+salary.oninput=calculate;
+
+// init
+addItem();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>OT Builder Pro</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<style>
+:root { --primary:#6366f1; }
+
+body{
+  font-family:'Segoe UI';
+  background:linear-gradient(135deg,#eef2ff,#f8fafc);
+  margin:0;padding:16px;
+}
+
+.container{max-width:1000px;margin:auto;}
+
+.card{
+  background:rgba(255,255,255,0.9);
+  backdrop-filter:blur(10px);
+  padding:18px;border-radius:16px;
+  margin-bottom:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.header{
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;
+}
+
+input, select{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  margin-top:6px;margin-bottom:10px;
+}
+
+.row{display:flex;gap:10px;}
+
+button{
+  width:100%;
+  padding:14px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;border:none;
+  border-radius:12px;
+}
+
+.drag{font-size:12px;color:#888;cursor:grab;}
+
+.info{font-size:13px;color:#555;margin-top:6px;}
+
+.badge{
+  padding:4px 8px;
+  border-radius:8px;
+  font-size:12px;
+}
+.weekday{background:#dcfce7;color:#166534;}
+.holiday{background:#ede9fe;color:#5b21b6;}
+
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+th{
+  background:#f3f4f6;
+  padding:10px;
+}
+
+td{
+  padding:10px;
+  text-align:center;
+}
+
+tr:nth-child(even) td{background:#fafafa;}
+tr:hover td{background:#eef2ff;}
+
+.total{
+  background:#eef2ff;
+  font-weight:bold;
+}
+
+.highlight{
+  color:#4f46e5;
+  font-weight:bold;
+}
+
+#explainBox{
+  background:#f8fafc;
+  padding:12px;
+  border-radius:10px;
+  border-left:4px solid #6366f1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card header">
+  <h2>💰 OT Builder</h2>
+</div>
+
+<div class="card">
+  <label>เงินเดือน</label>
+  <input id="salary" value="20380">
+</div>
+
+<button onclick="addItem()">+ เพิ่มโอที</button>
+
+<div id="items"></div>
+
+<button onclick="calculate()">คำนวณ</button>
+
+<div class="card" id="result"></div>
+
+<div class="card">
+  <button onclick="toggleExplain()" style="background:#e5e7eb;color:#333;">
+    📘 วิธีคิด OT
+  </button>
+
+  <div id="explainBox" style="display:none;">
+    เงินเดือน ÷ 30 ÷ 7 = ค่าแรง/ชม.<br><br>
+
+    วันธรรมดา → 1.5 เท่า<br>
+    วันหยุด 08:30-16:30 → 1 เท่า (พัก 12-13)<br>
+    นอกช่วง → 3 เท่า
+  </div>
+</div>
+
+</div>
+
+<script>
+
+const toHour=t=>{
+  if(!t) return 0;
+  const [h,m]=t.split(":").map(Number);
+  return h+m/60;
+};
+
+const fm=n=>!n?"":n.toLocaleString(undefined,{maximumFractionDigits:2});
+const fh=n=>!n?"":(n%1===0?n:n.toFixed(2));
+
+function addItem(){
+  const id=Date.now();
+
+  const html=`
+  <div class="card item" data-id="${id}">
+    <div class="drag">☰ ลากเรียง</div>
+
+    <label>ประเภท</label>
+    <select class="type">
+      <option value="weekday">วันธรรมดา</option>
+      <option value="holiday">วันหยุด</option>
+    </select>
+
+    <label>จำนวนวัน</label>
+    <input class="days" type="number" value="1">
+
+    <label>เวลา</label>
+    <div class="row">
+      <input class="start">
+      <input class="end">
+    </div>
+
+    <div class="info"></div>
+
+    <div class="name" style="font-weight:bold;margin-top:8px;"></div>
+
+    <button onclick="this.closest('.item').remove()" style="background:#ef4444;margin-top:8px;">
+      ลบ
+    </button>
+  </div>
+  `;
+
+  items.insertAdjacentHTML("beforeend",html);
+
+  const el=document.querySelector(`[data-id="${id}"]`);
+
+  const type=el.querySelector(".type");
+  const start=el.querySelector(".start");
+  const end=el.querySelector(".end");
+  const info=el.querySelector(".info");
+  const name=el.querySelector(".name");
+
+  const fp1=flatpickr(start,{enableTime:true,noCalendar:true,dateFormat:"H:i"});
+  const fp2=flatpickr(end,{enableTime:true,noCalendar:true,dateFormat:"H:i"});
+
+  function update(){
+    let s=toHour(start.value);
+    let e=toHour(end.value);
+
+    let total=0,cut=0;
+
+    for(let h=s;h<e;h+=0.5){
+      let x=h>=24?h-24:h;
+
+      if(type.value==="weekday"){
+        total+=0.5;
+      }
+      else{
+        if(x>=8.5&&x<16.5){
+          if(x>=12&&x<13){cut+=0.5;continue;}
+        }
+        total+=0.5;
+      }
+    }
+
+    info.innerText =
+      type.value==="weekday"
+      ? `รวม ${fh(total)} ชม. (1.5x)`
+      : `รวม ${fh(total)} ชม. (พัก ${fh(cut)} ชม.)`;
+
+    name.innerText =
+      `OT ${type.value==="weekday"?"วันธรรมดา":"วันหยุด"} ${start.value} - ${end.value}`;
+  }
+
+  type.onchange=()=>{
+    if(type.value==="weekday"){
+      fp1.setDate("17:00");
+      fp2.setDate("21:00");
+    }else{
+      fp1.setDate("08:30");
+      fp2.setDate("21:00");
+    }
+    update();
+  };
+
+  start.onchange=update;
+  end.onchange=update;
+
+  type.dispatchEvent(new Event("change"));
+}
+
+// drag
+new Sortable(items,{animation:150,handle:".drag"});
+
+// calculate
+function calculate(){
+  const salary=+document.getElementById("salary").value||0;
+  const hourly=salary/30/7;
+
+  let rows="",grand=0;
+
+  document.querySelectorAll(".item").forEach(item=>{
+
+    const type=item.querySelector(".type").value;
+    const days=+item.querySelector(".days").value||0;
+
+    const s=toHour(item.querySelector(".start").value);
+    const e=toHour(item.querySelector(".end").value);
+
+    let h1=0,h15=0,h3=0;
+
+    for(let h=s;h<e;h+=0.5){
+      let x=h>=24?h-24:h;
+
+      if(type==="weekday"){
+        h15+=0.5;
+      }else{
+        if(x>=8.5&&x<16.5){
+          if(x>=12&&x<13) continue;
+          h1+=0.5;
+        } else {
+          h3+=0.5;
+        }
+      }
+    }
+
+    const dayTotal = (h1*hourly)+(h15*hourly*1.5)+(h3*hourly*3);
+    const total=dayTotal*days;
+    grand+=total;
+
+    const badge = type==="weekday"
+      ? `<span class="badge weekday">วันธรรมดา</span>`
+      : `<span class="badge holiday">วันหยุด</span>`;
+
+    rows+=`
+    <tr>
+      <td>${badge}</td>
+      <td>${item.querySelector(".start").value}-${item.querySelector(".end").value}</td>
+
+      <td>${fh(h1)}</td><td>${fm(h1*hourly)}</td>
+      <td>${fh(h15)}</td><td>${fm(h15*hourly*1.5)}</td>
+      <td>${fh(h3)}</td><td>${fm(h3*hourly*3)}</td>
+
+      <td class="highlight">${fm(dayTotal)}</td>
+      <td>${days||""}</td>
+      <td>${fm(total)}</td>
+    </tr>
+    `;
+  });
+
+  result.innerHTML=`
+  <table>
+    <tr>
+      <th>ประเภท</th>
+      <th>เวลา</th>
+      <th colspan="2">1x</th>
+      <th colspan="2">1.5x</th>
+      <th colspan="2">3x</th>
+      <th>รวม/วัน</th>
+      <th>วัน</th>
+      <th>รวมเงิน</th>
+    </tr>
+
+    ${rows}
+
+    <tr class="total">
+      <td colspan="10">รวมทั้งหมด</td>
+      <td>${fm(grand)}</td>
+    </tr>
+  </table>
+  `;
+}
+
+// default
+addItem();
+
+function toggleExplain(){
+  const box=document.getElementById("explainBox");
+  box.style.display=box.style.display==="none"?"block":"none";
+}
+
+</script>
+
+</body>
+</html>

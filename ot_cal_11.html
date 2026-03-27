@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OT Builder Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0d0f14;
+            --surface: #161920;
+            --surface2: #1e2028;
+            --surface3: #252830;
+            --border: rgba(255,255,255,0.06);
+            --border2: rgba(255,255,255,0.1);
+            --text: #eef0f6;
+            --text2: #9399a8;
+            --text3: #5a6072;
+            --accent: #f0c040;
+            --accent2: #f8d878;
+            --accent-dim: rgba(240,192,64,0.12);
+            --green: #34d399;
+            --green-dim: rgba(52,211,153,0.12);
+            --blue: #60a5fa;
+            --blue-dim: rgba(96,165,250,0.12);
+            --red: #f87171;
+            --red-dim: rgba(248,113,113,0.1);
+            --radius: 14px;
+            --radius-sm: 8px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', 'Noto Sans Thai', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 0 0 60px;
+            overflow-x: hidden;
+        }
+
+        /* HERO HEADER */
+        .header-wrap {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 24px 32px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-mark {
+            width: 40px; height: 40px;
+            background: var(--accent);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .header-text h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
+        .header-text p {
+            font-size: 0.78rem;
+            color: var(--text3);
+            margin-top: 1px;
+        }
+
+        .header-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grand-total-badge {
+            background: var(--accent-dim);
+            border: 1px solid rgba(240,192,64,0.25);
+            border-radius: 10px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .grand-total-badge .label { font-size: 0.72rem; color: var(--accent2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .grand-total-badge .value { font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 500; color: var(--accent); }
+
+        /* MAIN LAYOUT */
+        .main { max-width: 1060px; margin: 0 auto; padding: 32px 24px; }
+
+        /* SALARY CARD */
+        .salary-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+        @media(max-width:640px){ .salary-card { grid-template-columns: 1fr; } }
+
+        .salary-input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+
+        .salary-input-wrap {
+            position: relative;
+        }
+        .salary-input-wrap .prefix {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text3);
+            font-size: 0.9rem;
+            font-weight: 600;
+            pointer-events: none;
+        }
+        .salary-input-wrap input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 1.3rem;
+            font-family: 'DM Mono', monospace;
+            font-weight: 500;
+            padding: 12px 14px 12px 32px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .salary-input-wrap input:focus {
+            border-color: var(--accent);
+            background: var(--surface3);
+        }
+
+        .rate-pills {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        @media(max-width:480px){ .rate-pills { grid-template-columns: repeat(2, 1fr); } }
+
+        .rate-pill {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            transition: background 0.2s;
+        }
+        .rate-pill:hover { background: var(--surface3); }
+        .rate-pill .rp-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 6px;
+        }
+        .rate-pill .rp-mult {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+        .rp-mult.x1 { background: var(--blue-dim); color: var(--blue); }
+        .rp-mult.x15 { background: var(--green-dim); color: var(--green); }
+        .rp-mult.x3 { background: var(--accent-dim); color: var(--accent); }
+        .rp-mult.daily { background: rgba(255,255,255,0.06); color: var(--text2); }
+
+        .rate-pill .rp-val {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* SECTION LABEL */
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            color: var(--text3);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ITEMS */
+        #items-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+        .item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .item:hover { border-color: var(--border2); }
+        .item.active {
+            border-color: rgba(240,192,64,0.3);
+            box-shadow: 0 0 0 1px rgba(240,192,64,0.1);
+        }
+
+        .item-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .drag-handle {
+            color: var(--text3);
+            font-size: 0.9rem;
+            cursor: grab;
+            padding: 2px 4px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .drag-handle:hover { opacity: 1; }
+
+        .item-type-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dot-weekday { background: var(--green); box-shadow: 0 0 6px var(--green); }
+        .dot-holiday { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+        .item-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            flex: 1;
+        }
+
+        .item-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-amount {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .item-chevron {
+            color: var(--text3);
+            font-size: 0.7rem;
+            transition: transform 0.25s;
+        }
+        .item.active .item-chevron { transform: rotate(180deg); }
+
+        .item-body {
+            display: none;
+            padding: 0 18px 18px;
+            border-top: 1px solid var(--border);
+            margin-top: 0;
+            padding-top: 18px;
+            animation: slideDown 0.2s ease;
+        }
+        .item.active .item-body { display: block; }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* FORM FIELDS */
+        .field-row {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .col-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .col-2 { grid-template-columns: 1fr 2fr; }
+        @media(max-width:580px){
+            .col-3, .col-2 { grid-template-columns: 1fr; }
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            margin-bottom: 6px;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: 'DM Sans', 'Noto Sans Thai', sans-serif;
+            padding: 10px 12px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            -webkit-appearance: none;
+        }
+        .field input:focus, .field select:focus {
+            border-color: var(--accent);
+            background: var(--surface3);
+        }
+        .field select option { background: var(--surface2); }
+
+        /* Flatpickr override */
+        .flatpickr-calendar {
+            background: var(--surface2) !important;
+            border: 1px solid var(--border2) !important;
+            border-radius: var(--radius) !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5) !important;
+            font-family: 'DM Sans', sans-serif !important;
+            color: var(--text) !important;
+        }
+        .flatpickr-time input, .flatpickr-time .flatpickr-am-pm {
+            background: transparent !important;
+            color: var(--text) !important;
+        }
+        .flatpickr-time .numInputWrapper:hover { background: var(--surface3) !important; }
+        .flatpickr-time .arrowUp::after { border-bottom-color: var(--text2) !important; }
+        .flatpickr-time .arrowDown::after { border-top-color: var(--text2) !important; }
+        .flatpickr-time input.cur-value { color: var(--accent) !important; font-weight: 600; }
+
+        /* INFO STRIP */
+        .info-strip {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.82rem;
+            color: var(--text2);
+            min-height: 38px;
+        }
+        .info-strip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+        .info-strip .hours { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--accent); }
+
+        /* DELETE BTN */
+        .btn-del {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: 1px solid rgba(248,113,113,0.2);
+            border-radius: var(--radius-sm);
+            color: var(--red);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 7px 12px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-del:hover { background: var(--red-dim); border-color: rgba(248,113,113,0.4); }
+
+        /* ADD BUTTON */
+        .btn-add {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: transparent;
+            border: 1.5px dashed rgba(240,192,64,0.3);
+            border-radius: var(--radius);
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: 'DM Sans', 'Noto Sans Thai', sans-serif;
+            padding: 14px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            margin-bottom: 28px;
+        }
+        .btn-add:hover { background: var(--accent-dim); border-color: rgba(240,192,64,0.5); }
+        .btn-add svg { transition: transform 0.2s; }
+        .btn-add:hover svg { transform: rotate(90deg); }
+
+        /* RESULTS CARD */
+        .results-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .results-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .results-header span {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text3);
+        }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 0.85rem; }
+
+        thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text3);
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        td {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        tbody tr:last-child td { border-bottom: 0; }
+        tbody tr { transition: background 0.15s; }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+        tfoot tr td {
+            padding: 14px 16px;
+            background: var(--surface2);
+            border-top: 1px solid var(--border2);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+        .badge-wd { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
+        .badge-hd { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(240,192,64,0.2); }
+
+        .hours-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.78rem;
+            padding: 3px 8px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text2);
+            margin-right: 4px;
+            white-space: nowrap;
+        }
+        .hours-chip.x1 { color: var(--blue); background: var(--blue-dim); }
+        .hours-chip.x15 { color: var(--green); background: var(--green-dim); }
+        .hours-chip.x3 { color: var(--accent); background: var(--accent-dim); }
+
+        .mono { font-family: 'DM Mono', monospace; font-size: 0.82rem; }
+        .amount { font-family: 'DM Mono', monospace; font-weight: 500; }
+        .amount.positive { color: var(--accent); }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text3);
+            font-size: 0.85rem;
+        }
+        .empty-state .icon { font-size: 2rem; margin-bottom: 8px; }
+
+        /* Grand total styling */
+        .grand-total-text {
+            color: var(--text3);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .grand-total-num {
+            font-family: 'DM Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+        /* Sortable ghost */
+        .sortable-ghost { opacity: 0.3; }
+        .sortable-drag { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="header-wrap">
+    <div class="logo-mark">⏱</div>
+    <div class="header-text">
+        <h1>OT Builder Pro</h1>
+        <p>คำนวณค่าล่วงเวลาอย่างแม่นยำ</p>
+    </div>
+    <div class="header-right">
+        <div class="grand-total-badge">
+            <div>
+                <div class="label">โอทีรวม</div>
+                <div class="value" id="headerTotal">฿0.00</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+
+    <!-- SALARY CARD -->
+    <div class="salary-card">
+        <div class="salary-input-group">
+            <label>เงินเดือนพื้นฐาน</label>
+            <div class="salary-input-wrap">
+                <span class="prefix">฿</span>
+                <input id="salary" type="number" value="20380" placeholder="0">
+            </div>
+        </div>
+        <div class="rate-pills">
+            <div class="rate-pill">
+                <div class="rp-label">รายวัน</div>
+                <div class="rp-mult daily">×1 day</div>
+                <div class="rp-val" id="sumDaily">—</div>
+            </div>
+            <div class="rate-pill">
+                <div class="rp-label">1.0× / ชม.</div>
+                <div class="rp-mult x1">×1.0</div>
+                <div class="rp-val" id="sum1">—</div>
+            </div>
+            <div class="rate-pill">
+                <div class="rp-label">1.5× / ชม.</div>
+                <div class="rp-mult x15">×1.5</div>
+                <div class="rp-val" id="sum15">—</div>
+            </div>
+            <div class="rate-pill">
+                <div class="rp-label">3.0× / ชม.</div>
+                <div class="rp-mult x3">×3.0</div>
+                <div class="rp-val" id="sum3">—</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ITEMS SECTION -->
+    <div class="section-label">รายการโอที</div>
+
+    <div id="items-container"></div>
+
+    <button class="btn-add" onclick="addItem()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        เพิ่มรายการโอที
+    </button>
+
+    <!-- RESULTS -->
+    <div class="section-label">สรุปผล</div>
+    <div class="results-card">
+        <div class="results-header">
+            <span>รายละเอียด</span>
+            <span id="itemCount" style="color:var(--text2)">0 รายการ</span>
+        </div>
+        <div class="table-wrap" id="result-table"></div>
+    </div>
+
+</div>
+
+<script>
+    const toHour = t => {
+        if (!t) return 0;
+        const [h, m] = t.split(":").map(Number);
+        return h + m / 60;
+    };
+    const fm = n => n != null ? n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
+    const fh = n => n != null ? (n % 1 === 0 ? n : +n.toFixed(2)) : "0";
+
+    function addItem() {
+        document.querySelectorAll(".item").forEach(i => i.classList.remove("active"));
+        const id = Date.now();
+        const html = `
+        <div class="item active" data-id="${id}">
+            <div class="item-header" onclick="this.closest('.item').classList.toggle('active')">
+                <span class="drag-handle" title="ลาก">⠿</span>
+                <span class="item-type-dot dot-weekday"></span>
+                <span class="item-name">รายการใหม่</span>
+                <div class="item-meta">
+                    <span class="item-amount">฿0.00</span>
+                    <svg class="item-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="item-body">
+                <div class="field-row col-3">
+                    <div class="field">
+                        <label>ประเภทวัน</label>
+                        <select class="type">
+                            <option value="weekday">วันธรรมดา</option>
+                            <option value="holiday">วันหยุด (ส-อา/นักขัต)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>เวลาเริ่ม</label>
+                        <input class="start" placeholder="เลือกเวลา">
+                    </div>
+                    <div class="field">
+                        <label>เวลาสิ้นสุด</label>
+                        <input class="end" placeholder="เลือกเวลา">
+                    </div>
+                </div>
+                <div class="field-row col-2">
+                    <div class="field">
+                        <label>จำนวนวัน</label>
+                        <input class="days" type="number" value="1" min="1">
+                    </div>
+                    <div class="field">
+                        <label>ชื่อรายการ / หมายเหตุ</label>
+                        <input class="name" placeholder="เช่น โอทีปิดงบ, เข้าเวรวันอาทิตย์…">
+                    </div>
+                </div>
+                <div class="info-strip">
+                    <span class="dot"></span>
+                    <span class="info-text">กำลังรอข้อมูล...</span>
+                </div>
+                <button class="btn-del" onclick="this.closest('.item').remove(); calculate()">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    ลบรายการ
+                </button>
+            </div>
+        </div>`;
+
+        document.getElementById("items-container").insertAdjacentHTML("beforeend", html);
+        const el = document.querySelector(`[data-id="${id}"]`);
+
+        const type = el.querySelector(".type");
+        const start = el.querySelector(".start");
+        const end = el.querySelector(".end");
+        const days = el.querySelector(".days");
+        const name = el.querySelector(".name");
+        const info = el.querySelector(".info-text");
+
+        const fp1 = flatpickr(start, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
+        const fp2 = flatpickr(end, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
+
+        const updateUI = () => {
+            let s = toHour(start.value);
+            let e = toHour(end.value);
+            if (!start.value || !end.value) { info.innerHTML = 'กรุณาเลือกเวลา'; calculate(); return; }
+            // Overnight: if end <= start, push end to next day
+            const overnight = e <= s;
+            if (overnight) e += 24;
+
+            let total = 0, breakTime = 0;
+            let h1 = 0, h15 = 0, h3 = 0;
+
+            for (let h = s; h < e; h += 0.5) {
+                let x = h >= 24 ? h - 24 : h;
+                if (type.value === "weekday") {
+                    if (x >= 8.5 && x < 16.5) continue;
+                    h15 += 0.5; total += 0.5;
+                } else {
+                    if (x >= 8.5 && x < 16.5) {
+                        if (x >= 12 && x < 13) { breakTime += 0.5; continue; }
+                        h1 += 0.5;
+                    } else {
+                        h3 += 0.5;
+                    }
+                    total += 0.5;
+                }
+            }
+
+            const dot = el.querySelector(".item-type-dot");
+            dot.className = `item-type-dot ${type.value === 'weekday' ? 'dot-weekday' : 'dot-holiday'}`;
+
+            let parts = [];
+            if (overnight) parts.push(`<span style="color:var(--blue);font-size:0.72rem;font-weight:700;background:var(--blue-dim);padding:2px 6px;border-radius:4px">+วันถัดไป</span>`);
+            if (h1 > 0) parts.push(`${fh(h1)} ชม. × 1.0`);
+            if (h15 > 0) parts.push(`${fh(h15)} ชม. × 1.5`);
+            if (h3 > 0) parts.push(`${fh(h3)} ชม. × 3.0`);
+            if (breakTime > 0) parts.push(`หักพัก ${fh(breakTime)} ชม.`);
+
+            info.innerHTML = parts.length > 0
+                ? `<span class="hours">${fh(total)} ชม.</span>&nbsp;&nbsp;${parts.join(' &nbsp;·&nbsp; ')}`
+                : 'กรุณาเลือกเวลา';
+
+            if (!name.dataset.edited) {
+                name.value = `${type.value === "weekday" ? "OT วันธรรมดา" : "OT วันหยุด"} ${start.value}–${end.value}`;
+            }
+            el.querySelector(".item-name").innerText = name.value || "รายการใหม่";
+            calculate();
+        };
+
+        name.oninput = () => {
+            name.dataset.edited = "1";
+            el.querySelector(".item-name").innerText = name.value || "รายการใหม่";
+            calculate();
+        };
+
+        type.onchange = () => {
+            if (type.value === "weekday") { fp1.setDate("17:00"); fp2.setDate("21:00"); }
+            else { fp1.setDate("08:30"); fp2.setDate("17:00"); }
+            updateUI();
+        };
+        [start, end, days].forEach(inp => inp.onchange = updateUI);
+
+        type.dispatchEvent(new Event("change"));
+    }
+
+    function calculate() {
+        const salary = +document.getElementById("salary").value || 0;
+        const hourly = salary / 30 / 8;
+        const daily = hourly * 8;
+
+        document.getElementById("sumDaily").innerText = fm(daily);
+        document.getElementById("sum1").innerText = fm(hourly);
+        document.getElementById("sum15").innerText = fm(hourly * 1.5);
+        document.getElementById("sum3").innerText = fm(hourly * 3);
+
+        let rows = "";
+        let grandTotal = 0;
+        const items = document.querySelectorAll(".item");
+
+        items.forEach(item => {
+            const type = item.querySelector(".type").value;
+            const name = item.querySelector(".name").value || "รายการไม่มีชื่อ";
+            const dayCount = +item.querySelector(".days").value || 0;
+            const s = toHour(item.querySelector(".start").value);
+            let e = toHour(item.querySelector(".end").value);
+            if (e <= s && s > 0) e += 24; // overnight
+            let h1 = 0, h15 = 0, h3 = 0;
+
+            for (let h = s; h < e; h += 0.5) {
+                let x = h >= 24 ? h - 24 : h;
+                if (type === "weekday") {
+                    if (x >= 8.5 && x < 16.5) continue;
+                    h15 += 0.5;
+                } else {
+                    if (x >= 8.5 && x < 16.5) {
+                        if (x >= 12 && x < 13) continue;
+                        h1 += 0.5;
+                    } else { h3 += 0.5; }
+                }
+            }
+
+            const dayVal = (h1 * hourly) + (h15 * hourly * 1.5) + (h3 * hourly * 3);
+            const total = dayVal * dayCount;
+            grandTotal += total;
+
+            // Update header amount in item
+            item.querySelector(".item-amount").innerText = `฿${fm(total)}`;
+
+            const c1 = h1 > 0 ? `<span class="hours-chip x1">×1.0 &nbsp;${fh(h1)}h &nbsp;${fm(h1 * hourly)}</span>` : '';
+            const c15 = h15 > 0 ? `<span class="hours-chip x15">×1.5 &nbsp;${fh(h15)}h &nbsp;${fm(h15 * hourly * 1.5)}</span>` : '';
+            const c3 = h3 > 0 ? `<span class="hours-chip x3">×3.0 &nbsp;${fh(h3)}h &nbsp;${fm(h3 * hourly * 3)}</span>` : '';
+
+            rows += `
+            <tr>
+                <td>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                        <span class="badge ${type === 'weekday' ? 'badge-wd' : 'badge-hd'}">${type === 'weekday' ? 'WD' : 'HD'}</span>
+                        <span style="font-weight:600;font-size:0.85rem">${name}</span>
+                    </div>
+                </td>
+                <td class="text-center mono" style="color:var(--text2)">${item.querySelector(".start").value || '—'}–${item.querySelector(".end").value || '—'}${(toHour(item.querySelector(".end").value) <= s && s > 0) ? ' <span style="font-size:0.65rem;color:var(--blue);background:var(--blue-dim);padding:1px 5px;border-radius:3px;font-family:DM Sans,sans-serif;font-weight:700">+1</span>' : ''}</td>
+                <td style="white-space:nowrap">${c1}${c15}${c3}</td>
+                <td class="text-center mono" style="color:var(--text2)">${dayCount}</td>
+                <td class="text-right"><span class="amount positive">฿${fm(total)}</span></td>
+            </tr>`;
+        });
+
+        document.getElementById("itemCount").innerText = `${items.length} รายการ`;
+
+        const emptyRow = `<tr><td colspan="5"><div class="empty-state"><div class="icon">📋</div>ยังไม่มีรายการ กด "เพิ่มรายการโอที"</div></td></tr>`;
+
+        document.getElementById("result-table").innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:30%">รายการ</th>
+                    <th class="text-center">ช่วงเวลา</th>
+                    <th>ชั่วโมง & อัตรา</th>
+                    <th class="text-center">วัน</th>
+                    <th class="text-right">รวม (บาท)</th>
+                </tr>
+            </thead>
+            <tbody>${rows || emptyRow}</tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-right">
+                        <span class="grand-total-text">รวมเงินโอทีทั้งหมด</span>
+                    </td>
+                    <td class="text-right">
+                        <span class="grand-total-num">฿${fm(grandTotal)}</span>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>`;
+
+        document.getElementById("headerTotal").innerText = `฿${fm(grandTotal)}`;
+    }
+
+    new Sortable(document.getElementById("items-container"), {
+        animation: 200,
+        handle: ".drag-handle",
+        ghostClass: "sortable-ghost",
+        dragClass: "sortable-drag",
+        onEnd: calculate
+    });
+
+    document.getElementById("salary").oninput = calculate;
+    calculate();
+    addItem();
+</script>
+</body>
+</html>

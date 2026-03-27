@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OT Calculator Pro</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<style>
+:root {
+  --primary:#6366f1;
+}
+
+/* ===== BODY ===== */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#eef2ff,#f8fafc);
+  margin:0;
+  padding:16px;
+}
+
+.container {
+  max-width:1000px;
+  margin:auto;
+  animation:fadeIn 0.5s ease;
+}
+
+/* ===== CARD ===== */
+.card {
+  background:rgba(255,255,255,0.85);
+  backdrop-filter: blur(12px);
+  padding:18px;
+  border-radius:18px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.06);
+  margin-bottom:16px;
+  border:1px solid rgba(255,255,255,0.4);
+}
+
+/* ===== HEADER ===== */
+.header {
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;
+}
+
+/* ===== GRID ===== */
+.grid {
+  display:grid;
+  gap:16px;
+}
+@media(min-width:768px){
+  .grid { grid-template-columns:1fr 1fr; }
+}
+
+/* ===== INPUT ===== */
+input {
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  background:#f9fafb;
+  margin-top:6px;
+  margin-bottom:10px;
+}
+input:focus {
+  border-color:var(--primary);
+  outline:none;
+  box-shadow:0 0 0 2px rgba(99,102,241,0.2);
+}
+
+/* ===== ROW ===== */
+.row { display:flex; gap:10px; }
+
+/* ===== BUTTON ===== */
+button {
+  width:100%;
+  padding:14px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:white;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.2s;
+  box-shadow:0 6px 15px rgba(99,102,241,0.3);
+}
+button:hover { transform:scale(1.02); }
+button:active { transform:scale(0.97); }
+
+/* ===== INFO ===== */
+.info { font-size:13px; color:#555; }
+
+/* ===== BADGE ===== */
+.badge {
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+}
+.weekday { background:#dcfce7; color:#166534; }
+.holiday { background:#ede9fe; color:#5b21b6; }
+
+/* ===== TABLE ===== */
+.table-wrap { overflow:auto; }
+
+table {
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  font-size:14px;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+th {
+  background:#f8fafc;
+  font-weight:600;
+  font-size:13px;
+  padding:10px;
+  border-bottom:2px solid #e5e7eb;
+}
+
+td {
+  padding:10px;
+  text-align:center;
+}
+
+tr:nth-child(even) td { background:#fafafa; }
+tr:hover td { background:#eef2ff; }
+
+td:empty { background:#f9fafb; }
+
+/* highlight groups */
+td:nth-child(3),
+td:nth-child(4),
+td:nth-child(5),
+td:nth-child(6),
+td:nth-child(7),
+td:nth-child(8) {
+  background:#fcfcff;
+}
+
+.highlight {
+  font-weight:700;
+  color:#4f46e5;
+}
+
+.total {
+  background:linear-gradient(90deg,#eef2ff,#e0e7ff);
+  font-size:15px;
+  font-weight:bold;
+}
+
+/* explain */
+#explainBox {
+  background:#f8fafc;
+  padding:12px;
+  border-radius:10px;
+  border-left:4px solid #6366f1;
+}
+
+/* animation */
+@keyframes fadeIn {
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1; transform:translateY(0);}
+}
+
+#result {
+  animation:slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {opacity:0; transform:translateY(20px);}
+  to {opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card header">
+  <h2 style="margin:0;">💰 OT Calculator</h2>
+  <div style="opacity:0.9;font-size:13px;">คำนวณค่าโอทีแบบมืออาชีพ</div>
+</div>
+
+<div class="card">
+  <label>เงินเดือน</label>
+  <input id="salary" value="20380">
+</div>
+
+<div class="grid">
+
+<div class="card">
+  <h3>🟢 วันธรรมดา</h3>
+  <input id="weekdayDays" value="1">
+
+  <div class="row">
+    <input id="weekdayStart">
+    <input id="weekdayEnd">
+  </div>
+  <div class="info" id="weekdayInfo"></div>
+</div>
+
+<div class="card">
+  <h3>🔵 วันหยุด</h3>
+  <input id="holidayDays" value="1">
+
+  <div class="row">
+    <input id="holidayStart">
+    <input id="holidayEnd">
+  </div>
+  <div class="info" id="holidayInfo"></div>
+</div>
+
+</div>
+
+<button onclick="calculate()">คำนวณ</button>
+
+<div class="card table-wrap" id="result"></div>
+
+<div class="card">
+  <button onclick="toggleExplain()" style="background:#e5e7eb;color:#333;">
+    📘 วิธีคิด OT
+  </button>
+
+  <div id="explainBox" style="display:none; margin-top:12px; line-height:1.7;">
+    <b>💵 วิธีคำนวณพื้นฐาน</b><br>
+    เงินเดือน ÷ 30 ÷ 7 = ค่าแรงต่อชั่วโมง<br><br>
+
+    <b>🟢 วันธรรมดา</b><br>
+    16:30 - 08:30 → 1.5 เท่า<br><br>
+
+    <b>🔵 วันหยุด</b><br>
+    08:30 - 16:30 → 1 เท่า<br>
+    พัก 12:00 - 13:00 (ไม่คิด)<br>
+    นอกช่วง → 3 เท่า
+  </div>
+</div>
+
+</div>
+
+<script>
+const el = {
+  salary: salary,
+  wd: weekdayDays,
+  ws: weekdayStart,
+  we: weekdayEnd,
+  hd: holidayDays,
+  hs: holidayStart,
+  he: holidayEnd,
+  wInfo: weekdayInfo,
+  hInfo: holidayInfo,
+  result: result
+};
+
+// picker
+flatpickr(el.ws,{enableTime:true,noCalendar:true,dateFormat:"H:i",defaultDate:"17:00"});
+flatpickr(el.we,{enableTime:true,noCalendar:true,dateFormat:"H:i",defaultDate:"21:00"});
+flatpickr(el.hs,{enableTime:true,noCalendar:true,dateFormat:"H:i",defaultDate:"08:30"});
+flatpickr(el.he,{enableTime:true,noCalendar:true,dateFormat:"H:i",defaultDate:"21:00"});
+
+// save
+Object.values(el).forEach(e=>{
+  if(e.tagName==="INPUT"){
+    const v=localStorage.getItem(e.id);
+    if(v) e.value=v;
+    e.oninput=()=>localStorage.setItem(e.id,e.value);
+  }
+});
+
+const toHour=t=>{
+  if(!t) return 0;
+  const [h,m]=t.split(":").map(Number);
+  return h+m/60;
+};
+
+const calcHours=(s,e)=> e<s?(e+24)-s:e-s;
+
+const fm=n=>!n?"":(n%1===0?n.toLocaleString():n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}));
+const fh=n=>!n?"":(n%1===0?n:n.toFixed(2));
+
+setInterval(()=>{
+  const w=calcHours(toHour(el.ws.value),toHour(el.we.value));
+  el.wInfo.innerText=`รวม ${fh(w)} ชม. (1.5x)`;
+
+  let t=0,cut=0;
+  for(let h=toHour(el.hs.value);h<toHour(el.he.value);h+=0.5){
+    let x=h>=24?h-24:h;
+    if(x>=8.5&&x<16.5){
+      if(x>=12&&x<13){cut+=0.5;continue;}
+    }
+    t+=0.5;
+  }
+  el.hInfo.innerText=`รวม ${fh(t)} ชม. (พัก ${fh(cut)})`;
+},500);
+
+function calculate(){
+  const salary=+el.salary.value||0;
+  const hourly=salary/30/7;
+  const wd=+el.wd.value||0;
+  const hd=+el.hd.value||0;
+
+  const wH=calcHours(toHour(el.ws.value),toHour(el.we.value));
+  const wPay=wH*hourly*1.5;
+
+  let h1=0,h3=0;
+  for(let h=toHour(el.hs.value);h<toHour(el.he.value);h+=0.5){
+    let x=h>=24?h-24:h;
+    if(x>=8.5&&x<16.5){
+      if(x>=12&&x<13) continue;
+      h1+=0.5;
+    } else h3+=0.5;
+  }
+
+  const total=(wPay*wd)+((h1*hourly+h3*hourly*3)*hd);
+
+  el.result.innerHTML=`
+  <table>
+    <tr>
+      <th>ประเภท</th>
+      <th>เวลา</th>
+      <th>1x</th>
+      <th>1.5x</th>
+      <th>3x</th>
+      <th>รวม/วัน</th>
+      <th>วัน</th>
+      <th>รวมเงิน</th>
+    </tr>
+
+    <tr>
+      <td><span class="badge weekday">วันธรรมดา</span></td>
+      <td>${el.ws.value}-${el.we.value}</td>
+      <td></td>
+      <td>${fm(wPay)}</td>
+      <td></td>
+      <td class="highlight">${fm(wPay)}</td>
+      <td>${wd||""}</td>
+      <td>${fm(wPay*wd)}</td>
+    </tr>
+
+    <tr>
+      <td><span class="badge holiday">วันหยุด</span></td>
+      <td>${el.hs.value}-${el.he.value}</td>
+      <td>${fm(h1*hourly)}</td>
+      <td></td>
+      <td>${fm(h3*hourly*3)}</td>
+      <td class="highlight">${fm(h1*hourly+h3*hourly*3)}</td>
+      <td>${hd||""}</td>
+      <td>${fm((h1*hourly+h3*hourly*3)*hd)}</td>
+    </tr>
+
+    <tr class="total">
+      <td colspan="7">รวมทั้งหมด</td>
+      <td>${fm(total)}</td>
+    </tr>
+  </table>
+  `;
+}
+
+function toggleExplain(){
+  const b=explainBox;
+  b.style.display=b.style.display==="none"?"block":"none";
+}
+</script>
+
+</body>
+</html>

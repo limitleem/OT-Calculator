@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OT Builder Pro | ระบบคำนวณโอทีอัจฉริยะ</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --surface: #161a23;
+            --card-inner: #1f242f;
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --accent: #facc15;
+            --accent-glow: rgba(250, 204, 21, 0.15);
+            --green: #22c55e;
+            --blue: #3b82f6;
+            --red: #ef4444;
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(11, 14, 20, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .total-box { text-align: right; }
+        .total-box .label { font-size: 0.7rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; }
+        .total-box .val { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; color: var(--accent); font-weight: 700; }
+
+        .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Salary Setup */
+        .salary-grid {
+            display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: center;
+        }
+        @media (max-width: 768px) { .salary-grid { grid-template-columns: 1fr; } }
+
+        .input-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; }
+        .input-wrapper { position: relative; }
+        .input-wrapper input {
+            width: 100%; background: var(--card-inner); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text-main); padding: 12px 12px 12px 40px;
+            font-size: 1.2rem; font-family: 'JetBrains Mono', monospace;
+        }
+        .input-wrapper::before { content: '฿'; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-sub); font-weight: bold; }
+
+        .rate-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        @media (max-width: 500px) { .rate-grid { grid-template-columns: repeat(2, 1fr); } }
+        
+        .rate-item { background: var(--card-inner); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+        .rate-item div { font-size: 0.65rem; color: var(--text-sub); font-weight: bold; margin-bottom: 4px; }
+        .rate-item b { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--text-main); }
+
+        /* OT Item */
+        .item-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+        .ot-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .ot-card.active { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+
+        .ot-header { padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .ot-header .drag { color: var(--text-sub); cursor: grab; }
+        .ot-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .ot-header .title { flex: 1; font-weight: 600; font-size: 0.95rem; }
+        .ot-header .amount { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-weight: 600; }
+
+        .ot-body { display: none; padding: 20px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.1); }
+        .ot-card.active .ot-body { display: block; }
+
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 12px; }
+        input, select { background: var(--card-inner); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 8px; width: 100%; font-family: inherit; }
+
+        .btn-add {
+            width: 100%; background: transparent; border: 2px dashed var(--border);
+            color: var(--text-sub); padding: 16px; border-radius: 12px; cursor: pointer;
+            font-weight: 600; margin-bottom: 24px; transition: 0.3s;
+        }
+        .btn-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+        .btn-del { background: transparent; border: 1px solid var(--red); color: var(--red); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+        .btn-del:hover { background: var(--red); color: white; }
+
+        /* Table Style */
+        .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 0.85rem; }
+        th { background: var(--card-inner); color: var(--text-sub); padding: 12px; text-align: left; font-size: 0.7rem; letter-spacing: 1px; }
+        td { padding: 14px 12px; border-bottom: 1px solid var(--border); }
+        
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+        .bg-wd { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+        .bg-hd { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+        .bg-hr { background: rgba(59, 130, 246, 0.1); color: #60a5fa; margin-right: 4px; border: 1px solid rgba(59, 130, 246, 0.2); }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <div style="display:flex; align-items:center; gap:10px;">
+        <div style="background:var(--accent); color:#000; padding:5px 10px; border-radius:8px; font-weight:bold;">OT</div>
+        <h1 style="font-size: 1.1rem;">Builder Pro</h1>
+    </div>
+    <div class="total-box">
+        <div class="label">รวมเงินโอทีทั้งหมด</div>
+        <div class="val" id="headerTotal">฿0.00</div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card">
+        <div class="salary-grid">
+            <div class="input-group">
+                <label>เงินเดือนพื้นฐาน (บาท)</label>
+                <div class="input-wrapper">
+                    <input id="salary" type="number" value="20380">
+                </div>
+            </div>
+            <div class="rate-grid">
+                <div class="rate-item"><div>รายวัน</div><b id="sumDaily">0</b></div>
+                <div class="rate-item"><div>1.0x / ชม.</div><b id="sum1">0</b></div>
+                <div class="rate-item"><div>1.5x / ชม.</div><b id="sum15">0</b></div>
+                <div class="rate-item"><div>3.0x / ชม.</div><b id="sum3">0</b></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="items-container" class="item-list"></div>
+
+    <button class="btn-add" onclick="addNewOT()">+ เพิ่มรายการโอทีใหม่</button>
+
+    <div class="table-wrap">
+        <table id="result-table">
+            <thead>
+                <tr>
+                    <th>รายการ</th>
+                    <th class="text-center">เวลา</th>
+                    <th class="text-right">1.0x (ชม./บาท)</th>
+                    <th class="text-right">1.5x (ชม./บาท)</th>
+                    <th class="text-right">3.0x (ชม./บาท)</th>
+                    <th class="text-center">วัน</th>
+                    <th class="text-right">รวมเงิน</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY = 'OT_DATA_PERSIST';
+
+    function saveData() {
+        const data = {
+            salary: document.getElementById('salary').value,
+            items: Array.from(document.querySelectorAll('.ot-card')).map(el => ({
+                id: el.dataset.id,
+                type: el.querySelector('.type').value,
+                start: el.querySelector('.start').value,
+                end: el.querySelector('.end').value,
+                days: el.querySelector('.days').value,
+                name: el.querySelector('.name').value,
+                edited: el.querySelector('.name').dataset.edited
+            }))
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const data = JSON.parse(saved);
+            document.getElementById('salary').value = data.salary;
+            data.items.forEach(item => addNewOT(item));
+        } else {
+            addNewOT();
+        }
+        calculate();
+    }
+
+    const toHour = t => {
+        if (!t) return 0;
+        const [h, m] = t.split(":").map(Number);
+        return h + m / 60;
+    };
+    const fm = n => n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fh = n => (n % 1 === 0 ? n : +n.toFixed(2));
+
+    function addNewOT(savedItem = null) {
+        document.querySelectorAll(".ot-card").forEach(i => i.classList.remove("active"));
+        const id = savedItem ? savedItem.id : Date.now();
+        
+        const html = `
+        <div class="ot-card active" data-id="${id}">
+            <div class="ot-header" onclick="this.closest('.ot-card').classList.toggle('active')">
+                <span class="drag">⠿</span>
+                <div class="dot" style="background:${(savedItem?.type || 'weekday') === 'weekday' ? '#22c55e' : '#fb923c'}"></div>
+                <span class="title">${savedItem?.name || 'รายการโอทีใหม่'}</span>
+                <span class="amount">฿0.00</span>
+            </div>
+            <div class="ot-body">
+                <div class="form-row">
+                    <div>
+                        <label style="font-size:0.7rem; color:var(--text-sub);">ประเภทวัน</label>
+                        <select class="type">
+                            <option value="weekday" ${savedItem?.type==='weekday'?'selected':''}>วันธรรมดา (1.5x)</option>
+                            <option value="holiday" ${savedItem?.type==='holiday'?'selected':''}>วันหยุด (1.0x / 3.0x)</option>
+                        </select>
+                    </div>
+                    <div><label style="font-size:0.7rem; color:var(--text-sub);">เริ่ม</label><input class="start" value="${savedItem?.start || ''}"></div>
+                    <div><label style="font-size:0.7rem; color:var(--text-sub);">สิ้นสุด</label><input class="end" value="${savedItem?.end || ''}"></div>
+                </div>
+                <div class="form-row" style="grid-template-columns: 80px 1fr;">
+                    <div><label style="font-size:0.7rem; color:var(--text-sub);">จำนวนวัน</label><input type="number" class="days" value="${savedItem?.days || 1}"></div>
+                    <div><label style="font-size:0.7rem; color:var(--text-sub);">ชื่อรายการ</label><input class="name" placeholder="ระบุชื่อรายการ..." value="${savedItem?.name || ''}" data-edited="${savedItem?.edited || ''}"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                    <span class="calc-hint" style="font-size:0.75rem; color:var(--text-sub);"></span>
+                    <button class="btn-del" onclick="this.closest('.ot-card').remove(); calculate();">ลบรายการ</button>
+                </div>
+            </div>
+        </div>`;
+
+        document.getElementById("items-container").insertAdjacentHTML("beforeend", html);
+        const el = document.querySelector(`[data-id="${id}"]`);
+
+        flatpickr(el.querySelector(".start"), { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, onChange: () => updateItem(el) });
+        flatpickr(el.querySelector(".end"), { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, onChange: () => updateItem(el) });
+
+        el.querySelector(".type").onchange = () => {
+            el.querySelector(".dot").style.background = el.querySelector(".type").value === 'weekday' ? '#22c55e' : '#fb923c';
+            updateItem(el);
+        };
+        el.querySelector(".days").oninput = calculate;
+        el.querySelector(".name").oninput = (e) => {
+            e.target.dataset.edited = "1";
+            el.querySelector(".title").innerText = e.target.value || 'รายการโอทีใหม่';
+            calculate();
+        };
+
+        if(!savedItem) updateItem(el);
+        calculate();
+    }
+
+    function updateItem(el) {
+        const type = el.querySelector(".type").value;
+        const nameInp = el.querySelector(".name");
+        if (!nameInp.dataset.edited) {
+            nameInp.value = `OT ${type==='weekday'?'ธรรมดา':'วันหยุด'} ${el.querySelector(".start").value}-${el.querySelector(".end").value}`;
+            el.querySelector(".title").innerText = nameInp.value;
+        }
+        calculate();
+    }
+
+    function calculate() {
+        const salary = +document.getElementById("salary").value || 0;
+        const hourly = salary / 30 / 8;
+        const daily = hourly * 8;
+
+        document.getElementById("sumDaily").innerText = fm(daily);
+        document.getElementById("sum1").innerText = fm(hourly);
+        document.getElementById("sum15").innerText = fm(hourly * 1.5);
+        document.getElementById("sum3").innerText = fm(hourly * 3);
+
+        let grandTotal = 0;
+        let rows = "";
+
+        document.querySelectorAll('.ot-card').forEach(el => {
+            const type = el.querySelector(".type").value;
+            const start = toHour(el.querySelector(".start").value);
+            let end = toHour(el.querySelector(".end").value);
+            const days = +el.querySelector(".days").value || 0;
+            const name = el.querySelector(".name").value;
+
+            if (end <= start && start > 0) end += 24;
+
+            let h1=0, h15=0, h3=0;
+            for (let h=start; h<end; h+=0.5) {
+                let x = h >= 24 ? h-24 : h;
+                if (type === "weekday") {
+                    if (x >= 8.5 && x < 17.5) continue;
+                    h15 += 0.5;
+                } else {
+                    if (x >= 8.5 && x < 17.5) {
+                        if (x >= 12 && x < 13) continue;
+                        h1 += 0.5;
+                    } else { h3 += 0.5; }
+                }
+            }
+
+            const total = ((h1*hourly) + (h15*hourly*1.5) + (h3*hourly*3)) * days;
+            grandTotal += total;
+
+            el.querySelector(".amount").innerText = `฿${fm(total)}`;
+            el.querySelector(".calc-hint").innerText = `รวม ${fh(h1+h15+h3)} ชม./วัน`;
+
+            rows += `
+                <tr>
+                    <td><span class="badge ${type==='weekday'?'bg-wd':'bg-hd'}">${type==='weekday'?'WD':'HD'}</span> <b>${name}</b></td>
+                    <td class="text-center mono">${el.querySelector(".start").value}-${el.querySelector(".end").value}</td>
+                    <td class="text-right"><span class="badge bg-hr">${fh(h1)}</span> <span class="mono">${fm(h1*hourly)}</span></td>
+                    <td class="text-right"><span class="badge bg-hr">${fh(h15)}</span> <span class="mono">${fm(h15*hourly*1.5)}</span></td>
+                    <td class="text-right"><span class="badge bg-hr">${fh(h3)}</span> <span class="mono">${fm(h3*hourly*3)}</span></td>
+                    <td class="text-center mono">${days}</td>
+                    <td class="text-right mono" style="color:var(--accent); font-weight:bold;">฿${fm(total)}</td>
+                </tr>
+            `;
+        });
+
+        document.getElementById("table-body").innerHTML = rows || '<tr><td colspan="7" class="text-center" style="padding:30px; color:var(--text-sub);">ยังไม่มีข้อมูลโอที</td></tr>';
+        document.getElementById("headerTotal").innerText = `฿${fm(grandTotal)}`;
+        saveData();
+    }
+
+    new Sortable(document.getElementById("items-container"), { handle: '.drag', animation: 150, onEnd: calculate });
+    document.getElementById("salary").oninput = calculate;
+    loadData();
+</script>
+</body>
+</html>
