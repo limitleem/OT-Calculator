@@ -243,9 +243,23 @@ td { padding: 16px 20px; border-bottom: 1px solid var(--border); color: var(--te
 .checkbox-custom.checked .cb-box { background: var(--accent); border-color: var(--accent); }
 .checkbox-custom.checked .cb-box::after { content: '✓'; color: #000; font-size: 12px; font-weight: 900; }
 
-.info-strip { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 12px; }
-.info-strip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; margin-top: 6px; }
-.info-strip .info-text { font-size: 0.78rem; color: var(--text2); font-weight: 500; line-height: 1.6; flex: 1; }
+.info-strip { margin-bottom: 20px; }
+.info-header { margin-bottom: 8px; }
+.info-title { font-size: 0.72rem; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+.info-detail { display: flex; flex-wrap: wrap; gap: 8px; }
+.info-badge { 
+    background: var(--surface3); border: 1px solid var(--border); 
+    padding: 6px 14px; border-radius: 30px; 
+    font-size: 0.75rem; color: var(--text2); 
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.2s;
+}
+.info-badge:hover { border-color: var(--accent); color: var(--text); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.info-badge.total { background: var(--surface); border-color: var(--text3); color: var(--text); font-weight: 700; }
+.info-badge.rate-1 { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); }
+.info-badge.rate-1-5 { background: rgba(240, 192, 64, 0.15); color: var(--accent); border-color: rgba(240, 192, 64, 0.3); }
+.info-badge.rate-3 { background: rgba(52, 211, 153, 0.15); color: var(--green); border-color: rgba(52, 211, 153, 0.3); }
+.info-badge.deduct { background: rgba(239, 68, 68, 0.15); color: var(--red); border-color: rgba(239, 68, 68, 0.3); }
 
 .btn-row { display: flex; gap: 12px; margin-bottom: 28px; }
 .btn-row .btn-add { flex: 1; margin-bottom: 0; }

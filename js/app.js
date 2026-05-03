@@ -23,6 +23,11 @@ const fm = n => (+n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximum
 const fh = n => (n % 1 === 0 ? n : +n.toFixed(2));
 const toHour = t => { if (!t) return 0; const [h, m] = t.split(":").map(Number); return h + m / 60; };
 const calMoney = m => Math.round(m * 100) / 100;
+const fmtT = dec => {
+    const h = Math.floor(dec);
+    const m = Math.round((dec - h) * 60);
+    return `${h}.${m.toString().padStart(2, '0')}`;
+};
 const isHoliday = dStr => {
     const d = new Date(dStr);
     return d.getDay() === 0 || d.getDay() === 6 || APP_CONFIG.HOLIDAYS_2569.some(h => h.date === dStr);
@@ -117,9 +122,11 @@ const UI = {
         </div>`,
 
     renderInfoStrip: (type, title, detail) => `
-        <div class="info-strip">
-            <div class="dot" style="background:var(--${type === 'wd' ? 'green' : 'accent'})"></div>
-            <div class="info-text"><b>${title}</b>: ${detail}</div>
+        <div class="info-strip ${type}">
+            <div class="info-header">
+                <span class="info-title">${title}</span>
+            </div>
+            <div class="info-detail">${detail}</div>
         </div>`,
 
     renderResultTable: (rows, total) => `
@@ -544,14 +551,30 @@ function updateItemUI(el) {
     let parts = [];
     if (chkWd && wd > 0) {
         const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true);
-        parts.push(UI.renderInfoStrip('wd', APP_CONFIG.TEXT.LABEL_WD_DAYS(wd), `${fh(h.total * wd)} ชม. (${fh(h.total)} ชม. × 1.5 เท่า)`));
+        const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
+        const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
+        
+        const totalBadge = `<span class="info-badge total">${fh(h.total * wd)} ชม.</span>`;
+        const part = `<span class="info-badge rate-1-5">${fh(h.total)} ชม. × 1.5 เท่า (${e_std} - ${s_std})</span>`;
+        
+        parts.push(UI.renderInfoStrip('wd', APP_CONFIG.TEXT.LABEL_WD_DAYS(wd), `${totalBadge} ${part}`));
     }
     if (chkHd && hd > 0) {
         const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false);
+        const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
+        const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
+        const s_lun = fmtT(APP_CONFIG.CALC.LUNCH.start);
+        const e_lun = fmtT(APP_CONFIG.CALC.LUNCH.end);
+        
         let hParts = [];
-        if (h.h1) hParts.push(`${fh(h.h1)} ชม. × 1.0`);
-        if (h.h3) hParts.push(`${fh(h.h3)} ชม. × 3.0`);
-        parts.push(UI.renderInfoStrip('hd', APP_CONFIG.TEXT.LABEL_HD_DAYS(hd), `${fh(h.total * hd)} ชม. (${hParts.join(' + ')} | หักพัก 1 ชม.)`));
+        if (h.h1) hParts.push(`<span class="info-badge rate-1">${fh(h.h1)} ชม. × 1 เท่า (${s_std} - ${e_std})</span>`);
+        if (h.h3) hParts.push(`<span class="info-badge rate-3">${fh(h.h3)} ชม. × 3 เท่า (${e_std} - ${s_std})</span>`);
+        
+        const totalBadge = `<span class="info-badge total">${fh(h.total * hd)} ชม.</span>`;
+        const lunchBadge = `<span class="info-badge deduct">หักพัก 1 ชม. (${s_lun} - ${e_lun})</span>`;
+        
+        const detail = `${totalBadge} ${hParts.join('')} ${lunchBadge}`;
+        parts.push(UI.renderInfoStrip('hd', APP_CONFIG.TEXT.LABEL_HD_DAYS(hd), detail));
     }
     el.querySelector(".item-info-container").innerHTML = parts.join('') || "";
     calculate();
