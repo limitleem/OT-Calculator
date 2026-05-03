@@ -27,6 +27,129 @@ const isHoliday = dStr => {
     return d.getDay() === 0 || d.getDay() === 6 || APP_CONFIG.HOLIDAYS_2569.some(h => h.date === dStr);
 };
 
+// --- UI COMPONENTS ---
+const UI = {
+    renderProfileCard: (u) => `
+        <div class="user-profile-card" onclick="selectProfile('${u.name}')">
+            <div class="user-avatar" style="background:${u.color}">
+                ${getAvatarHTML(u)}
+                ${u.pin ? '<div class="pin-indicator">🔒</div>' : ''}
+                ${u.isGuest ? '<div style="position:absolute; top:0; left:0; background:var(--red); color:#fff; font-size:0.6rem; padding:2px 6px; border-bottom-right-radius:8px;">GUEST</div>' : ''}
+            </div>
+            <div class="user-name">${u.name}</div>
+        </div>`,
+
+    renderAddProfileCard: () => `
+        <div class="user-profile-card" onclick="openProfileModal('add')">
+            <div class="user-avatar add-btn">+</div>
+            <div class="user-name">เพิ่มโปรไฟล์</div>
+        </div>`,
+
+    renderOTItem: (id) => `
+        <div class="item active" data-id="${id}">
+            <div class="item-header" onclick="this.closest('.item').classList.toggle('active')">
+                <span class="drag-handle" title="ลาก">⠿</span>
+                <span class="item-type-dot dot-weekday"></span>
+                <span class="item-name">${APP_CONFIG.TEXT.DEFAULT_ITEM_NAME}</span>
+                <div class="item-meta">
+                    <span class="item-amount">฿0.00</span>
+                    <svg class="item-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="item-body" onclick="event.stopPropagation();">
+                <div class="field-row col-2">
+                    <div class="field">
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_RANGE}</label>
+                        <input class="date-range" placeholder="เลือกช่วงวันที่">
+                    </div>
+                    <div class="field">
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_TYPE}</label>
+                        <div style="display:flex; gap:12px; align-items:center; height:38px;">
+                            <label class="checkbox-custom checked">
+                                <input type="checkbox" class="chk-wd" checked>
+                                <div class="cb-box"></div>
+                                <span>${APP_CONFIG.TEXT.INPUT_LABEL_WD}</span>
+                            </label>
+                            <label class="checkbox-custom">
+                                <input type="checkbox" class="chk-hd">
+                                <div class="cb-box"></div>
+                                <span>${APP_CONFIG.TEXT.INPUT_LABEL_HD}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-row col-2 time-row-wd">
+                    <div class="field">
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_START_WD}</label>
+                        <input class="start-wd" placeholder="เลือกเวลา" value="16:30">
+                    </div>
+                    <div class="field">
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_END_WD}</label>
+                        <input class="end-wd" placeholder="เลือกเวลา" value="20:30">
+                    </div>
+                </div>
+                <div class="field-row col-2 time-row-hd" style="display:none;">
+                    <div class="field">
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_START_HD}</label>
+                        <input class="start-hd" placeholder="เลือกเวลา" value="08:30">
+                    </div>
+                    <div class="field">
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_END_HD}</label>
+                        <input class="end-hd" placeholder="เลือกเวลา" value="16:30">
+                    </div>
+                </div>
+                <div class="field">
+                    <label>${APP_CONFIG.TEXT.INPUT_LABEL_NOTE}</label>
+                    <input type="text" class="name" placeholder="${APP_CONFIG.TEXT.INPUT_PLACEHOLDER_NOTE}" onfocus="this.dataset.edited='1'">
+                </div>
+                <div class="error-text" style="color:var(--red); font-size:0.75rem; margin-top:8px; display:none;"></div>
+                <div class="item-info-container" style="margin-top:12px;"></div>
+                <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+                    <button class="btn-del" onclick="this.closest('.item').remove();calculate()">
+                        <span>${APP_CONFIG.TEXT.BTN_DELETE_ITEM}</span>
+                    </button>
+                </div>
+            </div>
+        </div>`,
+
+    renderInfoStrip: (type, title, detail) => `
+        <div class="info-strip">
+            <div class="dot" style="background:var(--${type === 'wd' ? 'green' : 'accent'})"></div>
+            <div class="info-text"><b>${title}</b>: ${detail}</div>
+        </div>`,
+
+    renderResultTable: (rows, total) => `
+        <table>
+            <thead><tr><th>รายการ</th><th>เวลา</th><th class="text-center">เรต</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th><th class="text-right" style="background:rgba(240,192,64,0.03)">สรุปรายวัน</th></tr></thead>
+            <tbody>${rows || `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text3)">${APP_CONFIG.TEXT.NO_CALC_DATA}</td></tr>`}</tbody>
+            <tfoot><tr><td colspan="5" class="text-right">${APP_CONFIG.TEXT.TOTAL_INCOME}</td><td class="text-right" style="color:var(--accent); font-weight:700; font-size:1.1rem;">฿${fm(total)}</td></tr></tfoot>
+        </table>`,
+
+    renderHolidaySectionHeader: (title) => `
+        <div style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700; margin:16px 0 8px 4px; letter-spacing:0.5px; border-bottom:1px solid var(--border); padding-bottom:4px;">${title}</div>`,
+
+    renderHolidayItem: (dateFull, title) => `
+        <div class="holiday-item" style="background:var(--surface2); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <div style="font-size:0.85rem; font-weight:600;">${dateFull}</div>
+                <div style="font-size:0.75rem; color:var(--accent);">${title}</div>
+            </div>
+        </div>`,
+
+    renderBreakdownHeader: (summary) => `
+        <div style="font-weight:700; color:var(--accent); margin-bottom:12px;">${APP_CONFIG.TEXT.PERIOD} ${summary}</div>`,
+
+    renderBreakdownItem: (dateFull, holidayTitle) => `
+        <div class="holiday-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--surface2); padding:10px; border-radius:8px;">
+            <div>
+                <div style="font-size:0.85rem; font-weight:600;">${dateFull}</div>
+                ${holidayTitle ? `<div style="font-size:0.7rem; color:var(--accent);">${holidayTitle}</div>` : ''}
+            </div>
+        </div>`
+};
+
 function getAvatarHTML(user) {
     const type = user.avatarType || "dicebear";
     const style = user.avatarStyle || "avataaars";
@@ -92,16 +215,7 @@ function showLanding() {
         return 0;
     });
     
-    grid.innerHTML = sorted.map(u => `
-        <div class="user-profile-card" onclick="selectProfile('${u.name}')">
-            <div class="user-avatar" style="background:${u.color}">
-                ${getAvatarHTML(u)}
-                ${u.pin ? '<div class="pin-indicator">🔒</div>' : ''}
-                ${u.isGuest ? '<div style="position:absolute; top:0; left:0; background:var(--red); color:#fff; font-size:0.6rem; padding:2px 6px; border-bottom-right-radius:8px;">GUEST</div>' : ''}
-            </div>
-            <div class="user-name">${u.name}</div>
-        </div>
-    `).join('') + `<div class="user-profile-card" onclick="openProfileModal('add')"><div class="user-avatar add-btn">+</div><div class="user-name">เพิ่มโปรไฟล์</div></div>`;
+    grid.innerHTML = sorted.map(u => UI.renderProfileCard(u)).join('') + UI.renderAddProfileCard();
     
     document.getElementById("landingScreen").classList.add("show");
 }
@@ -336,76 +450,7 @@ function deleteUser() {
 
 function addItem() {
     const id = Date.now();
-    const html = `
-        <div class="item active" data-id="${id}">
-            <div class="item-header" onclick="this.closest('.item').classList.toggle('active')">
-                <span class="drag-handle" title="ลาก">⠿</span>
-                <span class="item-type-dot dot-weekday"></span>
-                <span class="item-name">${APP_CONFIG.TEXT.DEFAULT_ITEM_NAME}</span>
-                <div class="item-meta">
-                    <span class="item-amount">฿0.00</span>
-                    <svg class="item-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
-                        <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="item-body" onclick="event.stopPropagation();">
-                <div class="field-row col-2">
-                    <div class="field">
-                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_RANGE}</label>
-                        <input class="date-range" placeholder="เลือกช่วงวันที่">
-                    </div>
-                    <div class="field">
-                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_TYPE}</label>
-                        <div style="display:flex; gap:12px; align-items:center; height:38px;">
-                            <label class="checkbox-custom checked">
-                                <input type="checkbox" class="chk-wd" checked>
-                                <div class="cb-box"></div>
-                                <span>${APP_CONFIG.TEXT.INPUT_LABEL_WD}</span>
-                            </label>
-                            <label class="checkbox-custom">
-                                <input type="checkbox" class="chk-hd">
-                                <div class="cb-box"></div>
-                                <span>${APP_CONFIG.TEXT.INPUT_LABEL_HD}</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div class="field-row col-2 time-row-wd">
-                    <div class="field">
-                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_START_WD}</label>
-                        <input class="start-wd" placeholder="เลือกเวลา" value="16:30">
-                    </div>
-                    <div class="field">
-                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_END_WD}</label>
-                        <input class="end-wd" placeholder="เลือกเวลา" value="20:30">
-                    </div>
-                </div>
-                <div class="field-row col-2 time-row-hd" style="display:none;">
-                    <div class="field">
-                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_START_HD}</label>
-                        <input class="start-hd" placeholder="เลือกเวลา" value="08:30">
-                    </div>
-                    <div class="field">
-                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_END_HD}</label>
-                        <input class="end-hd" placeholder="เลือกเวลา" value="16:30">
-                    </div>
-                </div>
-                <div class="field">
-                    <label>${APP_CONFIG.TEXT.INPUT_LABEL_NOTE}</label>
-                    <input type="text" class="name" placeholder="${APP_CONFIG.TEXT.INPUT_PLACEHOLDER_NOTE}" onfocus="this.dataset.edited='1'">
-                </div>
-                <div class="error-text" style="color:var(--red); font-size:0.75rem; margin-top:8px; display:none;"></div>
-                <div class="item-info-container" style="margin-top:12px;"></div>
-                <div style="display:flex; justify-content:flex-end; margin-top:16px;">
-                    <button class="btn-del" onclick="this.closest('.item').remove();calculate()">
-                        <span>${APP_CONFIG.TEXT.BTN_DELETE_ITEM}</span>
-                    </button>
-                </div>
-            </div>
-        </div>`;
-    
-    document.getElementById("items-container").insertAdjacentHTML('beforeend', html); 
+    document.getElementById("items-container").insertAdjacentHTML('beforeend', UI.renderOTItem(id)); 
     const el = document.querySelector(`[data-id="${id}"]`);
     
     flatpickr(el.querySelector(".date-range"), { mode: "range", onChange: () => updateItemUI(el) });
@@ -464,14 +509,14 @@ function updateItemUI(el) {
     let parts = [];
     if (chkWd && wd > 0) { 
         const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true); 
-        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--green)"></div><div class="info-text"><b>${APP_CONFIG.TEXT.LABEL_WD_DAYS(wd)}</b>: ${fh(h.total * wd)} ชม. (${fh(h.total)} ชม. × 1.5 เท่า)</div></div>`); 
+        parts.push(UI.renderInfoStrip('wd', APP_CONFIG.TEXT.LABEL_WD_DAYS(wd), `${fh(h.total * wd)} ชม. (${fh(h.total)} ชม. × 1.5 เท่า)`)); 
     }
     if (chkHd && hd > 0) { 
         const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false); 
         let hParts = [];
         if (h.h1) hParts.push(`${fh(h.h1)} ชม. × 1.0`);
         if (h.h3) hParts.push(`${fh(h.h3)} ชม. × 3.0`);
-        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--accent)"></div><div class="info-text"><b>${APP_CONFIG.TEXT.LABEL_HD_DAYS(hd)}</b>: ${fh(h.total * hd)} ชม. (${hParts.join(' + ')} | หักพัก 1 ชม.)</div></div>`); 
+        parts.push(UI.renderInfoStrip('hd', APP_CONFIG.TEXT.LABEL_HD_DAYS(hd), `${fh(h.total * hd)} ชม. (${hParts.join(' + ')} | หักพัก 1 ชม.)`)); 
     }
     el.querySelector(".item-info-container").innerHTML = parts.join('') || ""; 
     calculate();
@@ -619,13 +664,7 @@ function calculate() {
         total += itemTotal;
     });
 
-    document.getElementById("result-table").innerHTML = `
-        <table>
-            <thead><tr><th>รายการ</th><th>เวลา</th><th class="text-center">เรต</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th><th class="text-right" style="background:rgba(240,192,64,0.03)">สรุปรายวัน</th></tr></thead>
-            <tbody>${rows || `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text3)">${APP_CONFIG.TEXT.NO_CALC_DATA}</td></tr>`}</tbody>
-            <tfoot><tr><td colspan="5" class="text-right">${APP_CONFIG.TEXT.TOTAL_INCOME}</td><td class="text-right" style="color:var(--accent); font-weight:700; font-size:1.1rem;">฿${fm(total)}</td></tr></tfoot>
-        </table>`;
-        
+    document.getElementById("result-table").innerHTML = UI.renderResultTable(rows, total);
     document.getElementById("headerTotal").innerText = `฿${fm(total)}`; 
     document.getElementById("itemCount").innerText = APP_CONFIG.TEXT.ITEM_COUNT(document.querySelectorAll(".item").length); 
     saveData();
@@ -733,18 +772,11 @@ const showDaysBreakdown = (title, dateList) => {
         return new Date(g[0]).getDate() + "-" + new Date(g[g.length-1]).getDate();
     }).join(", ");
     
-    listContainer.innerHTML = `<div style="font-weight:700; color:var(--accent); margin-bottom:12px;">${APP_CONFIG.TEXT.PERIOD} ${summary}</div>`;
+    listContainer.innerHTML = UI.renderBreakdownHeader(summary);
     listContainer.innerHTML += dateList.map(d => {
         const info = formatThaiDate(d);
         const h = APP_CONFIG.HOLIDAYS_2569.find(x => x.date === d);
-        return `
-            <div class="holiday-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--surface2); padding:10px; border-radius:8px;">
-                <div>
-                    <div style="font-size:0.85rem; font-weight:600;">${info.full}</div>
-                    ${h ? `<div style="font-size:0.7rem; color:var(--accent);">${h.title}</div>` : ''}
-                </div>
-            </div>
-        `;
+        return UI.renderBreakdownItem(info.full, h ? h.title : null);
     }).join('');
     modal.classList.add("show");
 };
@@ -775,16 +807,10 @@ const renderHolidays = () => {
         const mon = d.getMonth();
         if (mon !== currentMonth) {
             currentMonth = mon;
-            html += `<div style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700; margin:16px 0 8px 4px; letter-spacing:0.5px; border-bottom:1px solid var(--border); padding-bottom:4px;">${THAI_MONTHS_FULL[mon]}</div>`;
+            html += UI.renderHolidaySectionHeader(THAI_MONTHS_FULL[mon]);
         }
         const fd = formatThaiDate(h.date);
-        html += `
-            <div class="holiday-item" style="background:var(--surface2); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-size:0.85rem; font-weight:600;">${fd.full}</div>
-                    <div style="font-size:0.75rem; color:var(--accent);">${h.title}</div>
-                </div>
-            </div>`;
+        html += UI.renderHolidayItem(fd.full, h.title);
     });
     list.innerHTML = html || `<div style="text-align:center; padding:20px; color:var(--text3)">${APP_CONFIG.TEXT.NO_HOLIDAY_DATA}</div>`;
 };
