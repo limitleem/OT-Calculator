@@ -74,11 +74,11 @@ const UI = {
                 <!-- WD Row -->
                 <div class="ot-grid row-wd">
                     <div class="field">
-                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_TYPE}</label>
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_TYPE}${APP_CONFIG.TEXT.INPUT_LABEL_WD}</label>
                         <label class="checkbox-custom checked">
                             <input type="checkbox" class="chk-wd" checked>
                             <div class="cb-box"></div>
-                            <span>${APP_CONFIG.TEXT.INPUT_LABEL_WD}</span>
+                            <span></span>
                         </label>
                     </div>
                     <div class="field">
@@ -97,15 +97,16 @@ const UI = {
                         </div>
                     </div>
                 </div>
+                <div class="wd-info-container" style="margin: -8px 0 20px;"></div>
 
                 <!-- HD Row -->
                 <div class="ot-grid row-hd">
                     <div class="field">
-                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_TYPE}</label>
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_TYPE}${APP_CONFIG.TEXT.INPUT_LABEL_HD}</label>
                         <label class="checkbox-custom">
                             <input type="checkbox" class="chk-hd">
                             <div class="cb-box"></div>
-                            <span>${APP_CONFIG.TEXT.INPUT_LABEL_HD}</span>
+                            <span></span>
                         </label>
                     </div>
                     <div class="field">
@@ -124,13 +125,13 @@ const UI = {
                         </div>
                     </div>
                 </div>
+                <div class="hd-info-container" style="margin: -8px 0 20px;"></div>
 
                 <div class="field" style="margin-top:12px;">
                     <label>${APP_CONFIG.TEXT.INPUT_LABEL_NOTE}</label>
                     <input type="text" class="name" placeholder="${APP_CONFIG.TEXT.INPUT_PLACEHOLDER_NOTE}" onfocus="this.dataset.edited='1'">
                 </div>
                 <div class="error-text" style="color:var(--red); font-size:0.75rem; margin-top:8px; display:none;"></div>
-                <div class="item-info-container" style="margin-top:16px;"></div>
                 <div style="display:flex; justify-content:flex-end; margin-top:16px;">
                     <button class="btn-del" onclick="this.closest('.item').remove();calculate()">
                         <span>${APP_CONFIG.TEXT.BTN_DELETE_ITEM}</span>
@@ -319,10 +320,10 @@ function updateHeaderProfile() {
     header.style.background = `color-mix(in srgb, ${u.color} 8%, var(--surface) 92%)`;
     header.style.borderBottomColor = `color-mix(in srgb, ${u.color} 20%, var(--border))`;
     header.style.setProperty('--user-color', u.color);
-    
+
     // Trigger animation
     header.classList.remove('animate-reveal');
-    void header.offsetWidth; 
+    void header.offsetWidth;
     header.classList.add('animate-reveal');
 }
 
@@ -579,13 +580,13 @@ function updateItemUI(el) {
     else { dot.className = "item-type-dot"; dot.style.background = "var(--text3)"; }
 
     let parts = [];
-    
+
     // WD Update
     const rowWd = el.querySelector(".row-wd");
     const canWd = wd > 0;
     const chkBoxWd = el.querySelector(".chk-wd");
-    
-    // Only disable checkbox if there are zero workdays in range
+    const wdInfo = el.querySelector(".wd-info-container");
+
     chkBoxWd.disabled = !canWd;
     chkBoxWd.closest(".checkbox-custom").style.opacity = canWd ? "1" : "0.4";
     chkBoxWd.closest(".checkbox-custom").style.pointerEvents = canWd ? "auto" : "none";
@@ -596,17 +597,18 @@ function updateItemUI(el) {
     el.querySelector(".end-wd").disabled = !isWdValid;
 
     const wdSum = el.querySelector(".wd-sum");
+    wdInfo.innerHTML = "";
     if (canWd) {
         const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true);
         wdSum.querySelector(".d-cnt").innerText = `${wd} วัน`;
         wdSum.querySelector(".h-cnt b").innerText = isWdValid ? fh(h.total * wd) : "0";
-        
+
         if (isWdValid) {
             const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
             const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
             const totalBadge = `<span class="info-badge total">${fh(h.total * wd)} ชม.</span>`;
             const part = `<span class="info-badge rate-1-5">${fh(h.total)} ชม. × 1.5 เท่า (${e_std} - ${s_std})</span>`;
-            parts.push(UI.renderInfoStrip('wd', APP_CONFIG.TEXT.LABEL_WD_DAYS(wd), `${totalBadge} ${part}`));
+            wdInfo.innerHTML = UI.renderInfoStrip('wd', APP_CONFIG.TEXT.LABEL_WD_DAYS(wd), `${totalBadge} ${part}`);
         }
     } else {
         wdSum.querySelector(".d-cnt").innerText = "0 วัน";
@@ -617,7 +619,8 @@ function updateItemUI(el) {
     const rowHd = el.querySelector(".row-hd");
     const canHd = hd > 0;
     const chkBoxHd = el.querySelector(".chk-hd");
-    
+    const hdInfo = el.querySelector(".hd-info-container");
+
     chkBoxHd.disabled = !canHd;
     chkBoxHd.closest(".checkbox-custom").style.opacity = canHd ? "1" : "0.4";
     chkBoxHd.closest(".checkbox-custom").style.pointerEvents = canHd ? "auto" : "none";
@@ -628,30 +631,29 @@ function updateItemUI(el) {
     el.querySelector(".end-hd").disabled = !isHdValid;
 
     const hdSum = el.querySelector(".hd-sum");
+    hdInfo.innerHTML = "";
     if (canHd) {
         const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false);
         hdSum.querySelector(".d-cnt").innerText = `${hd} วัน`;
         hdSum.querySelector(".h-cnt b").innerText = isHdValid ? fh(h.total * hd) : "0";
-        
+
         if (isHdValid) {
             const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
             const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
             const s_lun = fmtT(APP_CONFIG.CALC.LUNCH.start);
             const e_lun = fmtT(APP_CONFIG.CALC.LUNCH.end);
-            
+
             let hParts = [];
             if (h.h1) hParts.push(`<span class="info-badge rate-1">${fh(h.h1)} ชม. × 1 เท่า (${s_std} - ${e_std})</span>`);
             if (h.h3) hParts.push(`<span class="info-badge rate-3">${fh(h.h3)} ชม. × 3 เท่า (${e_std} - ${s_std})</span>`);
             const totalBadge = `<span class="info-badge total">${fh(h.total * hd)} ชม.</span>`;
             const lunchBadge = `<span class="info-badge deduct">หักพัก 1 ชม. (${s_lun} - ${e_lun})</span>`;
-            parts.push(UI.renderInfoStrip('hd', APP_CONFIG.TEXT.LABEL_HD_DAYS(hd), `${totalBadge} ${hParts.join('')} ${lunchBadge}`));
+            hdInfo.innerHTML = UI.renderInfoStrip('hd', APP_CONFIG.TEXT.LABEL_HD_DAYS(hd), `${totalBadge} ${hParts.join('')} ${lunchBadge}`);
         }
     } else {
         hdSum.querySelector(".d-cnt").innerText = "0 วัน";
         hdSum.querySelector(".h-cnt b").innerText = "0";
     }
-
-    el.querySelector(".item-info-container").innerHTML = parts.join('') || "";
     calculate();
 }
 

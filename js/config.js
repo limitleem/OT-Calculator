@@ -115,13 +115,13 @@ const APP_CONFIG = {
         PERIOD: "ช่วงวันที่:",
         NO_HOLIDAY_DATA: "ไม่มีข้อมูลวันหยุดในปีนี้",
         INPUT_LABEL_RANGE: "ช่วงวันที่ทำ OT",
-        INPUT_LABEL_TYPE: "ประเภทวัน",
+        INPUT_LABEL_TYPE: "ทำ",
         INPUT_LABEL_WD: "วันทำงาน",
         INPUT_LABEL_HD: "วันหยุด",
-        INPUT_LABEL_START_WD: "เวลาเริ่ม (วันทำงาน)",
-        INPUT_LABEL_END_WD: "เวลาสิ้นสุด (วันทำงาน)",
-        INPUT_LABEL_START_HD: "เวลาเริ่ม (วันหยุด)",
-        INPUT_LABEL_END_HD: "เวลาสิ้นสุด (วันหยุด)",
+        INPUT_LABEL_START_WD: "เวลาเริ่ม",
+        INPUT_LABEL_END_WD: "เวลาสิ้นสุด",
+        INPUT_LABEL_START_HD: "เวลาเริ่ม",
+        INPUT_LABEL_END_HD: "เวลาสิ้นสุด",
         INPUT_LABEL_NOTE: "หมายเหตุ / ชื่อรายการ",
         INPUT_PLACEHOLDER_NOTE: "ระบุหมายเหตุ..."
     }
