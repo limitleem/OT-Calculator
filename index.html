@@ -89,17 +89,118 @@
             gap: 10px;
         }
 
-        .grand-total-badge {
-            background: var(--accent-dim);
-            border: 1px solid rgba(240,192,64,0.25);
-            border-radius: 10px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        /* LANDING SCREEN */
+        .landing-screen {
+            position: fixed; inset: 0; background: var(--bg); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .grand-total-badge .label { font-size: 0.72rem; color: var(--accent2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .grand-total-badge .value { font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 500; color: var(--accent); }
+        .landing-screen.show { opacity: 1; pointer-events: auto; }
+        .landing-screen h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 40px; color: var(--text); }
+        
+        .user-grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; max-width: 900px; padding: 20px; }
+        .user-profile-card {
+            display: flex; flex-direction: column; align-items: center; gap: 15px; cursor: pointer; transition: transform 0.3s; width: 140px;
+        }
+        .user-profile-card:hover { transform: scale(1.1); }
+        .user-avatar {
+            width: 120px; height: 120px; border-radius: 12px; background: var(--surface3);
+            display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 700;
+            border: 3px solid transparent; transition: border-color 0.3s; position: relative;
+        }
+        .user-profile-card:hover .user-avatar { border-color: var(--text); }
+        .user-avatar.add-btn { background: var(--surface2); border: 2px dashed var(--border2); font-size: 2rem; color: var(--text3); }
+        .user-avatar.add-btn:hover { border-style: solid; color: var(--text2); }
+        
+        .user-name { font-size: 1.1rem; color: var(--text2); font-weight: 600; transition: color 0.3s; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; }
+        .user-profile-card:hover .user-name { color: var(--text); }
+        
+        .pin-indicator { position: absolute; bottom: -8px; right: -8px; background: var(--accent); color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        /* PIN MODAL */
+        .pin-screen {
+            position: fixed; inset: 0; background: rgba(13,15,20,0.95); z-index: 2100;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .pin-screen.show { display: flex; }
+        .pin-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .pin-dots { display: flex; gap: 15px; }
+        .pin-dot { width: 16px; height: 16px; border: 2px solid var(--text3); border-radius: 50%; transition: all 0.2s; }
+        .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.2); box-shadow: 0 0 15px var(--accent-dim); }
+        
+        .num-pad { display: grid; grid-template-columns: repeat(3, 70px); gap: 15px; margin-top: 30px; }
+        .num-btn {
+            width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--border);
+            background: var(--surface2); color: var(--text); font-size: 1.5rem; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .num-btn:hover { background: var(--surface3); border-color: var(--text3); }
+        .num-btn:active { transform: scale(0.9); background: var(--accent-dim); color: var(--accent); }
+
+        .header-btn:hover { background: var(--surface3); color: var(--text); border-color: var(--text3); }
+
+        /* PROFILE DROPDOWN */
+        .profile-section { position: relative; }
+        .profile-trigger {
+            display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 14px;
+            background: var(--surface2); border: 1px solid var(--border); border-radius: 30px;
+            cursor: pointer; transition: all 0.2s; user-select: none;
+        }
+        .profile-trigger:hover { background: var(--surface3); border-color: var(--border2); }
+        .profile-trigger .p-name { font-size: 0.85rem; font-weight: 700; color: var(--text2); }
+        .profile-trigger .p-avatar {
+            width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; font-weight: 800; color: #000;
+        }
+        
+        .profile-dropdown {
+            position: absolute; top: calc(100% + 10px); right: 0;
+            width: 200px; background: var(--surface); border: 1px solid var(--border2);
+            border-radius: var(--radius-sm); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 8px; z-index: 1500; display: none; flex-direction: column;
+            transform-origin: top right; transition: all 0.2s;
+        }
+        .profile-dropdown.show { display: flex; animation: dropFade 0.2s ease-out; }
+        @keyframes dropFade { from { opacity: 0; transform: scale(0.95) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .dropdown-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+            border-radius: 6px; cursor: pointer; color: var(--text2);
+            font-size: 0.85rem; font-weight: 600; transition: all 0.2s;
+        }
+        .dropdown-item:hover { background: var(--surface2); color: var(--text); }
+        .dropdown-item.danger { color: var(--red); }
+        .dropdown-item.danger:hover { background: var(--red-dim); }
+        .dropdown-divider { height: 1px; background: var(--border); margin: 6px 4px; }
+
+        /* ADD USER MODAL */
+        .glass-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px); z-index: 2500;
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .glass-modal.show { display: flex; opacity: 1; }
+        .glass-card {
+            background: var(--surface); border: 1px solid var(--border2);
+            border-radius: var(--radius); width: 100%; max-width: 380px;
+            padding: 32px; box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            transform: translateY(20px); transition: transform 0.3s;
+        }
+        .glass-modal.show .glass-card { transform: translateY(0); }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; }
+        .form-input {
+            width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+            border-radius: 8px; padding: 12px 16px; color: var(--text); font-size: 1rem;
+            outline: none; transition: border-color 0.2s;
+        }
+        .form-input:focus { border-color: var(--accent); }
+        .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
+        .btn-prime { flex: 1; background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .btn-sec { flex: 1; background: var(--surface3); color: var(--text2); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
 
         /* MAIN LAYOUT */
         .main { max-width: 1060px; margin: 0 auto; padding: 32px 24px; }
@@ -658,23 +759,109 @@
         }
         .holiday-date { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; }
         .holiday-title { color: var(--text); font-size: 0.9rem; font-weight: 500; }
+        .btn-user-action:hover { color: var(--text); }
     </style>
 </head>
 <body>
 
-<div class="header-wrap">
-    <div class="logo-mark">⏱</div>
+<header class="header-wrap">
+    <div class="logo-mark">⚡</div>
     <div class="header-text">
         <h1>OT Builder Pro</h1>
-        <p>คำนวณค่าล่วงเวลาอย่างแม่นยำ</p>
+        <p>เครื่องมือคำนวณโอทีอัจฉริยะ</p>
     </div>
+    
     <div class="header-right">
-        <div class="grand-total-badge">
-            <div>
-                <div class="label">โอทีรวม</div>
-                <div class="value" id="headerTotal">฿0.00</div>
+        <div class="profile-section" id="profileSection" style="display:none">
+            <div class="profile-trigger" onclick="toggleProfileDropdown()">
+                <div class="p-name" id="topUserName">User Name</div>
+                <div class="p-avatar" id="topUserAvatar">U</div>
+            </div>
+            <div class="profile-dropdown" id="profileDropdown">
+                <div class="dropdown-item" onclick="showLanding()">
+                    <span>⇄</span> สลับผู้ใช้
+                </div>
+                <div class="dropdown-item" onclick="openPinModal()">
+                    <span>🔒</span> ตั้งค่า / เปลี่ยน PIN
+                </div>
+                <div class="dropdown-divider"></div>
+                <div class="dropdown-item danger" onclick="deleteUser()">
+                    <span>🗑</span> ลบผู้ใช้นี้
+                </div>
             </div>
         </div>
+        <div class="grand-total-badge">
+            <span style="font-size:0.7rem; font-weight:700; color:var(--text3); text-transform:uppercase;">Grand Total</span>
+            <span id="headerTotal" style="font-family:'DM Mono', monospace; font-size:1.15rem; font-weight:700; color:var(--accent);">฿0.00</span>
+        </div>
+    </div>
+</header>
+
+<div id="addUserModal" class="glass-modal">
+    <div class="glass-card">
+        <h2 style="font-size:1.5rem; margin-bottom:24px;">เพิ่มผู้ใช้ใหม่</h2>
+        <div class="form-group">
+            <label>ชื่อผู้ใช้</label>
+            <input type="text" id="newUserName" class="form-input" placeholder="ใส่ชื่อของคุณ..." autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label>PIN 6 หลัก (ไม่บังคับ)</label>
+            <input type="password" id="newUserPin" class="form-input" placeholder="เลข 6 หลัก" maxlength="6" pattern="\d*">
+        </div>
+        <div class="modal-btns">
+            <button class="btn-sec" onclick="closeAddUserModal()">ยกเลิก</button>
+            <button class="btn-prime" onclick="confirmAddUser()">สร้างผู้ใช้</button>
+        </div>
+    </div>
+</div>
+
+<div id="pinSettingsModal" class="glass-modal">
+    <div class="glass-card">
+        <h2 id="pinModalTitle" style="font-size:1.5rem; margin-bottom:12px;">ความปลอดภัย</h2>
+        <p id="pinModalMsg" style="color:var(--text3); font-size:0.85rem; margin-bottom:24px;">ตั้งรหัสผ่าน 6 หลักเพื่อปกป้องข้อมูลของคุณ</p>
+        <div class="form-group">
+            <label>รหัสผ่านใหม่ (เลข 6 หลัก)</label>
+            <input type="password" id="settingsPin" class="form-input" placeholder="ปล่อยว่างเพื่อยกเลิก PIN" maxlength="6">
+        </div>
+        <div class="modal-btns">
+            <button class="btn-sec" onclick="closePinModal()">ยกเลิก</button>
+            <button class="btn-prime" onclick="confirmPinChange()">บันทึก</button>
+        </div>
+    </div>
+</div>
+
+<div id="landingScreen" class="landing-screen">
+    <h1 style="font-family:'DM Sans', sans-serif; letter-spacing:-1px;">เลือกผู้ใช้</h1>
+    <div id="userGrid" class="user-grid"></div>
+</div>
+
+<div id="pinScreen" class="pin-screen">
+    <div class="pin-container">
+        <h2 id="pinUserTitle" style="font-size:1.8rem; margin-bottom:10px;">ใส่รหัส PIN</h2>
+        <p id="pinMsg" style="color:var(--text3); margin-bottom:20px;">กรุณาใส่รหัสผ่าน 6 หลักเพื่อเข้าใช้งาน</p>
+        <div class="pin-dots">
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+            <div class="pin-dot"></div>
+        </div>
+        <div class="num-pad">
+            <button class="num-btn" onclick="pressPin(1)">1</button>
+            <button class="num-btn" onclick="pressPin(2)">2</button>
+            <button class="num-btn" onclick="pressPin(3)">3</button>
+            <button class="num-btn" onclick="pressPin(4)">4</button>
+            <button class="num-btn" onclick="pressPin(5)">5</button>
+            <button class="num-btn" onclick="pressPin(6)">6</button>
+            <button class="num-btn" onclick="pressPin(7)">7</button>
+            <button class="num-btn" onclick="pressPin(8)">8</button>
+            <button class="num-btn" onclick="pressPin(9)">9</button>
+            <button class="num-btn" style="visibility:hidden"></button>
+            <button class="num-btn" onclick="pressPin(0)">0</button>
+            <button class="num-btn" onclick="backspacePin()" style="font-size:1rem">DEL</button>
+        </div>
+        <button class="header-btn" style="margin-top:40px; padding:10px 24px;" onclick="hidePinScreen()">ยกเลิก</button>
     </div>
 </div>
 
@@ -1356,13 +1543,219 @@
 
         document.getElementById("headerTotal").innerText = `฿${fm(grandTotal)}`;
 
-        // SAVE
+        saveData();
+    }
+    // USER MANAGEMENT
+    let currentUser = null;
+    let userProfiles = [{ name: "Default User", pin: null, color: "#60a5fa" }];
+    let currentPinInput = "";
+    let targetUserForPin = null;
+
+    function initUsers() {
+        const storedProfiles = JSON.parse(localStorage.getItem("otUserProfiles_v2"));
+        if (storedProfiles && storedProfiles.length) {
+            userProfiles = storedProfiles;
+        } else {
+            const oldProfiles = JSON.parse(localStorage.getItem("otUserProfiles"));
+            if (oldProfiles) {
+                userProfiles = oldProfiles.map(u => ({ name: u, pin: null, color: getRandomColor() }));
+            }
+        }
+        
+        const storedActive = localStorage.getItem("otCurrentUser");
+        if (storedActive && userProfiles.some(u => u.name === storedActive)) {
+            currentUser = storedActive;
+            updateHeaderProfile();
+            loadData();
+        } else {
+            showLanding();
+        }
+    }
+
+    function getRandomColor() {
+        const colors = ["#f87171", "#60a5fa", "#34d399", "#f0c040", "#a78bfa", "#f472b6", "#fb923c"];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function showLanding() {
+        saveData(true);
+        currentUser = null;
+        document.getElementById("profileSection").style.display = "none";
+        const landing = document.getElementById("landingScreen");
+        const grid = document.getElementById("userGrid");
+        
+        grid.innerHTML = userProfiles.map(u => `
+            <div class="user-profile-card" onclick="selectProfile('${u.name.replace(/'/g, "\\'")}')">
+                <div class="user-avatar" style="background:${u.color}">
+                    ${u.name.charAt(0).toUpperCase()}
+                    ${u.pin ? '<div class="pin-indicator">🔒</div>' : ''}
+                </div>
+                <div class="user-name">${u.name}</div>
+            </div>
+        `).join('');
+        
+        grid.innerHTML += `
+            <div class="user-profile-card" onclick="openAddUserModal()">
+                <div class="user-avatar add-btn">+</div>
+                <div class="user-name">เพิ่มผู้ใช้</div>
+            </div>
+        `;
+        
+        landing.classList.add("show");
+    }
+
+    function toggleProfileDropdown() {
+        document.getElementById("profileDropdown").classList.toggle("show");
+    }
+
+    window.addEventListener('click', (e) => {
+        if (!document.getElementById("profileSection").contains(e.target)) {
+            document.getElementById("profileDropdown").classList.remove("show");
+        }
+    });
+
+    function updateHeaderProfile() {
+        if (!currentUser) return;
+        const user = userProfiles.find(u => u.name === currentUser);
+        document.getElementById("profileSection").style.display = "block";
+        document.getElementById("topUserName").innerText = user.name;
+        document.getElementById("topUserAvatar").innerText = user.name.charAt(0).toUpperCase();
+        document.getElementById("topUserAvatar").style.background = user.color;
+    }
+
+    function selectProfile(name) {
+        const user = userProfiles.find(u => u.name === name);
+        if (user.pin) {
+            showPinScreen(user);
+        } else {
+            completeLogin(name);
+        }
+    }
+
+    function showPinScreen(user) {
+        targetUserForPin = user;
+        currentPinInput = "";
+        updatePinDots();
+        document.getElementById("pinUserTitle").innerText = `${user.name}`;
+        document.getElementById("pinMsg").innerText = "กรุณาใส่รหัสผ่าน 6 หลัก";
+        document.getElementById("pinScreen").classList.add("show");
+    }
+
+    function hidePinScreen() {
+        document.getElementById("pinScreen").classList.remove("show");
+    }
+
+    function pressPin(num) {
+        if (currentPinInput.length < 6) {
+            currentPinInput += num;
+            updatePinDots();
+            if (currentPinInput.length === 6) {
+                if (currentPinInput === targetUserForPin.pin) {
+                    completeLogin(targetUserForPin.name);
+                    hidePinScreen();
+                } else {
+                    currentPinInput = "";
+                    updatePinDots();
+                    document.getElementById("pinMsg").innerText = "รหัสผ่านไม่ถูกต้อง!";
+                    document.getElementById("pinMsg").style.color = "var(--red)";
+                    setTimeout(() => {
+                        document.getElementById("pinMsg").innerText = "กรุณาใส่รหัสผ่าน 6 หลัก";
+                        document.getElementById("pinMsg").style.color = "var(--text3)";
+                    }, 2000);
+                }
+            }
+        }
+    }
+
+    function backspacePin() {
+        currentPinInput = currentPinInput.slice(0, -1);
+        updatePinDots();
+    }
+
+    function updatePinDots() {
+        const dots = document.querySelectorAll(".pin-dot");
+        dots.forEach((dot, i) => {
+            dot.classList.toggle("filled", i < currentPinInput.length);
+        });
+    }
+
+    // KEYBOARD LISTENER FOR PIN
+    window.addEventListener('keydown', (e) => {
+        if (!document.getElementById("pinScreen").classList.contains("show")) return;
+        if (e.key >= '0' && e.key <= '9') pressPin(e.key);
+        if (e.key === 'Backspace') backspacePin();
+    });
+
+    function completeLogin(name) {
+        currentUser = name;
+        localStorage.setItem("otCurrentUser", name);
+        document.getElementById("landingScreen").classList.remove("show");
+        document.getElementById("items-container").innerHTML = "";
+        updateHeaderProfile();
+        loadData();
+    }
+
+    // MODAL ACTIONS
+    function openAddUserModal() {
+        document.getElementById("newUserName").value = "";
+        document.getElementById("newUserPin").value = "";
+        document.getElementById("addUserModal").classList.add("show");
+    }
+    function closeAddUserModal() { document.getElementById("addUserModal").classList.remove("show"); }
+    
+    function confirmAddUser() {
+        const nameInput = document.getElementById("newUserName");
+        const pinInput = document.getElementById("newUserPin");
+        const name = nameInput.value.trim();
+        const pin = pinInput.value.trim();
+
+        if (!name) { alert("กรุณาใส่ชื่อผู้ใช้"); return; }
+        if (userProfiles.some(u => u.name === name)) { alert("ชื่อผู้ใช้นี้มีอยู่แล้ว"); return; }
+        if (pin && !/^\d{6}$/.test(pin)) { alert("รหัสผ่านต้องเป็นตัวเลข 6 หลัก"); return; }
+
+        userProfiles.push({ name: name, pin: pin || null, color: getRandomColor() });
+        localStorage.setItem("otUserProfiles_v2", JSON.stringify(userProfiles));
+        closeAddUserModal();
+        showLanding();
+    }
+
+    function openPinModal() {
+        const user = userProfiles.find(u => u.name === currentUser);
+        document.getElementById("settingsPin").value = user.pin || "";
+        document.getElementById("pinSettingsModal").classList.add("show");
+    }
+    function closePinModal() { document.getElementById("pinSettingsModal").classList.remove("show"); }
+    
+    function confirmPinChange() {
+        const user = userProfiles.find(u => u.name === currentUser);
+        const pin = document.getElementById("settingsPin").value.trim();
+        
+        if (pin && !/^\d{6}$/.test(pin)) { alert("รหัสผ่านต้องเป็นตัวเลข 6 หลัก"); return; }
+        
+        user.pin = pin || null;
+        localStorage.setItem("otUserProfiles_v2", JSON.stringify(userProfiles));
+        closePinModal();
+        alert("บันทึกการตั้งค่าแล้ว");
+        showLanding(); // Return to select to re-verify
+    }
+
+    function deleteUser() {
+        if (userProfiles.length <= 1) { alert("ไม่สามารถลบผู้ใช้คนสุดท้ายได้"); return; }
+        if (!confirm(`ลบผู้ใช้ "${currentUser}"? ข้อมูลทั้งหมดจะหายไป`)) return;
+        
+        userProfiles = userProfiles.filter(u => u.name !== currentUser);
+        localStorage.removeItem(`otData_${currentUser}`);
+        localStorage.setItem("otUserProfiles_v2", JSON.stringify(userProfiles));
+        showLanding();
+    }
+
+    function saveData(silent = false) {
+        if (!currentUser) return;
         const data = {
             version: "2.0",
             salary: document.getElementById("salary").value,
             items: []
         };
-
         document.querySelectorAll(".item").forEach(item => {
             data.items.push({
                 dateRange: item.querySelector(".date-range").value,
@@ -1376,31 +1769,29 @@
                 datasetEdited: item.querySelector(".name").dataset.edited
             });
         });
-
-        localStorage.setItem("otData", JSON.stringify(data));
+        localStorage.setItem(`otData_${currentUser}`, JSON.stringify(data));
     }
 
     function loadData() {
+        if (!currentUser) return;
         try {
-            const stored = localStorage.getItem("otData");
-            if (!stored) return;
-            const data = JSON.parse(stored);
-
-            if (data.salary) {
-                document.getElementById("salary").value = data.salary;
+            const stored = localStorage.getItem(`otData_${currentUser}`);
+            if (!stored) {
+                document.getElementById("salary").value = "30000";
+                addItem();
+                calculate();
+                return;
             }
+            const data = JSON.parse(stored);
+            if (data.salary) document.getElementById("salary").value = data.salary;
 
             if (data.items && data.items.length) {
                 document.getElementById("items-container").innerHTML = "";
                 data.items.forEach(it => {
                     addItem();
                     const el = document.querySelector("#items-container .item:last-child");
-
                     if (it.dateRange !== undefined) {
-                        // New format
-                        if (it.dateRange) {
-                             el.querySelector(".date-range")._flatpickr.setDate(it.dateRange.includes(" to ") ? it.dateRange.split(" to ") : it.dateRange);
-                        }
+                        if (it.dateRange) el.querySelector(".date-range")._flatpickr.setDate(it.dateRange.includes(" to ") ? it.dateRange.split(" to ") : it.dateRange);
                         el.querySelector(".chk-wd").checked = it.chkWd;
                         el.querySelector(".chk-hd").checked = it.chkHd;
                         if(it.startWd) el.querySelector(".start-wd")._flatpickr.setDate(it.startWd);
@@ -1409,57 +1800,31 @@
                         if(it.endHd) el.querySelector(".end-hd")._flatpickr.setDate(it.endHd);
                         el.querySelector(".name").value = it.name || "";
                         if(it.datasetEdited) el.querySelector(".name").dataset.edited = it.datasetEdited;
-                    } else {
-                        // Legacy format
-                        el.querySelector(".name").value = it.name || "";
-                        if (it.type === "weekday") {
-                            el.querySelector(".chk-wd").checked = true;
-                            el.querySelector(".chk-hd").checked = false;
-                            el.querySelector(".start-wd")._flatpickr.setDate(it.start || "17:00");
-                            el.querySelector(".end-wd")._flatpickr.setDate(it.end || "21:00");
-                        } else {
-                            el.querySelector(".chk-wd").checked = false;
-                            el.querySelector(".chk-hd").checked = true;
-                            el.querySelector(".start-hd")._flatpickr.setDate(it.start || "08:30");
-                            el.querySelector(".end-hd")._flatpickr.setDate(it.end || "17:00");
-                        }
                     }
-
-                    // trigger update
                     el.querySelector(".chk-wd").dispatchEvent(new Event("change"));
                 });
-            }
+            } else { addItem(); calculate(); }
         } catch (e) {
-            console.error("Data Load Error:", e);
-            alert("พบข้อผิดพลาดในการโหลดข้อมูล (โครงสร้างข้อมูลไม่รองรับ) ระบบจะรีเซ็ตข้อมูลเพื่อเริ่มใหม่");
-            localStorage.removeItem("otData");
-            location.reload();
+            console.error(e);
+            showLanding();
         }
     }
 
     function clearAll() {
-        if (!confirm("ลบรายการโอทีทั้งหมดใช่ไหม?")) return;
+        if (!confirm(`ลบรายการทั้งหมดของ "${currentUser}"?`)) return;
         document.getElementById("items-container").innerHTML = "";
-        localStorage.removeItem("otData");
+        localStorage.removeItem(`otData_${currentUser}`);
+        addItem();
         calculate();
     }
 
     new Sortable(document.getElementById("items-container"), {
-        animation: 200,
-        handle: ".drag-handle",
-        ghostClass: "sortable-ghost",
-        dragClass: "sortable-drag",
-        onEnd: calculate
+        animation: 200, handle: ".drag-handle", ghostClass: "sortable-ghost", dragClass: "sortable-drag", onEnd: calculate
     });
 
     document.getElementById("salary").oninput = calculate;
-    loadData();
+    initUsers();
     calculate();
-
-    // fallback if empty
-    if (!document.querySelectorAll(".item").length) {
-        addItem();
-    }
 </script>
 </body>
 </html>
