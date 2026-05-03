@@ -155,7 +155,10 @@ const UI = {
             <thead><tr><th>รายการ</th><th>เวลา</th><th class="text-center">เรต</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th><th class="text-right" style="background:rgba(240,192,64,0.03)">สรุปรายวัน</th></tr></thead>
             <tbody>${rows || `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text3)">${APP_CONFIG.TEXT.NO_CALC_DATA}</td></tr>`}</tbody>
             <tfoot><tr><td colspan="5" class="text-right">${APP_CONFIG.TEXT.TOTAL_INCOME}</td><td class="text-right" style="color:var(--accent); font-weight:700; font-size:1.1rem;">฿${fm(total)}</td></tr></tfoot>
-        </table>`,
+        </table>
+        <div style="margin-top:12px; font-size:0.75rem; color:var(--text3); line-height:1.5;">
+            * ทศนิยมอาจคาดเคลื่อน เนื่องจากการคำนวณใน SAP มีการแบ่งคาบเวลา / ตัดทศนิยม ไม่ตรงกัน
+        </div>`,
 
     renderHolidaySectionHeader: (title) => `
         <div style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700; margin:16px 0 8px 4px; letter-spacing:0.5px; border-bottom:1px solid var(--border); padding-bottom:4px;">${title}</div>`,
