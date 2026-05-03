@@ -126,10 +126,17 @@ function completeLogin(name) {
     document.getElementById("items-container").innerHTML = ""; 
     updateHeaderProfile(); 
     loadData();
+    renderHolidays();
+    if (typeof Sortable !== 'undefined') {
+        new Sortable(document.getElementById("items-container"), {
+            animation: 200, handle: ".drag-handle", ghostClass: "sortable-ghost", dragClass: "sortable-drag", onEnd: calculate
+        });
+    }
 }
 
 function updateHeaderProfile() {
     const u = userProfiles.find(x => x.name === currentUser); 
+    if (!u) return;
     document.getElementById("profileSection").style.display = "block"; 
     document.getElementById("topUserName").innerText = u.name;
     const av = document.getElementById("topUserAvatar"); 
@@ -369,8 +376,9 @@ function addItem() {
                 </div>
                 <div class="field">
                     <label>หมายเหตุ / ชื่อรายการ</label>
-                    <input type="text" class="name" placeholder="ระบุหมายเหตุ...">
+                    <input type="text" class="name" placeholder="ระบุหมายเหตุ..." onfocus="this.dataset.edited='1'">
                 </div>
+                <div class="error-text" style="color:var(--red); font-size:0.75rem; margin-top:8px; display:none;"></div>
                 <div class="item-info-container" style="margin-top:12px;"></div>
                 <div style="display:flex; justify-content:flex-end; margin-top:16px;">
                     <button class="btn-del" onclick="this.closest('.item').remove();calculate()">
@@ -407,7 +415,6 @@ function updateItemUI(el) {
     const range = el.querySelector(".date-range").value;
     const dates = getDaysInRange(range);
     let wd = 0, hd = 0; 
-    
     dates.forEach(d => { 
         if (APP_CONFIG.HOLIDAYS_2569.some(h => h.date === d)) hd++; 
         else wd++; 
@@ -415,8 +422,22 @@ function updateItemUI(el) {
 
     const chkWd = el.querySelector(".chk-wd").checked;
     const chkHd = el.querySelector(".chk-hd").checked;
+    const nameInput = el.querySelector(".name");
+    const errorEl = el.querySelector(".error-text");
+
+    // Warnings
+    errorEl.style.display = "none";
+    if (chkWd && dates.length > 0 && wd === 0) { errorEl.innerText = "⚠️ ไม่มีวันทำงานในช่วงวันที่เลือก!"; errorEl.style.display = "block"; }
+    if (chkHd && dates.length > 0 && hd === 0) { errorEl.innerText = "⚠️ ไม่มีวันหยุดในช่วงวันที่เลือก!"; errorEl.style.display = "block"; }
+
+    // Auto naming
+    if (!nameInput.dataset.edited && dates.length > 0) {
+        const d1 = formatThaiDate(dates[0]).short;
+        const d2 = formatThaiDate(dates[dates.length-1]).short;
+        nameInput.value = dates.length > 1 ? `OT ${d1} - ${d2}` : `OT ${d1}`;
+        el.querySelector(".item-name").innerText = nameInput.value;
+    }
     
-    // Update type dot
     const dot = el.querySelector(".item-type-dot");
     if (chkWd && chkHd) { dot.className = "item-type-dot dot-weekday"; dot.style.background = "linear-gradient(to right, var(--green), var(--accent))"; }
     else if (chkWd) { dot.className = "item-type-dot dot-weekday"; dot.style.background = ""; }
@@ -426,16 +447,15 @@ function updateItemUI(el) {
     let parts = [];
     if (chkWd && wd > 0) { 
         const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true); 
-        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--green)"></div><div class="info-text"><b>งาน ${wd} วัน</b>: ${fh(h.total * wd)} ชม. (${fh(h.total)} ชม. × 1.5 เท่า)</div></div>`); 
+        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--green)"></div><div class="info-text"><b>วันทำงาน ${wd} วัน</b>: ${fh(h.total * wd)} ชม. (${fh(h.total)} ชม. × 1.5 เท่า)</div></div>`); 
     }
     if (chkHd && hd > 0) { 
         const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false); 
         let hParts = [];
         if (h.h1) hParts.push(`${fh(h.h1)} ชม. × 1.0`);
         if (h.h3) hParts.push(`${fh(h.h3)} ชม. × 3.0`);
-        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--accent)"></div><div class="info-text"><b>หยุด ${hd} วัน</b>: ${fh(h.total * hd)} ชม. (${hParts.join(' + ')} | หักพัก 1 ชม.)</div></div>`); 
+        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--accent)"></div><div class="info-text"><b>วันหยุด ${hd} วัน</b>: ${fh(h.total * hd)} ชม. (${hParts.join(' + ')} | หักพัก 1 ชม.)</div></div>`); 
     }
-    
     el.querySelector(".item-info-container").innerHTML = parts.join('') || ""; 
     calculate();
 }
@@ -476,25 +496,8 @@ const formatThaiDate = (dateStr) => {
     return { short: `${date} ${month} ${year}`, full: `${day} ${date} ${month} ${year}`, monthIndex: d.getMonth(), monthName: month, year };
 };
 
-const showDaysBreakdown = (title, dateList) => {
-    const modal = document.getElementById("dayBreakdownModal");
-    const listContainer = document.getElementById("dayBreakdownList");
-    document.getElementById("dayBreakdownTitle").innerText = title;
-    
-    listContainer.innerHTML = dateList.map(d => {
-        const info = formatThaiDate(d);
-        const h = APP_CONFIG.HOLIDAYS_2569.find(x => x.date === d);
-        return `
-            <div class="holiday-item" style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <div style="font-size:0.85rem; font-weight:600;">${info.full}</div>
-                    ${h ? `<div style="font-size:0.7rem; color:var(--accent);">${h.title}</div>` : ''}
-                </div>
-            </div>
-        `;
-    }).join('');
-    modal.classList.add("show");
-};
+
+
 
 function calculate() {
     const salary = +document.getElementById("salary").value || 0;
@@ -632,21 +635,25 @@ function saveData() {
 function loadData() {
     const stored = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.DATA_PREFIX + currentUser); 
     if (!stored) return addItem();
-    const data = JSON.parse(stored); 
-    document.getElementById("salary").value = data.salary;
-    data.items.forEach(it => { 
-        addItem(); 
-        const el = document.querySelector(".item:last-child"); 
-        el.querySelector(".date-range")._flatpickr.setDate(it.range.split(" to ")); 
-        el.querySelector(".chk-wd").checked = it.chkWd; 
-        el.querySelector(".chk-hd").checked = it.chkHd; 
-        el.querySelector(".start-wd")._flatpickr.setDate(it.startWd); 
-        el.querySelector(".end-wd")._flatpickr.setDate(it.endWd); 
-        el.querySelector(".start-hd")._flatpickr.setDate(it.startHd); 
-        el.querySelector(".end-hd")._flatpickr.setDate(it.endHd); 
-        el.querySelector(".name").value = it.name; 
-        updateItemUI(el); 
-    });
+    try {
+        const data = JSON.parse(stored); 
+        if (data.salary) document.getElementById("salary").value = data.salary;
+        if (data.items && Array.isArray(data.items)) {
+            data.items.forEach(it => { 
+                addItem(); 
+                const el = document.querySelector(".item:last-child"); 
+                if (it.range) el.querySelector(".date-range")._flatpickr.setDate(it.range.includes(" to ") ? it.range.split(" to ") : it.range); 
+                el.querySelector(".chk-wd").checked = it.chkWd; 
+                el.querySelector(".chk-hd").checked = it.chkHd; 
+                if (it.startWd) el.querySelector(".start-wd")._flatpickr.setDate(it.startWd); 
+                if (it.endWd) el.querySelector(".end-wd")._flatpickr.setDate(it.endWd); 
+                if (it.startHd) el.querySelector(".start-hd")._flatpickr.setDate(it.startHd); 
+                if (it.endHd) el.querySelector(".end-hd")._flatpickr.setDate(it.endHd); 
+                el.querySelector(".name").value = it.name || ""; 
+                updateItemUI(el); 
+            });
+        } else { addItem(); }
+    } catch (e) { console.error("Load error:", e); addItem(); }
 }
 
 function clearAll() { 
@@ -685,3 +692,69 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("salary").oninput = calculate;
     initUsers();
 });
+
+const showDaysBreakdown = (title, dateList) => {
+    const modal = document.getElementById("dayBreakdownModal");
+    const listContainer = document.getElementById("dayBreakdownList");
+    document.getElementById("dayBreakdownTitle").innerText = title;
+    
+    // Grouping logic
+    let groups = [];
+    if (dateList.length > 0) {
+        let temp = [dateList[0]];
+        for (let i = 1; i < dateList.length; i++) {
+            let p = new Date(dateList[i-1]);
+            let c = new Date(dateList[i]);
+            if ((c - p) / 86400000 === 1) temp.push(dateList[i]);
+            else { groups.push(temp); temp = [dateList[i]]; }
+        }
+        groups.push(temp);
+    }
+    let summary = groups.map(g => {
+        if (g.length === 1) return new Date(g[0]).getDate();
+        return new Date(g[0]).getDate() + "-" + new Date(g[g.length-1]).getDate();
+    }).join(", ");
+    
+    listContainer.innerHTML = `<div style="font-weight:700; color:var(--accent); margin-bottom:12px;">ช่วงวันที่: ${summary}</div>`;
+    listContainer.innerHTML += dateList.map(d => {
+        const info = formatThaiDate(d);
+        const h = APP_CONFIG.HOLIDAYS_2569.find(x => x.date === d);
+        return `
+            <div class="holiday-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; background:var(--surface2); padding:10px; border-radius:8px;">
+                <div>
+                    <div style="font-size:0.85rem; font-weight:600;">${info.full}</div>
+                    ${h ? `<div style="font-size:0.7rem; color:var(--accent);">${h.title}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+    modal.classList.add("show");
+};
+
+const renderHolidays = () => {
+    const list = document.getElementById("holidayListContainer");
+    const select = document.getElementById("holidayYearSelect");
+    if(!list) return;
+
+    const years = [...new Set(APP_CONFIG.HOLIDAYS_2569.map(h => new Date(h.date).getFullYear()))].sort();
+    if(select && select.options.length === 0) {
+        years.forEach(y => {
+            const opt = document.createElement("option");
+            opt.value = y; opt.text = y + 543;
+            select.appendChild(opt);
+        });
+        if(years.length > 0) select.value = years[0];
+    }
+
+    const filterYear = select ? parseInt(select.value) : (years[0] || new Date().getFullYear());
+    const filtered = APP_CONFIG.HOLIDAYS_2569.filter(h => new Date(h.date).getFullYear() === filterYear);
+    
+    list.innerHTML = filtered.map(h => {
+        const fd = formatThaiDate(h.date);
+        return `
+            <div class="holiday-item" style="background:var(--surface2); padding:12px; border-radius:8px; margin-bottom:8px;">
+                <div style="font-size:0.85rem; font-weight:600;">${fd.full}</div>
+                <div style="font-size:0.75rem; color:var(--accent);">${h.title}</div>
+            </div>`;
+    }).join('');
+};

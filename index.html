@@ -196,15 +196,25 @@
 <!-- Modals for details -->
 <div id="holidayModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
     <div class="modal-content">
-        <div class="modal-header"><h3>วันหยุดพิเศษ</h3><button onclick="document.getElementById('holidayModal').classList.remove('show')" style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer">&times;</button></div>
-        <div class="modal-body" id="holidayList"></div>
+        <div class="modal-header">
+            <h3 style="display:flex; align-items:center; gap:8px;">วันหยุดนักขัตฤกษ์ <select id="holidayYearSelect" onchange="renderHolidays()" style="padding:2px 4px; border-radius:4px; border:1px solid var(--border); background:var(--surface2); color:var(--text); font-size:0.9rem; font-weight:600; outline:none; cursor:pointer;"></select></h3>
+            <button class="modal-close" style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer" onclick="document.getElementById('holidayModal').classList.remove('show')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="holidayListContainer"></div>
+        </div>
     </div>
 </div>
 
 <div id="dayBreakdownModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
     <div class="modal-content">
-        <div class="modal-header"><h3 id="dayBreakdownTitle">วัน</h3><button onclick="document.getElementById('dayBreakdownModal').classList.remove('show')" style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer">&times;</button></div>
-        <div class="modal-body" id="dayBreakdownList"></div>
+        <div class="modal-header">
+            <h3 id="dayBreakdownTitle">รายละเอียดวัน</h3>
+            <button class="modal-close" style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer" onclick="document.getElementById('dayBreakdownModal').classList.remove('show')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="dayBreakdownList" class="holiday-list"></div>
+        </div>
     </div>
 </div>
 

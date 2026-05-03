@@ -92,9 +92,10 @@ body {
 
 .profile-section { position: relative; }
 .profile-trigger {
-    display: flex; align-items: center; gap: 12px; padding: 6px 14px;
+    display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 14px;
     background: var(--surface2); border: 1px solid var(--border); border-radius: 30px; cursor: pointer;
 }
+.profile-trigger .p-name { font-size: 0.85rem; font-weight: 700; color: var(--text2); }
 .profile-trigger .p-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 
 .profile-dropdown {
