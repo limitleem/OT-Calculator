@@ -16,6 +16,7 @@ let tempAvatarEmoji = "😀";
 let tempAvatarStyle = "avataaars";
 let dicebearView = "styles";
 let currentVariants = [];
+let currentEmojis = [];
 
 // Helper functions
 const fm = n => (+n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -327,6 +328,8 @@ function openProfileModal(mode, user = null) {
         tempAvatarEmoji = editingUser.emoji;
         tempAvatarStyle = editingUser.avatarStyle || "avataaars";
     }
+    refreshVariants(false);
+    refreshEmojis(false);
     renderGrids();
     setAvatarType(tempAvatarType);
     document.getElementById("profileModal").classList.add("show");
@@ -341,7 +344,8 @@ function renderGrids() {
     `).join('');
 
     // Emoji Grid
-    document.getElementById("emojiGrid").innerHTML = APP_CONFIG.PRESET_EMOJIS.map(e => `
+    const emojisToRender = currentEmojis.length ? currentEmojis : APP_CONFIG.PRESET_EMOJIS.slice(0, 12);
+    document.getElementById("emojiGrid").innerHTML = emojisToRender.map(e => `
         <div class="emoji-opt ${e === tempAvatarEmoji ? 'active' : ''}" onclick="setTempEmoji('${e}')">${e}</div>
     `).join('');
 
@@ -388,6 +392,12 @@ function setDicebearView(v) {
 function refreshVariants(shouldRender = true) {
     currentVariants = Array.from({ length: 10 }, () => Math.random().toString(36).substring(7));
     if (shouldRender) renderDicebearSection();
+}
+
+function refreshEmojis(shouldRender = true) {
+    const all = APP_CONFIG.PRESET_EMOJIS;
+    currentEmojis = [...all].sort(() => 0.5 - Math.random()).slice(0, 12);
+    if (shouldRender) renderGrids();
 }
 
 function setTempColor(c) { tempAvatarColor = c; renderGrids(); updateAvatarPreview(); }
