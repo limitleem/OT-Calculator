@@ -610,21 +610,17 @@ function updateItemUI(el) {
     const wdSum = el.querySelector(".wd-sum");
     wdInfo.innerHTML = "";
     if (canWd) {
-        const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true);
+        const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true, hourlyRate);
         wdSum.querySelector(".d-cnt").innerText = `${wd} วัน`;
         wdSum.querySelector(".h-cnt b").innerText = isWdValid ? fh(h.total * wd) : "0";
-        
-        const costDay = h.total * 1.5 * hourlyRate;
-        wdSum.querySelector(".c-cnt").innerText = isWdValid ? `฿${fm(costDay * wd)}` : "฿0.00";
+        wdSum.querySelector(".c-cnt").innerText = isWdValid ? `฿${fm(h.costDay * wd)}` : "฿0.00";
 
         if (isWdValid) {
             const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
             const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
-            
             const totalText = `<span style="color:var(--text); font-weight:700; font-size:0.85rem; margin-right:12px;">${fh(h.total)} ชม. / วัน</span>`;
             const part = `<span class="info-badge rate-1-5">${fh(h.total)} ชม. × 1.5 เท่า (${e_std} - ${s_std})</span>`;
-            const costText = `<span style="margin-left:auto; color:var(--accent); font-weight:800; font-family:'DM Mono', monospace; font-size:0.85rem;">฿${fm(costDay)} / วัน</span>`;
-            
+            const costText = `<span style="margin-left:auto; color:var(--accent); font-weight:800; font-family:'DM Mono', monospace; font-size:0.85rem;">฿${fm(h.costDay)} / วัน</span>`;
             wdInfo.innerHTML = `<div class="info-detail" style="display:flex; width:100%; align-items:center;">${totalText} ${part} ${costText}</div>`;
         }
     } else {
@@ -650,27 +646,22 @@ function updateItemUI(el) {
     const hdSum = el.querySelector(".hd-sum");
     hdInfo.innerHTML = "";
     if (canHd) {
-        const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false);
+        const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false, hourlyRate);
         hdSum.querySelector(".d-cnt").innerText = `${hd} วัน`;
         hdSum.querySelector(".h-cnt b").innerText = isHdValid ? fh(h.total * hd) : "0";
-
-        const costDay = (h.h1 * 1.0 * hourlyRate) + (h.h3 * 3.0 * hourlyRate);
-        hdSum.querySelector(".c-cnt").innerText = isHdValid ? `฿${fm(costDay * hd)}` : "฿0.00";
+        hdSum.querySelector(".c-cnt").innerText = isHdValid ? `฿${fm(h.costDay * hd)}` : "฿0.00";
 
         if (isHdValid) {
             const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
             const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
             const s_lun = fmtT(APP_CONFIG.CALC.LUNCH.start);
             const e_lun = fmtT(APP_CONFIG.CALC.LUNCH.end);
-            
             let hParts = [];
             if (h.h1) hParts.push(`<span class="info-badge rate-1">${fh(h.h1)} ชม. × 1 เท่า (${s_std} - ${e_std})</span>`);
             if (h.h3) hParts.push(`<span class="info-badge rate-3">${fh(h.h3)} ชม. × 3 เท่า (${e_std} - ${s_std})</span>`);
-            
             const totalText = `<span style="color:var(--text); font-weight:700; font-size:0.85rem; margin-right:12px;">${fh(h.total)} ชม. / วัน</span>`;
             const lunchBadge = `<span class="info-badge deduct">หักพัก 1 ชม. (${s_lun} - ${e_lun})</span>`;
-            const costText = `<span style="margin-left:auto; color:var(--accent); font-weight:800; font-family:'DM Mono', monospace; font-size:0.85rem;">฿${fm(costDay)} / วัน</span>`;
-            
+            const costText = `<span style="margin-left:auto; color:var(--accent); font-weight:800; font-family:'DM Mono', monospace; font-size:0.85rem;">฿${fm(h.costDay)} / วัน</span>`;
             hdInfo.innerHTML = `<div class="info-detail" style="display:flex; width:100%; align-items:center;">${totalText} ${hParts.join('')} ${lunchBadge} ${costText}</div>`;
         }
     } else {
@@ -692,10 +683,11 @@ function getDaysInRange(r) {
     return d;
 }
 
-function calcH(sv, ev, isW) {
+function calcH(sv, ev, isW, hourly) {
     const { STANDARD, LUNCH, RATES } = APP_CONFIG.CALC;
     let s = toHour(sv), e = toHour(ev);
-    if (e <= s) e += 24;
+    if (!sv || !ev) return { total: 0, h1: 0, h15: 0, h3: 0, m1: 0, m15: 0, m3: 0, costDay: 0 };
+    if (e <= s && s > 0) e += 24;
     let total = 0, h1 = 0, h15 = 0, h3 = 0;
     for (let h = s; h < e; h += 0.5) {
         let x = h >= 24 ? h - 24 : h;
@@ -710,7 +702,11 @@ function calcH(sv, ev, isW) {
             total += 0.5;
         }
     }
-    return { total, h1, h15, h3 };
+    const m1 = calMoney(h1 * hourly * 1.0);
+    const m15 = calMoney(h15 * hourly * 1.5);
+    const m3 = calMoney(h3 * hourly * 3.0);
+    const costDay = calMoney(m1 + m15 + m3);
+    return { total, h1, h15, h3, m1, m15, m3, costDay };
 }
 
 const THAI_DAYS = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
@@ -761,77 +757,53 @@ function calculate() {
             else wdD.push(d);
         });
 
-        const calcRow = (isWd, startVal, endVal, count, dateList) => {
-            if (!startVal || !endVal || count === 0) return null;
-            let s = toHour(startVal);
-            let e = toHour(endVal);
-            if (e <= s && s > 0) e += 24;
-            let h1 = 0, h15 = 0, h3 = 0;
-            for (let h = s; h < e; h += 0.5) {
-                let x = h >= 24 ? h - 24 : h;
-                if (isWd) {
-                    if (x >= STANDARD.start && x < STANDARD.end) continue;
-                    h15 += 0.5;
-                } else {
-                    if (x >= STANDARD.start && x < STANDARD.end) {
-                        if (x >= LUNCH.start && x < LUNCH.end) continue;
-                        h1 += 0.5;
-                    } else { h3 += 0.5; }
-                }
-            }
-
-            let hhh1 = calMoney(h1 * hourly);
-            if (h1 >= 7) {
-                hhh1 = calMoney(3.5 * hourly) + calMoney((h1 - 3.5) * hourly);
-            }
-            const hhh15 = calMoney(h15 * prHrly15);
-            const hhh3 = calMoney(h3 * prHrly3);
-
-            const dayVal = calMoney(hhh1 + hhh15 + hhh3);
-            const sumTotal = calMoney(dayVal * count);
-
-            const c1 = h1 > 0 ? `<span class="hours-chip x1">${fh(h1)} ชม. × ${RATES.HD.standard.toFixed(1)} = ${fm(hhh1)}</span>` : '';
-            const c15 = h15 > 0 ? `<span class="hours-chip x15">${fh(h15)} ชม. × ${RATES.WD.ot.toFixed(1)} = ${fm(hhh15)}</span>` : '';
-            const c3 = h3 > 0 ? `<span class="hours-chip x3">${fh(h3)} ชม. × ${RATES.HD.ot.toFixed(1)} = ${fm(hhh3)}</span>` : '';
+        const w = item.querySelector(".chk-wd").checked ? calcH(item.querySelector(".start-wd").value, item.querySelector(".end-wd").value, true, hourly) : null;
+        const h = item.querySelector(".chk-hd").checked ? calcH(item.querySelector(".start-hd").value, item.querySelector(".end-hd").value, false, hourly) : null;
+        
+        const formatRow = (res, isWd, count, dateList) => {
+            if (!res || count === 0) return null;
+            const total = calMoney(res.costDay * count);
+            const c1 = res.h1 > 0 ? `<span class="hours-chip x1">${fh(res.h1)} ชม. × 1.0 = ${fm(res.m1)}</span>` : '';
+            const c15 = res.h15 > 0 ? `<span class="hours-chip x15">${fh(res.h15)} ชม. × 1.5 = ${fm(res.m15)}</span>` : '';
+            const c3 = res.h3 > 0 ? `<span class="hours-chip x3">${fh(res.h3)} ชม. × 3.0 = ${fm(res.m3)}</span>` : '';
             const ratesHtml = `${c1}${c15}${c3}`;
-
             const badgeHtml = isWd ? '<span class="badge badge-wd" style="margin-right:6px;">WD</span>' : '<span class="badge badge-hd" style="margin-right:6px;">HD</span>';
-            const timeHtml = `<div class="mono" style="display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:0.75rem">${badgeHtml}${startVal}–${endVal} ${(e > 24) ? '<span style="font-size:0.6rem;color:var(--blue);background:var(--blue-dim);padding:1px 4px;border-radius:3px;margin-left:4px;">+1</span>' : ''}</div>`;
-
+            const sVal = isWd ? item.querySelector(".start-wd").value : item.querySelector(".start-hd").value;
+            const eVal = isWd ? item.querySelector(".end-wd").value : item.querySelector(".end-hd").value;
+            const isNextDay = toHour(eVal) <= toHour(sVal) && toHour(sVal) > 0;
+            const timeHtml = `<div class="mono" style="display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:0.75rem">${badgeHtml}${sVal}–${eVal} ${isNextDay ? '<span style="font-size:0.6rem;color:var(--blue);background:var(--blue-dim);padding:1px 4px;border-radius:3px;margin-left:4px;">+1</span>' : ''}</div>`;
             const nameSafe = name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
             const datesJson = JSON.stringify(dateList).replace(/"/g, '&quot;');
             const daysDisplay = `<span style="cursor:pointer; text-decoration:underline;" onclick="showDaysBreakdown('${isWd ? 'วันทำงาน' : 'วันหยุด'} - ${nameSafe}', ${datesJson})">${count} วัน</span>`;
-
-            return { total: sumTotal, ratesHtml, timeHtml, dayVal, daysDisplay };
+            return { total, ratesHtml, timeHtml, daysDisplay };
         };
-
-        const w = item.querySelector(".chk-wd").checked ? calcRow(true, item.querySelector(".start-wd").value, item.querySelector(".end-wd").value, wdD.length, wdD) : null;
-        const h = item.querySelector(".chk-hd").checked ? calcRow(false, item.querySelector(".start-hd").value, item.querySelector(".end-hd").value, hdD.length, hdD) : null;
+        const wdRes = formatRow(w, true, wdD.length, wdD);
+        const hdRes = formatRow(h, false, hdD.length, hdD);
 
         let itemTotal = 0;
-        if (w && h) {
-            itemTotal = w.total + h.total;
+        if (wdRes && hdRes) {
+            itemTotal = wdRes.total + hdRes.total;
             rows += `
             <tr>
                 <td rowspan="2"><span style="font-weight:600;font-size:0.85rem">${name}</span></td>
-                <td>${w.timeHtml}</td>
-                <td style="white-space:nowrap">${w.ratesHtml}</td>
-                <td class="text-center mono" style="color:var(--text2)">${w.daysDisplay}</td>
-                <td class="text-right">฿${fm(w.total)}</td>
+                <td>${wdRes.timeHtml}</td>
+                <td style="white-space:nowrap">${wdRes.ratesHtml}</td>
+                <td class="text-center mono" style="color:var(--text2)">${wdRes.daysDisplay}</td>
+                <td class="text-right">฿${fm(wdRes.total)}</td>
                 <td rowspan="2" class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td>
             </tr>
             <tr>
-                <td>${h.timeHtml}</td>
-                <td style="white-space:nowrap">${h.ratesHtml}</td>
-                <td class="text-center mono" style="color:var(--text2)">${h.daysDisplay}</td>
-                <td class="text-right">฿${fm(h.total)}</td>
+                <td>${hdRes.timeHtml}</td>
+                <td style="white-space:nowrap">${hdRes.ratesHtml}</td>
+                <td class="text-center mono" style="color:var(--text2)">${hdRes.daysDisplay}</td>
+                <td class="text-right">฿${fm(hdRes.total)}</td>
             </tr>`;
-        } else if (w) {
-            itemTotal = w.total;
-            rows += `<tr><td><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td>${w.timeHtml}</td><td style="white-space:nowrap">${w.ratesHtml}</td><td class="text-center mono" style="color:var(--text2)">${w.daysDisplay}</td><td class="text-right">฿${fm(w.total)}</td><td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
-        } else if (h) {
-            itemTotal = h.total;
-            rows += `<tr><td><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td>${h.timeHtml}</td><td style="white-space:nowrap">${h.ratesHtml}</td><td class="text-center mono" style="color:var(--text2)">${h.daysDisplay}</td><td class="text-right">฿${fm(h.total)}</td><td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
+        } else if (wdRes) {
+            itemTotal = wdRes.total;
+            rows += `<tr><td><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td>${wdRes.timeHtml}</td><td style="white-space:nowrap">${wdRes.ratesHtml}</td><td class="text-center mono" style="color:var(--text2)">${wdRes.daysDisplay}</td><td class="text-right">฿${fm(wdRes.total)}</td><td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
+        } else if (hdRes) {
+            itemTotal = hdRes.total;
+            rows += `<tr><td><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td>${hdRes.timeHtml}</td><td style="white-space:nowrap">${hdRes.ratesHtml}</td><td class="text-center mono" style="color:var(--text2)">${hdRes.daysDisplay}</td><td class="text-right">฿${fm(hdRes.total)}</td><td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
         }
 
         item.querySelector(".item-amount").innerText = `฿${fm(itemTotal)}`;
@@ -864,7 +836,12 @@ function saveData() {
 }
 
 function loadData() {
+    const container = document.getElementById("items-container");
     const stored = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.DATA_PREFIX + currentUser);
+    
+    // Clear current items before loading new ones
+    container.innerHTML = "";
+    
     if (!stored) {
         document.getElementById("salary").value = APP_CONFIG.DEFAULTS.SALARY;
         return addItem();
