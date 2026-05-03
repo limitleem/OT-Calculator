@@ -289,6 +289,16 @@ function updateHeaderProfile() {
     const av = document.getElementById("topUserAvatar");
     av.style.background = getGrad(u.color);
     av.innerHTML = getAvatarHTML(u);
+
+    const header = document.getElementById("appHeader");
+    header.style.background = `color-mix(in srgb, ${u.color} 8%, var(--surface) 92%)`;
+    header.style.borderBottomColor = `color-mix(in srgb, ${u.color} 20%, var(--border))`;
+    header.style.setProperty('--user-color', u.color);
+    
+    // Trigger animation
+    header.classList.remove('animate-reveal');
+    void header.offsetWidth; 
+    header.classList.add('animate-reveal');
 }
 
 function pressPin(n) {
