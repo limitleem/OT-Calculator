@@ -66,53 +66,71 @@ const UI = {
                 </div>
             </div>
             <div class="item-body" onclick="event.stopPropagation();">
-                <div class="field-row col-2">
-                    <div class="field">
-                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_RANGE}</label>
-                        <input class="date-range" placeholder="เลือกช่วงวันที่">
-                    </div>
+                <div class="field" style="margin-bottom:20px;">
+                    <label>${APP_CONFIG.TEXT.INPUT_LABEL_RANGE}</label>
+                    <input class="date-range" placeholder="เลือกช่วงวันที่">
+                </div>
+
+                <!-- WD Row -->
+                <div class="ot-grid row-wd">
                     <div class="field">
                         <label>${APP_CONFIG.TEXT.INPUT_LABEL_TYPE}</label>
-                        <div style="display:flex; gap:12px; align-items:center; height:38px;">
-                            <label class="checkbox-custom checked">
-                                <input type="checkbox" class="chk-wd" checked>
-                                <div class="cb-box"></div>
-                                <span>${APP_CONFIG.TEXT.INPUT_LABEL_WD}</span>
-                            </label>
-                            <label class="checkbox-custom">
-                                <input type="checkbox" class="chk-hd">
-                                <div class="cb-box"></div>
-                                <span>${APP_CONFIG.TEXT.INPUT_LABEL_HD}</span>
-                            </label>
-                        </div>
+                        <label class="checkbox-custom checked">
+                            <input type="checkbox" class="chk-wd" checked>
+                            <div class="cb-box"></div>
+                            <span>${APP_CONFIG.TEXT.INPUT_LABEL_WD}</span>
+                        </label>
                     </div>
-                </div>
-                <div class="field-row col-2 time-row-wd">
                     <div class="field">
                         <label>${APP_CONFIG.TEXT.INPUT_LABEL_START_WD}</label>
-                        <input class="start-wd" placeholder="เลือกเวลา" value="${APP_CONFIG.DEFAULTS.OT_TIME_WD.start}">
+                        <input class="start-wd" placeholder="เวลา" value="${APP_CONFIG.DEFAULTS.OT_TIME_WD.start}">
                     </div>
                     <div class="field">
                         <label>${APP_CONFIG.TEXT.INPUT_LABEL_END_WD}</label>
-                        <input class="end-wd" placeholder="เลือกเวลา" value="${APP_CONFIG.DEFAULTS.OT_TIME_WD.end}">
+                        <input class="end-wd" placeholder="เวลา" value="${APP_CONFIG.DEFAULTS.OT_TIME_WD.end}">
+                    </div>
+                    <div class="field">
+                        <label>สรุปวันทำงาน</label>
+                        <div class="ot-row-info wd-sum">
+                            <span class="d-cnt">0 วัน</span>
+                            <span class="h-cnt"><b>0</b> ชม.</span>
+                        </div>
                     </div>
                 </div>
-                <div class="field-row col-2 time-row-hd" style="display:none;">
+
+                <!-- HD Row -->
+                <div class="ot-grid row-hd">
+                    <div class="field">
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_TYPE}</label>
+                        <label class="checkbox-custom">
+                            <input type="checkbox" class="chk-hd">
+                            <div class="cb-box"></div>
+                            <span>${APP_CONFIG.TEXT.INPUT_LABEL_HD}</span>
+                        </label>
+                    </div>
                     <div class="field">
                         <label>${APP_CONFIG.TEXT.INPUT_LABEL_START_HD}</label>
-                        <input class="start-hd" placeholder="เลือกเวลา" value="${APP_CONFIG.DEFAULTS.OT_TIME_HD.start}">
+                        <input class="start-hd" placeholder="เวลา" value="${APP_CONFIG.DEFAULTS.OT_TIME_HD.start}">
                     </div>
                     <div class="field">
                         <label>${APP_CONFIG.TEXT.INPUT_LABEL_END_HD}</label>
-                        <input class="end-hd" placeholder="เลือกเวลา" value="${APP_CONFIG.DEFAULTS.OT_TIME_HD.end}">
+                        <input class="end-hd" placeholder="เวลา" value="${APP_CONFIG.DEFAULTS.OT_TIME_HD.end}">
+                    </div>
+                    <div class="field">
+                        <label>สรุปวันหยุด</label>
+                        <div class="ot-row-info hd-sum">
+                            <span class="d-cnt">0 วัน</span>
+                            <span class="h-cnt"><b>0</b> ชม.</span>
+                        </div>
                     </div>
                 </div>
-                <div class="field">
+
+                <div class="field" style="margin-top:12px;">
                     <label>${APP_CONFIG.TEXT.INPUT_LABEL_NOTE}</label>
                     <input type="text" class="name" placeholder="${APP_CONFIG.TEXT.INPUT_PLACEHOLDER_NOTE}" onfocus="this.dataset.edited='1'">
                 </div>
                 <div class="error-text" style="color:var(--red); font-size:0.75rem; margin-top:8px; display:none;"></div>
-                <div class="item-info-container" style="margin-top:12px;"></div>
+                <div class="item-info-container" style="margin-top:16px;"></div>
                 <div style="display:flex; justify-content:flex-end; margin-top:16px;">
                     <button class="btn-del" onclick="this.closest('.item').remove();calculate()">
                         <span>${APP_CONFIG.TEXT.BTN_DELETE_ITEM}</span>
@@ -502,8 +520,6 @@ function addItem() {
 
     el.querySelectorAll(".chk-wd, .chk-hd").forEach(x => x.onchange = () => {
         x.closest('.checkbox-custom').classList.toggle('checked', x.checked);
-        el.querySelector(".time-row-wd").style.display = el.querySelector(".chk-wd").checked ? "grid" : "none";
-        el.querySelector(".time-row-hd").style.display = el.querySelector(".chk-hd").checked ? "grid" : "none";
         updateItemUI(el);
     });
 
@@ -534,12 +550,26 @@ function updateItemUI(el) {
     if (chkWd && dates.length > 0 && wd === 0) { errorEl.innerText = APP_CONFIG.TEXT.WARN_NO_WD; errorEl.style.display = "block"; }
     if (chkHd && dates.length > 0 && hd === 0) { errorEl.innerText = APP_CONFIG.TEXT.WARN_NO_HD; errorEl.style.display = "block"; }
 
-    // Auto naming
+    // Smart naming
     if (!nameInput.dataset.edited && dates.length > 0) {
-        const d1 = formatThaiDate(dates[0]).short;
-        const d2 = formatThaiDate(dates[dates.length - 1]).short;
-        nameInput.value = dates.length > 1 ? `OT ${d1} - ${d2}` : `OT ${d1}`;
-        el.querySelector(".item-name").innerText = nameInput.value;
+        const d1 = formatThaiDate(dates[0]);
+        const d2 = formatThaiDate(dates[dates.length - 1]);
+        let label = "";
+        if (dates.length === 1) {
+            label = d1.short;
+        } else {
+            if (d1.year === d2.year) {
+                if (d1.monthIndex === d2.monthIndex) {
+                    label = `${d1.date} - ${d2.date} ${d2.monthName} ${d2.shortYear}`;
+                } else {
+                    label = `${d1.date} ${d1.monthName} - ${d2.date} ${d2.monthName} ${d2.shortYear}`;
+                }
+            } else {
+                label = `${d1.date} ${d1.monthName} ${d1.shortYear} - ${d2.date} ${d2.monthName} ${d2.shortYear}`;
+            }
+        }
+        nameInput.value = label;
+        el.querySelector(".item-name").innerText = label;
     }
 
     const dot = el.querySelector(".item-type-dot");
@@ -549,33 +579,78 @@ function updateItemUI(el) {
     else { dot.className = "item-type-dot"; dot.style.background = "var(--text3)"; }
 
     let parts = [];
-    if (chkWd && wd > 0) {
+    
+    // WD Update
+    const rowWd = el.querySelector(".row-wd");
+    const canWd = wd > 0;
+    const chkBoxWd = el.querySelector(".chk-wd");
+    
+    // Only disable checkbox if there are zero workdays in range
+    chkBoxWd.disabled = !canWd;
+    chkBoxWd.closest(".checkbox-custom").style.opacity = canWd ? "1" : "0.4";
+    chkBoxWd.closest(".checkbox-custom").style.pointerEvents = canWd ? "auto" : "none";
+
+    const isWdValid = chkWd && canWd;
+    rowWd.classList.toggle("disabled", !isWdValid);
+    el.querySelector(".start-wd").disabled = !isWdValid;
+    el.querySelector(".end-wd").disabled = !isWdValid;
+
+    const wdSum = el.querySelector(".wd-sum");
+    if (canWd) {
         const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true);
-        const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
-        const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
+        wdSum.querySelector(".d-cnt").innerText = `${wd} วัน`;
+        wdSum.querySelector(".h-cnt b").innerText = isWdValid ? fh(h.total * wd) : "0";
         
-        const totalBadge = `<span class="info-badge total">${fh(h.total * wd)} ชม.</span>`;
-        const part = `<span class="info-badge rate-1-5">${fh(h.total)} ชม. × 1.5 เท่า (${e_std} - ${s_std})</span>`;
-        
-        parts.push(UI.renderInfoStrip('wd', APP_CONFIG.TEXT.LABEL_WD_DAYS(wd), `${totalBadge} ${part}`));
+        if (isWdValid) {
+            const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
+            const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
+            const totalBadge = `<span class="info-badge total">${fh(h.total * wd)} ชม.</span>`;
+            const part = `<span class="info-badge rate-1-5">${fh(h.total)} ชม. × 1.5 เท่า (${e_std} - ${s_std})</span>`;
+            parts.push(UI.renderInfoStrip('wd', APP_CONFIG.TEXT.LABEL_WD_DAYS(wd), `${totalBadge} ${part}`));
+        }
+    } else {
+        wdSum.querySelector(".d-cnt").innerText = "0 วัน";
+        wdSum.querySelector(".h-cnt b").innerText = "0";
     }
-    if (chkHd && hd > 0) {
+
+    // HD Update
+    const rowHd = el.querySelector(".row-hd");
+    const canHd = hd > 0;
+    const chkBoxHd = el.querySelector(".chk-hd");
+    
+    chkBoxHd.disabled = !canHd;
+    chkBoxHd.closest(".checkbox-custom").style.opacity = canHd ? "1" : "0.4";
+    chkBoxHd.closest(".checkbox-custom").style.pointerEvents = canHd ? "auto" : "none";
+
+    const isHdValid = chkHd && canHd;
+    rowHd.classList.toggle("disabled", !isHdValid);
+    el.querySelector(".start-hd").disabled = !isHdValid;
+    el.querySelector(".end-hd").disabled = !isHdValid;
+
+    const hdSum = el.querySelector(".hd-sum");
+    if (canHd) {
         const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false);
-        const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
-        const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
-        const s_lun = fmtT(APP_CONFIG.CALC.LUNCH.start);
-        const e_lun = fmtT(APP_CONFIG.CALC.LUNCH.end);
+        hdSum.querySelector(".d-cnt").innerText = `${hd} วัน`;
+        hdSum.querySelector(".h-cnt b").innerText = isHdValid ? fh(h.total * hd) : "0";
         
-        let hParts = [];
-        if (h.h1) hParts.push(`<span class="info-badge rate-1">${fh(h.h1)} ชม. × 1 เท่า (${s_std} - ${e_std})</span>`);
-        if (h.h3) hParts.push(`<span class="info-badge rate-3">${fh(h.h3)} ชม. × 3 เท่า (${e_std} - ${s_std})</span>`);
-        
-        const totalBadge = `<span class="info-badge total">${fh(h.total * hd)} ชม.</span>`;
-        const lunchBadge = `<span class="info-badge deduct">หักพัก 1 ชม. (${s_lun} - ${e_lun})</span>`;
-        
-        const detail = `${totalBadge} ${hParts.join('')} ${lunchBadge}`;
-        parts.push(UI.renderInfoStrip('hd', APP_CONFIG.TEXT.LABEL_HD_DAYS(hd), detail));
+        if (isHdValid) {
+            const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
+            const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
+            const s_lun = fmtT(APP_CONFIG.CALC.LUNCH.start);
+            const e_lun = fmtT(APP_CONFIG.CALC.LUNCH.end);
+            
+            let hParts = [];
+            if (h.h1) hParts.push(`<span class="info-badge rate-1">${fh(h.h1)} ชม. × 1 เท่า (${s_std} - ${e_std})</span>`);
+            if (h.h3) hParts.push(`<span class="info-badge rate-3">${fh(h.h3)} ชม. × 3 เท่า (${e_std} - ${s_std})</span>`);
+            const totalBadge = `<span class="info-badge total">${fh(h.total * hd)} ชม.</span>`;
+            const lunchBadge = `<span class="info-badge deduct">หักพัก 1 ชม. (${s_lun} - ${e_lun})</span>`;
+            parts.push(UI.renderInfoStrip('hd', APP_CONFIG.TEXT.LABEL_HD_DAYS(hd), `${totalBadge} ${hParts.join('')} ${lunchBadge}`));
+        }
+    } else {
+        hdSum.querySelector(".d-cnt").innerText = "0 วัน";
+        hdSum.querySelector(".h-cnt b").innerText = "0";
     }
+
     el.querySelector(".item-info-container").innerHTML = parts.join('') || "";
     calculate();
 }
@@ -617,13 +692,18 @@ const THAI_MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.
 const THAI_MONTHS_FULL = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
 const formatThaiDate = (dateStr) => {
-    if (!dateStr) return { short: "", full: "" };
+    if (!dateStr) return { short: "", full: "", date: 0, year: 0, monthIndex: 0, monthName: "" };
     const d = new Date(dateStr);
-    const day = THAI_DAYS[d.getDay()];
     const date = d.getDate();
-    const month = THAI_MONTHS[d.getMonth()];
+    const monthIndex = d.getMonth();
+    const monthName = THAI_MONTHS[monthIndex];
     const year = d.getFullYear() + 543;
-    return { short: `${date} ${month} ${year}`, full: `${day} ${date} ${month} ${year}`, monthIndex: d.getMonth(), monthName: month, year };
+    const shortYear = year.toString().slice(-2);
+    return {
+        short: `${date} ${monthName} ${shortYear}`,
+        full: `${THAI_DAYS[d.getDay()]} ${date} ${monthName} ${year}`,
+        date, monthIndex, monthName, year, shortYear
+    };
 };
 
 
