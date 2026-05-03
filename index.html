@@ -12,7 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         :root {
             --bg: #0d0f14;
             --surface: #161920;
@@ -35,731 +34,159 @@
             --radius: 14px;
             --radius-sm: 8px;
         }
-
-        html { scroll-behavior: smooth; }
-
         body {
             font-family: 'DM Sans', 'Noto Sans Thai', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             padding: 0 0 60px;
-            overflow-x: hidden;
         }
-
-        /* HERO HEADER */
         .header-wrap {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 24px 32px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(20px);
-            display: flex;
-            align-items: center;
-            gap: 16px;
+            background: var(--surface); border-bottom: 1px solid var(--border);
+            padding: 24px 32px; position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(20px); display: flex; align-items: center; gap: 16px;
         }
-
         .logo-mark {
-            width: 40px; height: 40px;
-            background: var(--accent);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem;
-            flex-shrink: 0;
+            width: 40px; height: 40px; background: var(--accent); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
         }
+        .header-text h1 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+        .header-text p { font-size: 0.98rem; color: var(--text3); }
+        .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
 
-        .header-text h1 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.3px;
-        }
-        .header-text p {
-            font-size: 0.98rem;
-            color: var(--text3);
-            margin-top: 1px;
-        }
-
-        .header-right {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* LANDING SCREEN */
         .landing-screen {
             position: fixed; inset: 0; background: var(--bg); z-index: 2000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0; pointer-events: none; transition: opacity 0.4s;
         }
         .landing-screen.show { opacity: 1; pointer-events: auto; }
-        .landing-screen h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 40px; color: var(--text); }
-        
         .user-grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; max-width: 900px; padding: 20px; }
-        .user-profile-card {
-            display: flex; flex-direction: column; align-items: center; gap: 15px; cursor: pointer; transition: transform 0.3s; width: 140px;
-        }
+        .user-profile-card { display: flex; flex-direction: column; align-items: center; gap: 15px; cursor: pointer; transition: transform 0.3s; width: 140px; }
         .user-profile-card:hover { transform: scale(1.1); }
         .user-avatar {
             width: 120px; height: 120px; border-radius: 12px; background: var(--surface3);
             display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 700;
-            border: 3px solid transparent; transition: border-color 0.3s; position: relative;
+            position: relative; overflow: hidden; border: 3px solid transparent;
         }
+        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .user-profile-card:hover .user-avatar { border-color: var(--text); }
         .user-avatar.add-btn { background: var(--surface2); border: 2px dashed var(--border2); font-size: 2rem; color: var(--text3); }
-        .user-avatar.add-btn:hover { border-style: solid; color: var(--text2); }
-        
-        .user-name { font-size: 1.1rem; color: var(--text2); font-weight: 600; transition: color 0.3s; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; }
-        .user-profile-card:hover .user-name { color: var(--text); }
-        
-        .pin-indicator { position: absolute; bottom: -8px; right: -8px; background: var(--accent); color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .user-name { font-size: 1.1rem; color: var(--text2); font-weight: 600; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; }
+        .pin-indicator { position: absolute; bottom: -8px; right: -8px; background: var(--accent); color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
 
-        /* PIN MODAL */
         .pin-screen {
             position: fixed; inset: 0; background: rgba(13,15,20,0.95); z-index: 2100;
             display: none; flex-direction: column; align-items: center; justify-content: center;
         }
         .pin-screen.show { display: flex; }
-        .pin-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .pin-dots { display: flex; gap: 15px; }
-        .pin-dot { width: 16px; height: 16px; border: 2px solid var(--text3); border-radius: 50%; transition: all 0.2s; }
-        .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.2); box-shadow: 0 0 15px var(--accent-dim); }
-        
-        .num-pad { display: grid; grid-template-columns: repeat(3, 70px); gap: 15px; margin-top: 30px; }
+        .pin-dots { display: flex; gap: 15px; margin: 20px 0; }
+        .pin-dot { width: 16px; height: 16px; border: 2px solid var(--text3); border-radius: 50%; }
+        .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.2); }
+        .num-pad { display: grid; grid-template-columns: repeat(3, 70px); gap: 15px; }
         .num-btn {
             width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--border);
-            background: var(--surface2); color: var(--text); font-size: 1.5rem; font-weight: 600;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+            background: var(--surface2); color: var(--text); font-size: 1.5rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
         }
-        .num-btn:hover { background: var(--surface3); border-color: var(--text3); }
-        .num-btn:active { transform: scale(0.9); background: var(--accent-dim); color: var(--accent); }
+        .num-btn:active { transform: scale(0.9); background: var(--accent-dim); }
 
-        .header-btn:hover { background: var(--surface3); color: var(--text); border-color: var(--text3); }
-
-        /* PROFILE DROPDOWN */
         .profile-section { position: relative; }
         .profile-trigger {
-            display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 14px;
-            background: var(--surface2); border: 1px solid var(--border); border-radius: 30px;
-            cursor: pointer; transition: all 0.2s; user-select: none;
+            display: flex; align-items: center; gap: 12px; padding: 6px 14px;
+            background: var(--surface2); border: 1px solid var(--border); border-radius: 30px; cursor: pointer;
         }
-        .profile-trigger:hover { background: var(--surface3); border-color: var(--border2); }
-        .profile-trigger .p-name { font-size: 0.85rem; font-weight: 700; color: var(--text2); }
-        .profile-trigger .p-avatar {
-            width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem; font-weight: 800; color: #000;
-        }
-        
+        .profile-trigger .p-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .profile-dropdown {
-            position: absolute; top: calc(100% + 10px); right: 0;
-            width: 200px; background: var(--surface); border: 1px solid var(--border2);
-            border-radius: var(--radius-sm); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            padding: 8px; z-index: 1500; display: none; flex-direction: column;
-            transform-origin: top right; transition: all 0.2s;
+            position: absolute; top: calc(100% + 10px); right: 0; width: 200px;
+            background: var(--surface); border: 1px solid var(--border2); border-radius: 8px;
+            display: none; flex-direction: column; padding: 8px; z-index: 1500;
         }
-        .profile-dropdown.show { display: flex; animation: dropFade 0.2s ease-out; }
-        @keyframes dropFade { from { opacity: 0; transform: scale(0.95) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-
-        .dropdown-item {
-            display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-            border-radius: 6px; cursor: pointer; color: var(--text2);
-            font-size: 0.85rem; font-weight: 600; transition: all 0.2s;
-        }
+        .profile-dropdown.show { display: flex; }
+        .dropdown-item { padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text2); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
         .dropdown-item:hover { background: var(--surface2); color: var(--text); }
         .dropdown-item.danger { color: var(--red); }
-        .dropdown-item.danger:hover { background: var(--red-dim); }
-        .dropdown-divider { height: 1px; background: var(--border); margin: 6px 4px; }
 
-        /* ADD USER MODAL */
         .glass-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(8px); z-index: 2500;
-            display: none; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.3s;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            z-index: 2500; display: none; align-items: center; justify-content: center;
         }
-        .glass-modal.show { display: flex; opacity: 1; }
-        .glass-card {
-            background: var(--surface); border: 1px solid var(--border2);
-            border-radius: var(--radius); width: 100%; max-width: 380px;
-            padding: 32px; box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-            transform: translateY(20px); transition: transform 0.3s;
-        }
-        .glass-modal.show .glass-card { transform: translateY(0); }
-        
+        .glass-modal.show { display: flex; }
+        .glass-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 14px; padding: 32px; width: 90%; max-width: 420px; }
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text3); text-transform: uppercase; margin-bottom: 8px; }
-        .form-input {
-            width: 100%; background: var(--surface2); border: 1px solid var(--border2);
-            border-radius: 8px; padding: 12px 16px; color: var(--text); font-size: 1rem;
-            outline: none; transition: border-color 0.2s;
-        }
-        .form-input:focus { border-color: var(--accent); }
-        .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
-        .btn-prime { flex: 1; background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-        .btn-sec { flex: 1; background: var(--surface3); color: var(--text2); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .form-group label { display: block; font-size: 0.75rem; color: var(--text3); margin-bottom: 8px; text-transform: uppercase; }
+        .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px; color: var(--text); outline: none; }
+        .btn-prime { background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
+        .btn-sec { background: var(--surface3); color: var(--text2); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
 
-        /* MAIN LAYOUT */
+        .preview-large { width: 80px; height: 80px; border-radius: 16px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; overflow: hidden; }
+        .preview-large img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-tabs { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: 10px; margin-bottom: 16px; }
+        .avatar-tab { flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 7px; cursor: pointer; text-align: center; color: var(--text3); }
+        .avatar-tab.active { background: var(--surface3); color: var(--text); }
+        .emoji-grid, .style-grid, .variant-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; padding: 4px; margin-top: 12px; }
+        .variant-grid { grid-template-columns: repeat(5, 1fr); }
+        .emoji-opt, .style-opt, .variant-opt { 
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; border-radius: 8px; background: var(--surface2);
+            transition: all 0.2s; border: 2px solid transparent; overflow: hidden;
+        }
+        .emoji-opt { font-size: 1.5rem; }
+        .style-opt img, .variant-opt img { width: 85%; height: 85%; object-fit: contain; }
+        .emoji-opt:hover, .style-opt:hover, .variant-opt:hover { background: var(--surface3); transform: scale(1.05); }
+        .emoji-opt.active, .style-opt.active, .variant-opt.active { border-color: var(--accent); background: var(--accent-dim); transform: scale(1.05); }
+
+        .color-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .color-opt { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
+        .color-opt:hover { transform: scale(1.1); }
+        .color-opt.active { border: 2px solid var(--text); box-shadow: 0 0 0 2px var(--bg); }
+
+        .toast-container { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--surface2); border: 1px solid var(--border2); padding: 12px 20px; border-radius: 30px; color: var(--text); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; animation: toastIn 0.3s; }
+        @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
         .main { max-width: 1060px; margin: 0 auto; padding: 32px 24px; }
-
-        /* SALARY CARD */
-        .salary-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
-            margin-bottom: 24px;
-            display: grid;
-            grid-template-columns: 260px 1fr;
-            gap: 24px;
-            align-items: center;
-        }
-        @media(max-width:640px){ .salary-card { grid-template-columns: 1fr; } }
-
-        .salary-input-group label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text3);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 8px;
-        }
-
-        .salary-input-wrap {
-            position: relative;
-        }
-        .salary-input-wrap .prefix {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text3);
-            font-size: 0.9rem;
-            font-weight: 600;
-            pointer-events: none;
-        }
-        .salary-input-wrap input {
-            width: 100%;
-            background: var(--surface2);
-            border: 1px solid var(--border2);
-            border-radius: var(--radius-sm);
-            color: var(--text);
-            font-size: 1.3rem;
-            font-family: 'DM Mono', monospace;
-            font-weight: 500;
-            padding: 12px 14px 12px 32px;
-            outline: none;
-            transition: border-color 0.2s, background 0.2s;
-        }
-        .salary-input-wrap input:focus {
-            border-color: var(--accent);
-            background: var(--surface3);
-        }
-
-        .rate-pills {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-        @media(max-width:480px){ .rate-pills { grid-template-columns: repeat(2, 1fr); } }
-
-        .rate-pill {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 12px 14px;
-            transition: background 0.2s;
-        }
-        .rate-pill:hover { background: var(--surface3); }
-        .rate-pill .rp-label {
-            font-size: 0.68rem;
-            font-weight: 700;
-            color: var(--text3);
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            margin-bottom: 6px;
-        }
-        .rate-pill .rp-mult {
-            font-size: 1.0rem;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 4px;
-        }
+        .salary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 24px; display: grid; grid-template-columns: 260px 1fr; gap: 24px; align-items: center; }
+        .rate-pills { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .rate-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+        .rate-pill .rp-label { font-size: 0.65rem; color: var(--text3); text-transform: uppercase; margin-bottom: 6px; }
+        .rp-mult { font-size: 0.9rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
         .rp-mult.x1 { background: var(--blue-dim); color: var(--blue); }
         .rp-mult.x15 { background: var(--green-dim); color: var(--green); }
         .rp-mult.x3 { background: var(--accent-dim); color: var(--accent); }
         .rp-mult.daily { background: rgba(255,255,255,0.06); color: var(--text2); }
+        .rp-val { font-family: 'DM Mono', monospace; font-size: 0.95rem; }
 
-        .rate-pill .rp-val {
-            font-family: 'DM Mono', monospace;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--text);
-        }
-
-        /* SECTION LABEL */
-        .section-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 14px;
-            color: var(--text3);
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .section-label::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        /* ITEMS */
-        #items-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-
-        .item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .item:hover { border-color: var(--border2); }
-        .item.active {
-            border-color: rgba(240,192,64,0.3);
-            box-shadow: 0 0 0 1px rgba(240,192,64,0.1);
-        }
-
-        .item-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 18px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .drag-handle {
-            color: var(--text3);
-            font-size: 0.9rem;
-            cursor: grab;
-            padding: 2px 4px;
-            opacity: 0.5;
-            transition: opacity 0.2s;
-        }
-        .drag-handle:hover { opacity: 1; }
-
-        .item-type-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .dot-weekday { background: var(--green); box-shadow: 0 0 6px var(--green); }
-        .dot-holiday { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-
-        .item-name {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text);
-            flex: 1;
-        }
-
-        .item-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .item-amount {
-            font-family: 'DM Mono', monospace;
-            font-size: 0.88rem;
-            font-weight: 500;
-            color: var(--accent);
-        }
-
-        .item-chevron {
-            color: var(--text3);
-            font-size: 0.7rem;
-            transition: transform 0.25s;
-        }
-        .item.active .item-chevron { transform: rotate(180deg); }
-
-        .item-body {
-            display: none;
-            padding: 0 18px 18px;
-            border-top: 1px solid var(--border);
-            margin-top: 0;
-            padding-top: 18px;
-            animation: slideDown 0.2s ease;
-        }
+        .item { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 10px; }
+        .item-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; }
+        .item-name { flex: 1; font-weight: 600; font-size: 0.9rem; }
+        .item-amount { font-family: 'DM Mono', monospace; color: var(--accent); font-size: 0.9rem; }
+        .item-body { display: none; padding: 18px; border-top: 1px solid var(--border); }
         .item.active .item-body { display: block; }
+        .item-info { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 0.8rem; color: var(--text2); }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+        .badge-wd { background: var(--green-dim); color: var(--green); }
+        .badge-hd { background: var(--accent-dim); color: var(--accent); }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .results-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .results-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text3); text-transform: uppercase; font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { padding: 12px 16px; text-align: left; background: var(--surface2); color: var(--text3); border-bottom: 1px solid var(--border); }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+        .hours-chip { display: inline-block; padding: 2px 6px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 0.75rem; margin-right: 4px; }
+        .hours-chip.x1 { background: var(--blue-dim); color: var(--blue); }
+        .hours-chip.x15 { background: var(--green-dim); color: var(--green); }
+        .hours-chip.x3 { background: var(--accent-dim); color: var(--accent); }
 
-        /* FORM FIELDS */
-        .field-row {
-            display: grid;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-        .col-3 { grid-template-columns: 1fr 1fr 1fr; }
-        .col-2 { grid-template-columns: 1fr 2fr; }
-        @media(max-width:580px){
-            .col-3, .col-2 { grid-template-columns: 1fr; }
-        }
-
-        .field label {
-            display: block;
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--text3);
-            text-transform: uppercase;
-            letter-spacing: 0.7px;
-            margin-bottom: 6px;
-        }
-
-.btn-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 28px;
-}
-
-/* ADD button = auto size (DON'T stretch) */
-.btn-row .btn-add:first-child {
-    flex: 1;
-    white-space: nowrap; /* 👈 prevent vertical text */
-}
-
-/* CLEAR button = take remaining space */
-.btn-clear {
-    flex: 0; /* 👈 this one grows instead */
-}
-
-.btn-add {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap; /* 👈 important */
-}
-
-
-.btn-clear {
-    border-color: rgba(248,113,113,0.4);
-    color: var(--red);
-}
-
-.btn-clear:hover {
-    background: var(--red-dim);
-    border-color: rgba(248,113,113,0.6);
-}
-
-
-
-        .field input, .field select {
-            width: 100%;
-            background: var(--surface2);
-            border: 1px solid var(--border2);
-            border-radius: var(--radius-sm);
-            color: var(--text);
-            font-size: 0.9rem;
-            font-family: 'DM Sans', 'Noto Sans Thai', sans-serif;
-            padding: 10px 12px;
-            outline: none;
-            transition: border-color 0.2s, background 0.2s;
-            -webkit-appearance: none;
-        }
-        .field input:focus, .field select:focus {
-            border-color: var(--accent);
-            background: var(--surface3);
-        }
-        .field select option { background: var(--surface2); }
-
-        /* Flatpickr override */
-        .flatpickr-calendar {
-            background: var(--surface2) !important;
-            border: 1px solid var(--border2) !important;
-            border-radius: var(--radius) !important;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5) !important;
-            font-family: 'DM Sans', sans-serif !important;
-            color: var(--text) !important;
-        }
-        .flatpickr-time input, .flatpickr-time .flatpickr-am-pm {
-            background: transparent !important;
-            color: var(--text) !important;
-        }
-        .flatpickr-time .numInputWrapper:hover { background: var(--surface3) !important; }
-        .flatpickr-time .arrowUp::after { border-bottom-color: var(--text2) !important; }
-        .flatpickr-time .arrowDown::after { border-top-color: var(--text2) !important; }
-        .flatpickr-time input.cur-value { color: var(--accent) !important; font-weight: 600; }
-
-        /* CHECKBOX CUSTOM */
-        .checkbox-custom {
-            display: flex; align-items: center; gap: 8px; cursor: pointer;
-            padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-            background: var(--surface2); transition: all 0.2s; user-select: none;
-        }
-        .checkbox-custom:hover { background: var(--surface3); border-color: var(--border2); }
-        .checkbox-custom.checked { background: var(--accent-dim); border-color: var(--accent); }
-        .checkbox-custom input { display: none; }
-        .cb-box {
-            width: 18px; height: 18px; border: 2px solid var(--text3); border-radius: 4px;
-            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-        }
-        .checkbox-custom.checked .cb-box { background: var(--accent); border-color: var(--accent); }
-        .checkbox-custom.checked .cb-box::after {
-            content: '✓'; color: #000; font-size: 12px; font-weight: 900;
-        }
-        .error-text { color: var(--red); font-size: 0.75rem; margin-top: 4px; display: none; font-weight: 500; }
-
-        .clickable-days {
-            cursor: pointer; color: var(--blue); border-bottom: 1px dashed var(--blue);
-            transition: opacity 0.2s; display: inline-block;
-        }
-        .clickable-days:hover { opacity: 0.7; }
-
-        /* INFO STRIP */
-        .info-strip {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 12px 14px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-        .info-strip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; margin-top: 6px; }
-        .info-strip .info-text {
-            font-size: 0.78rem;
-            color: var(--text2);
-            font-weight: 500;
-            line-height: 1.6;
-            flex: 1;
-        }
-
-        /* DELETE BTN */
-        .btn-del {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: transparent;
-            border: 1px solid rgba(248,113,113,0.2);
-            border-radius: var(--radius-sm);
-            color: var(--red);
-            font-size: 0.8rem;
-            font-weight: 600;
-            padding: 7px 12px;
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
-            font-family: 'DM Sans', sans-serif;
-        }
-        .btn-del:hover { background: var(--red-dim); border-color: rgba(248,113,113,0.4); }
-
-        /* ADD BUTTON */
-        .btn-add {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            background: transparent;
-            border: 1.5px dashed rgba(240,192,64,0.3);
-            border-radius: var(--radius);
-            color: var(--accent);
-            font-size: 0.9rem;
-            font-weight: 600;
-            font-family: 'DM Sans', 'Noto Sans Thai', sans-serif;
-            padding: 14px;
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
-            margin-bottom: 28px;
-        }
-        .btn-add:hover { background: var(--accent-dim); border-color: rgba(240,192,64,0.5); }
-        .btn-add svg { transition: transform 0.2s; }
-        .btn-add:hover svg { transform: rotate(90deg); }
-
-        /* RESULTS CARD */
-        .results-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .results-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .results-header span {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text3);
-        }
-
-        .table-wrap { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 720px; font-size: 0.85rem; }
-
-        thead th {
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 0.88rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text3);
-            background: var(--surface2);
-            border-bottom: 1px solid var(--border);
-            white-space: nowrap;
-        }
-        td {
-            padding: 13px 16px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-        tbody tr:last-child td { border-bottom: 0; }
-        tbody tr { transition: background 0.15s; }
-        tbody tr:hover { background: rgba(255,255,255,0.02); }
-
-        tfoot tr td {
-            padding: 14px 16px;
-            background: var(--surface2);
-            border-top: 1px solid var(--border2);
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
-
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-
-        /* BADGES */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 0.66rem;
-            font-weight: 700;
-            letter-spacing: 0.4px;
-            text-transform: uppercase;
-        }
-        .badge-wd { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
-        .badge-hd { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(240,192,64,0.2); }
-
-        .hours-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-family: 'DM Mono', monospace;
-            font-size: 0.78rem;
-            padding: 3px 8px;
-            border-radius: 5px;
-            background: rgba(255,255,255,0.05);
-            color: var(--text2);
-            margin-right: 4px;
-            white-space: nowrap;
-        }
-        .hours-chip.x1 { color: var(--blue); background: var(--blue-dim); }
-        .hours-chip.x15 { color: var(--green); background: var(--green-dim); }
-        .hours-chip.x3 { color: var(--accent); background: var(--accent-dim); }
-
-        .mono { font-family: 'DM Mono', monospace; font-size: 0.82rem; }
-        .amount { font-family: 'DM Mono', monospace; font-weight: 500; }
-        .amount.positive { color: var(--accent); }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--text3);
-            font-size: 0.85rem;
-        }
-        .empty-state .icon { font-size: 2rem; margin-bottom: 8px; }
-
-        /* Grand total styling */
-        .grand-total-text {
-            color: var(--text3);
-            font-size: 0.78rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .grand-total-num {
-            font-family: 'DM Mono', monospace;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: var(--accent);
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-        /* Sortable ghost */
-        .sortable-ghost { opacity: 0.3; }
-        .sortable-drag { opacity: 0.9; }
-
-        /* MODAL */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            display: none;
-            align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.2s;
-        }
-        .modal-overlay.show { display: flex; opacity: 1; }
-        .modal-content {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            width: 90%; max-width: 500px;
-            max-height: 80vh;
-            display: flex; flex-direction: column;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            transform: translateY(20px); transition: transform 0.2s;
-        }
-        .modal-overlay.show .modal-content { transform: translateY(0); }
-        .modal-header {
-            padding: 18px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .modal-header h3 { font-size: 1.1rem; color: var(--text); }
-        .modal-close {
-            background: transparent; border: none; color: var(--text3);
-            font-size: 1.5rem; cursor: pointer; transition: color 0.2s;
-        }
-        .modal-close:hover { color: var(--text); }
-        .modal-body {
-            padding: 20px 24px; overflow-y: auto; flex: 1;
-        }
-        .holiday-list { display: flex; flex-direction: column; gap: 12px; }
-        .holiday-item {
-            background: var(--surface2); border: 1px solid var(--border2);
-            border-radius: var(--radius-sm); padding: 12px 16px;
-            display: flex; flex-direction: column; gap: 4px;
-        }
-        .holiday-date { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; }
-        .holiday-title { color: var(--text); font-size: 0.9rem; font-weight: 500; }
-        .btn-user-action:hover { color: var(--text); }
+        .btn-add { width: 100%; background: transparent; border: 1.5px dashed var(--border2); border-radius: 14px; padding: 14px; color: var(--accent); cursor: pointer; margin-bottom: 20px; font-weight: 600; }
+        .btn-add:hover { background: var(--accent-dim); border-color: var(--accent); }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background: var(--surface); border-radius: 14px; width: 90%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; }
+        .modal-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .modal-body { padding: 20px 24px; overflow-y: auto; }
+        .holiday-item { background: var(--surface2); padding: 12px; border-radius: 8px; margin-bottom: 8px; }
+        .holiday-date { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.8rem; }
     </style>
 </head>
 <body>
@@ -770,1061 +197,495 @@
         <h1>OT Builder Pro</h1>
         <p>เครื่องมือคำนวณโอทีอัจฉริยะ</p>
     </div>
-    
     <div class="header-right">
         <div class="profile-section" id="profileSection" style="display:none">
-            <div class="profile-trigger" onclick="toggleProfileDropdown()">
-                <div class="p-name" id="topUserName">User Name</div>
+            <div class="profile-trigger" onclick="document.getElementById('profileDropdown').classList.toggle('show')">
+                <div class="p-name" id="topUserName">User</div>
                 <div class="p-avatar" id="topUserAvatar">U</div>
             </div>
             <div class="profile-dropdown" id="profileDropdown">
-                <div class="dropdown-item" onclick="showLanding()">
-                    <span>⇄</span> สลับผู้ใช้
-                </div>
-                <div class="dropdown-item" onclick="openPinModal()">
-                    <span>🔒</span> ตั้งค่า / เปลี่ยน PIN
-                </div>
-                <div class="dropdown-divider"></div>
-                <div class="dropdown-item danger" onclick="deleteUser()">
-                    <span>🗑</span> ลบผู้ใช้นี้
-                </div>
+                <div class="dropdown-item" onclick="showLanding()">⇄ สลับผู้ใช้</div>
+                <div class="dropdown-item" onclick="openProfileModal('edit')">⚙️ ตั้งค่าโปรไฟล์</div>
+                <div class="dropdown-divider" style="height:1px; background:var(--border); margin:4px 0;"></div>
+                <div class="dropdown-item danger" onclick="deleteUser()">🗑 ลบผู้ใช้นี้</div>
             </div>
         </div>
-        <div class="grand-total-badge">
-            <span style="font-size:0.7rem; font-weight:700; color:var(--text3); text-transform:uppercase;">Grand Total</span>
-            <span id="headerTotal" style="font-family:'DM Mono', monospace; font-size:1.15rem; font-weight:700; color:var(--accent);">฿0.00</span>
+        <div class="grand-total-badge" style="text-align:right">
+            <div style="font-size:0.6rem; color:var(--text3); font-weight:700;">TOTAL</div>
+            <div id="headerTotal" style="font-family:'DM Mono', monospace; color:var(--accent); font-weight:700;">฿0.00</div>
         </div>
     </div>
 </header>
 
-<div id="addUserModal" class="glass-modal">
-    <div class="glass-card">
-        <h2 style="font-size:1.5rem; margin-bottom:24px;">เพิ่มผู้ใช้ใหม่</h2>
-        <div class="form-group">
-            <label>ชื่อผู้ใช้</label>
-            <input type="text" id="newUserName" class="form-input" placeholder="ใส่ชื่อของคุณ..." autocomplete="off">
-        </div>
-        <div class="form-group">
-            <label>PIN 6 หลัก (ไม่บังคับ)</label>
-            <input type="password" id="newUserPin" class="form-input" placeholder="เลข 6 หลัก" maxlength="6" pattern="\d*">
-        </div>
-        <div class="modal-btns">
-            <button class="btn-sec" onclick="closeAddUserModal()">ยกเลิก</button>
-            <button class="btn-prime" onclick="confirmAddUser()">สร้างผู้ใช้</button>
-        </div>
-    </div>
-</div>
-
-<div id="pinSettingsModal" class="glass-modal">
-    <div class="glass-card">
-        <h2 id="pinModalTitle" style="font-size:1.5rem; margin-bottom:12px;">ความปลอดภัย</h2>
-        <p id="pinModalMsg" style="color:var(--text3); font-size:0.85rem; margin-bottom:24px;">ตั้งรหัสผ่าน 6 หลักเพื่อปกป้องข้อมูลของคุณ</p>
-        <div class="form-group">
-            <label>รหัสผ่านใหม่ (เลข 6 หลัก)</label>
-            <input type="password" id="settingsPin" class="form-input" placeholder="ปล่อยว่างเพื่อยกเลิก PIN" maxlength="6">
-        </div>
-        <div class="modal-btns">
-            <button class="btn-sec" onclick="closePinModal()">ยกเลิก</button>
-            <button class="btn-prime" onclick="confirmPinChange()">บันทึก</button>
-        </div>
-    </div>
-</div>
-
 <div id="landingScreen" class="landing-screen">
-    <h1 style="font-family:'DM Sans', sans-serif; letter-spacing:-1px;">เลือกผู้ใช้</h1>
+    <h1>เลือกโปรไฟล์</h1>
     <div id="userGrid" class="user-grid"></div>
 </div>
 
 <div id="pinScreen" class="pin-screen">
     <div class="pin-container">
-        <h2 id="pinUserTitle" style="font-size:1.8rem; margin-bottom:10px;">ใส่รหัส PIN</h2>
-        <p id="pinMsg" style="color:var(--text3); margin-bottom:20px;">กรุณาใส่รหัสผ่าน 6 หลักเพื่อเข้าใช้งาน</p>
+        <h2 id="pinUserTitle">PIN</h2>
         <div class="pin-dots">
-            <div class="pin-dot"></div>
-            <div class="pin-dot"></div>
-            <div class="pin-dot"></div>
-            <div class="pin-dot"></div>
-            <div class="pin-dot"></div>
-            <div class="pin-dot"></div>
+            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
         </div>
         <div class="num-pad">
-            <button class="num-btn" onclick="pressPin(1)">1</button>
-            <button class="num-btn" onclick="pressPin(2)">2</button>
-            <button class="num-btn" onclick="pressPin(3)">3</button>
-            <button class="num-btn" onclick="pressPin(4)">4</button>
-            <button class="num-btn" onclick="pressPin(5)">5</button>
-            <button class="num-btn" onclick="pressPin(6)">6</button>
-            <button class="num-btn" onclick="pressPin(7)">7</button>
-            <button class="num-btn" onclick="pressPin(8)">8</button>
-            <button class="num-btn" onclick="pressPin(9)">9</button>
-            <button class="num-btn" style="visibility:hidden"></button>
-            <button class="num-btn" onclick="pressPin(0)">0</button>
-            <button class="num-btn" onclick="backspacePin()" style="font-size:1rem">DEL</button>
+            <button class="num-btn" onclick="pressPin(1)">1</button><button class="num-btn" onclick="pressPin(2)">2</button><button class="num-btn" onclick="pressPin(3)">3</button>
+            <button class="num-btn" onclick="pressPin(4)">4</button><button class="num-btn" onclick="pressPin(5)">5</button><button class="num-btn" onclick="pressPin(6)">6</button>
+            <button class="num-btn" onclick="pressPin(7)">7</button><button class="num-btn" onclick="pressPin(8)">8</button><button class="num-btn" onclick="pressPin(9)">9</button>
+            <button class="num-btn" style="visibility:hidden"></button><button class="num-btn" onclick="pressPin(0)">0</button>
+            <button class="num-btn" onclick="backspacePin()" style="font-size:0.8rem">DEL</button>
         </div>
-        <button class="header-btn" style="margin-top:40px; padding:10px 24px;" onclick="hidePinScreen()">ยกเลิก</button>
+        <button class="btn-sec" style="margin-top:20px; width:auto; padding:8px 24px;" onclick="document.getElementById('pinScreen').classList.remove('show')">ยกเลิก</button>
     </div>
 </div>
+
+<div id="profileModal" class="glass-modal">
+    <div class="glass-card">
+        <h2 id="profileModalTitle">โปรไฟล์</h2>
+        <div class="preview-large" id="avatarPreviewLarge">U</div>
+        <div class="avatar-tabs">
+            <div class="avatar-tab active" data-type="dicebear" onclick="setAvatarType('dicebear')">DiceBear</div>
+            <div class="avatar-tab" data-type="initials" onclick="setAvatarType('initials')">Initials</div>
+            <div class="avatar-tab" data-type="emoji" onclick="setAvatarType('emoji')">Emoji</div>
+        </div>
+        <div id="pickerDicebear">
+            <div id="dicebearStyleView">
+                <div class="style-grid" id="styleGrid"></div>
+            </div>
+            <div id="dicebearVariantView" style="display:none">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700;">เลือกลาย (Variants)</span>
+                    <button class="btn-sec" style="width:auto; padding:4px 10px; font-size:0.7rem;" onclick="setDicebearView('styles')">← กลับ</button>
+                </div>
+                <div class="variant-grid" id="variantGrid"></div>
+                <button class="btn-sec" style="margin-top:12px;" onclick="refreshVariants()">🔄 สุ่มใหม่ (Refresh)</button>
+            </div>
+        </div>
+        <div id="pickerEmoji" style="display:none"><div class="emoji-grid" id="emojiGrid"></div></div>
+        
+        <div class="form-group" style="margin-top:20px;">
+            <label>สีพื้นหลัง (Background Color)</label>
+            <div class="color-grid" id="colorGrid"></div>
+        </div>
+
+        <div class="form-group">
+            <label>ชื่อผู้ใช้ (Name)</label>
+            <input type="text" id="profileName" class="form-input" oninput="updateAvatarPreview()" autocomplete="off">
+        </div>
+        
+        <div class="form-group">
+            <label>PIN 6 หลัก (ถ้ามี)</label>
+            <input type="password" id="profilePin" class="form-input" maxlength="6" placeholder="ใส่รหัส 6 หลักเพื่อความปลอดภัย">
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-sec" onclick="closeProfileModal()">ปิด</button>
+            <button class="btn-prime" onclick="saveProfile()">บันทึก</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirmModal" class="glass-modal">
+    <div class="glass-card" style="text-align:center">
+        <div id="confirmIcon" style="font-size:3rem">❓</div>
+        <h3 id="confirmTitle">ยืนยัน</h3>
+        <p id="confirmMsg" style="margin:12px 0; font-size:0.9rem; color:var(--text2)"></p>
+        <div style="display:flex; gap:10px;">
+            <button class="btn-sec" onclick="closeConfirm(false)">ไม่</button>
+            <button class="btn-prime" onclick="closeConfirm(true)">ใช่</button>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
 
 <div class="main">
-
-    <!-- SALARY CARD -->
     <div class="salary-card">
-        <div class="salary-input-group">
-            <label>ฐานเงินเดือน</label>
-            <div class="salary-input-wrap">
-                <span class="prefix">฿</span>
-                <input id="salary" type="number" value="20380" placeholder="0">
-            </div>
+        <div>
+            <label style="font-size:0.7rem; color:var(--text3); text-transform:uppercase; font-weight:700;">เงินเดือน</label>
+            <input id="salary" type="number" value="30000" style="width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:1.5rem; padding:10px; font-family:'DM Mono', monospace;">
         </div>
         <div class="rate-pills">
-            <div class="rate-pill">
-                <div class="rp-label">ค่าแรงรายวัน (7 ชม.)</div>
-                <div class="rp-mult daily">×1 day</div>
-                <div class="rp-val" id="sumDaily">—</div>
-            </div>
-            <div class="rate-pill">
-                <div class="rp-label">ค่าแรง 1 เท่า / ชม.</div>
-                <div class="rp-mult x1">×1.0</div>
-                <div class="rp-val" id="sum1">—</div>
-            </div>
-            <div class="rate-pill">
-                <div class="rp-label">ค่าแรง 1.5 เท่า / ชม.</div>
-                <div class="rp-mult x15">×1.5</div>
-                <div class="rp-val" id="sum15">—</div>
-            </div>
-            <div class="rate-pill">
-                <div class="rp-label">ค่าแรง 3 เท่า / ชม.</div>
-                <div class="rp-mult x3">×3.0</div>
-                <div class="rp-val" id="sum3">—</div>
-            </div>
+            <div class="rate-pill"><div class="rp-label">วัน</div><div class="rp-mult daily">×1</div><div class="rp-val" id="sumDaily">0</div></div>
+            <div class="rate-pill"><div class="rp-label">1.0x</div><div class="rp-mult x1">×1</div><div class="rp-val" id="sum1">0</div></div>
+            <div class="rate-pill"><div class="rp-label">1.5x</div><div class="rp-mult x15">×1.5</div><div class="rp-val" id="sum15">0</div></div>
+            <div class="rate-pill"><div class="rp-label">3.0x</div><div class="rp-mult x3">×3</div><div class="rp-val" id="sum3">0</div></div>
         </div>
     </div>
-
-    <!-- ITEMS SECTION -->
-    <div class="section-label">รายการโอที</div>
-
     <div id="items-container"></div>
-
-    <div class="btn-row">
-    <button class="btn-add" onclick="addItem()">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        เพิ่มรายการโอที
-    </button>
-
-    <button class="btn-add btn-clear" onclick="clearAll()">
-        🗑 ล้าง
-    </button>
-</div>
-    <!-- RESULTS -->
-    <div class="section-label">สรุปผล</div>
+    <button class="btn-add" onclick="addItem()">+ เพิ่มรายการโอที</button>
+    <button class="btn-sec" onclick="clearAll()" style="margin-bottom:32px;">🗑 ล้างทั้งหมด</button>
     <div class="results-card">
-        <div class="results-header">
-            <span>รายละเอียด</span>
-            <div style="display:flex; align-items:center; gap:16px;">
-                <button onclick="document.getElementById('holidayModal').classList.add('show')" style="background:var(--surface2); border:1px solid var(--border2); color:var(--text); padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:600;">🗓 ดูวันหยุดพิเศษ</button>
-                <span id="itemCount" style="color:var(--text2)">0 รายการ</span>
-            </div>
-        </div>
-        <div class="table-wrap" id="result-table"></div>
+        <div class="results-header"><span>สรุปรายการ</span> <span id="itemCount">0 รายการ</span></div>
+        <div id="result-table"></div>
     </div>
-
 </div>
 
 <div id="holidayModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
     <div class="modal-content">
-        <div class="modal-header">
-            <h3 style="display:flex; align-items:center; gap:8px;">วันหยุดนักขัตฤกษ์ <select id="holidayYearSelect" onchange="renderHolidays()" style="padding:2px 4px; border-radius:4px; border:1px solid var(--border); background:var(--surface2); color:var(--text); font-size:0.9rem; font-weight:600; outline:none; cursor:pointer;"></select></h3>
-            <button class="modal-close" onclick="document.getElementById('holidayModal').classList.remove('show')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="holiday-list" id="holidayListContainer"></div>
-        </div>
+        <div class="modal-header"><h3>วันหยุดพิเศษ</h3><button onclick="document.getElementById('holidayModal').classList.remove('show')" style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer">&times;</button></div>
+        <div class="modal-body" id="holidayList"></div>
     </div>
 </div>
 
 <div id="dayBreakdownModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
     <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="dayBreakdownTitle">รายละเอียดวัน</h3>
-            <button class="modal-close" onclick="document.getElementById('dayBreakdownModal').classList.remove('show')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="dayBreakdownList" class="holiday-list"></div>
-        </div>
+        <div class="modal-header"><h3 id="dayBreakdownTitle">วัน</h3><button onclick="document.getElementById('dayBreakdownModal').classList.remove('show')" style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer">&times;</button></div>
+        <div class="modal-body" id="dayBreakdownList"></div>
     </div>
 </div>
 
 <script>
     const HOLIDAY_2569 = [
-        {"date":"2026-01-01","title":"วันขึ้นปีใหม่"},
-        {"date":"2026-01-02","title":"วันหยุดราชการเพิ่มเติมเป็นกรณีพิเศษ"},
-        {"date":"2026-03-03","title":"วันมาฆบูชา"},
-        {"date":"2026-04-06","title":"วันพระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช และวันที่ระลึกมหาจักรีบรมราชวงศ์"},
-        {"date":"2026-04-13","title":"วันสงกรานต์"},
-        {"date":"2026-04-14","title":"วันสงกรานต์"},
-        {"date":"2026-04-15","title":"วันสงกรานต์"},
-        {"date":"2026-05-01","title":"วันแรงงานแห่งชาติ"},
-        {"date":"2026-05-04","title":"วันฉัตรมงคล"},
-        {"date":"2026-05-13","title":"วันพระราชพิธีจรดพระนังคัลแรกนาขวัญ"},
-        {"date":"2026-06-01","title":"ชดเชยวันวิสาขบูชา"},
-        {"date":"2026-06-03","title":"วันเฉลิมพระชนพรรษาสมเด็จพระนางเจ้าฯ พระบรมราชินี"},
-        {"date":"2026-07-28","title":"วันเฉลิมพระชนพรรษาพระบาทสมเด็จพระปรเมนทรรามาธิบดีศรีสินทรมหาวชิราลงกรณ พระวชิรเกล้าเจ้าอยู่หัว"},
-        {"date":"2026-07-29","title":"วันอาสาฬหบูชา"},
-        {"date":"2026-07-30","title":"วันเข้าพรรษา"},
-        {"date":"2026-08-12","title":"วันเฉลิมพระชนพรรษาสมเด็จพระบรมราชชนนีพันปีหลวงและวันแม่แห่งชาติ"},
-        {"date":"2026-10-13","title":"วันคล้ายวันสวรรคตของพระบาทสมเด็จพระบรมชนกาธิเบศรมหาภูมิพลอดุลยเดชมหาราช บรมนาถบพิตร"},
-        {"date":"2026-10-23","title":"วันปิยมหาราช"},
-        {"date":"2026-12-07","title":"ชดเชยวันพ่อแห่งชาติ"},
-        {"date":"2026-12-10","title":"วันรัฐธรรมนูญ"},
-        {"date":"2026-12-31","title":"วันสิ้นปี"}
+        {"date":"2026-01-01","title":"วันขึ้นปีใหม่"},{"date":"2026-01-02","title":"วันหยุดกรณีพิเศษ"},{"date":"2026-02-02","title":"วันมาฆบูชา"},{"date":"2026-04-06","title":"วันจักรี"},{"date":"2026-04-13","title":"วันสงกรานต์"},{"date":"2026-04-14","title":"วันสงกรานต์"},{"date":"2026-04-15","title":"วันสงกรานต์"},{"date":"2026-05-01","title":"วันแรงงาน"},{"date":"2026-05-04","title":"วันฉัตรมงคล"},{"date":"2026-05-11","title":"วันหยุดกรณีพิเศษ"},{"date":"2026-05-31","title":"วันวิสาขบูชา"},{"date":"2026-06-01","title":"ชดเชยวันวิสาขบูชา"},{"date":"2026-06-03","title":"วันเฉลิมฯ พระบรมราชินี"},{"date":"2026-07-28","title":"วันเฉลิมฯ ร.10"},{"date":"2026-07-29","title":"วันอาสาฬหบูชา"},{"date":"2026-07-30","title":"วันเข้าพรรษา"},{"date":"2026-08-12","title":"วันแม่แห่งชาติ"},{"date":"2026-10-13","title":"วันนวมินทรมหาราช"},{"date":"2026-10-23","title":"วันปิยมหาราช"},{"date":"2026-12-05","title":"วันพ่อแห่งชาติ"},{"date":"2026-12-07","title":"ชดเชยวันพ่อ"},{"date":"2026-12-10","title":"วันรัฐธรรมนูญ"},{"date":"2026-12-31","title":"วันสิ้นปี"}
+    ];
+    const PRESET_COLORS = ["#f87171", "#60a5fa", "#34d399", "#fbbf24", "#a78bfa", "#f472b6", "#fb923c", "#9ca3af", "#4ade80", "#2dd4bf", "#818cf8", "#e879f9", "#ffffff", "#000000"];
+    const PRESET_EMOJIS = ["😀", "😎", "🦊", "🚀", "⚡", "🔥", "🌈", "🎨", "🍔", "⚽", "🎮", "🌟", "🐱", "🐶", "🦁", "🐧", "🦄", "🌈", "💎", "🍺", "🍕", "🦾", "👾"];
+    const DICEBEAR_STYLES = [
+        { id: "avataaars", name: "People" },
+        { id: "bottts", name: "Robots" },
+        { id: "pixel-art", name: "Pixel" },
+        { id: "lorelei", name: "Cute" },
+        { id: "notionists", name: "Notion" },
+        { id: "personas", name: "Personas" },
+        { id: "adventurer", name: "Adventurer" },
+        { id: "thumbs", name: "Thumbs (Pets/Fun)" },
+        { id: "icons", name: "Icons" },
+        { id: "shapes", name: "Shapes" }
     ];
 
-    const isHoliday = (dateStr) => {
-        const d = new Date(dateStr);
-        const day = d.getDay();
-        if (day === 0 || day === 6) return true; // Sunday or Saturday
-        return HOLIDAY_2569.some(h => h.date === dateStr);
-    };
+    let currentUser = null, userProfiles = [], currentPinInput = "", targetUserForPin = null;
+    let profileModalMode = "add", editingUser = null, tempAvatarType = "dicebear", tempAvatarSeed = "Felix", tempAvatarColor = "#60a5fa", tempAvatarEmoji = "😀", tempAvatarStyle = "avataaars";
+    let dicebearView = "styles", currentVariants = [];
 
-    const getHolidayTitle = (dateStr) => {
-        const h = HOLIDAY_2569.find(h => h.date === dateStr);
-        if (h) return h.title;
-        const d = new Date(dateStr);
-        const day = d.getDay();
-        if (day === 0) return "วันอาทิตย์";
-        if (day === 6) return "วันเสาร์";
-        return "";
-    };
+    const fm = n => (+n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fh = n => (n % 1 === 0 ? n : +n.toFixed(2));
+    const toHour = t => { if (!t) return 0; const [h, m] = t.split(":").map(Number); return h + m / 60; };
+    const calMoney = m => Math.round(m * 100) / 100;
 
-    const THAI_MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-    const THAI_DAYS = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
-
-    const formatThaiDate = (dateStr) => {
-        if (!dateStr) return { short: "", full: "" };
-        const d = new Date(dateStr);
-        const day = THAI_DAYS[d.getDay()];
-        const date = d.getDate();
-        const month = THAI_MONTHS[d.getMonth()];
-        const year = d.getFullYear() + 543;
-        return { short: `${date} ${month} ${year}`, full: `${day} ${date} ${month} ${year}`, monthIndex: d.getMonth(), monthName: month, year };
-    };
-
-    const showDaysBreakdown = (title, dateList) => {
-        const modal = document.getElementById("dayBreakdownModal");
-        const listContainer = document.getElementById("dayBreakdownList");
-        document.getElementById("dayBreakdownTitle").innerText = title;
-        
-        // Grouping logic for "1 - 5 , 9 - 10"
-        let groups = [];
-        if (dateList.length > 0) {
-            let temp = [dateList[0]];
-            for (let i = 1; i < dateList.length; i++) {
-                let prev = new Date(dateList[i-1]);
-                let curr = new Date(dateList[i]);
-                prev.setDate(prev.getDate() + 1);
-                if (prev.toISOString().split('T')[0] === dateList[i]) {
-                    temp.push(dateList[i]);
-                } else {
-                    groups.push(temp);
-                    temp = [dateList[i]];
-                }
-            }
-            groups.push(temp);
-        }
-
-        let summaryText = dateList.length + " วัน (";
-        summaryText += groups.map(g => {
-            if (g.length === 1) return new Date(g[0]).getDate();
-            return new Date(g[0]).getDate() + "-" + new Date(g[g.length-1]).getDate();
-        }).join(", ");
-        summaryText += ")";
-
-        listContainer.innerHTML = `<div style="font-weight:700; color:var(--accent); margin-bottom:12px;">${summaryText}</div>`;
-        
-        listContainer.innerHTML += dateList.map(d => {
-            const fd = formatThaiDate(d);
-            const holidayTitle = getHolidayTitle(d);
-            return `
-                <div class="holiday-item">
-                    <div class="holiday-date">${fd.full}</div>
-                    <div class="holiday-title">${holidayTitle}</div>
-                </div>
-            `;
-        }).join('');
-        
-        modal.classList.add("show");
-    };
-
-    window.addEventListener('DOMContentLoaded', () => renderHolidays());
-
-    const renderHolidays = () => {
-        const list = document.getElementById("holidayListContainer");
-        const select = document.getElementById("holidayYearSelect");
-        if(!list) return;
-
-        const years = [...new Set(HOLIDAY_2569.map(h => new Date(h.date).getFullYear()))].sort();
-        if(select && select.options.length === 0) {
-            years.forEach(y => {
-                const opt = document.createElement("option");
-                opt.value = y;
-                opt.text = y + 543;
-                select.appendChild(opt);
-            });
-            if(years.length > 0) select.value = years[0];
-        }
-
-        const filterYear = select ? parseInt(select.value) : (years[0] || new Date().getFullYear());
-        const filtered = HOLIDAY_2569.filter(h => new Date(h.date).getFullYear() === filterYear);
-        
-        let html = '';
-        let currentMonth = -1;
-
-        filtered.forEach(h => {
-            const fd = formatThaiDate(h.date);
-            if (fd.monthIndex !== currentMonth) {
-                html += `<div style="color:var(--text3); font-size:0.8rem; font-weight:700; margin-top:12px; margin-bottom:4px; border-bottom:1px solid var(--border); padding-bottom:4px;">${fd.monthName} ${fd.year}</div>`;
-                currentMonth = fd.monthIndex;
-            }
-            html += `
-                <div class="holiday-item">
-                    <div class="holiday-date">${fd.full}</div>
-                    <div class="holiday-title">${h.title}</div>
-                </div>
-            `;
-        });
-        list.innerHTML = html || '<div class="empty-state" style="padding:20px;">ไม่มีวันหยุดในปีที่เลือก</div>';
-    };
-
-    const getDaysInRange = (rangeStr) => {
-        if (!rangeStr) return [];
-        const parts = rangeStr.split(" to ");
-        const dates = [];
-        let curr = new Date(parts[0]);
-        const end = new Date(parts.length > 1 ? parts[1] : parts[0]);
-        while (curr <= end) {
-            dates.push(curr.toISOString().split('T')[0]);
-            curr.setDate(curr.getDate() + 1);
-        }
-        return dates;
-    };
-
-    const toHour = t => {
-        if (!t) return 0;
-        const [h, m] = t.split(":").map(Number);
-        return h + m / 60;
-    };
-    const fm = n => n != null ? n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00";
-    const fh = n => n != null ? (n % 1 === 0 ? n : +n.toFixed(2)) : "0";
-
-    function addItem() {
-        document.querySelectorAll(".item").forEach(i => i.classList.remove("active"));
-        const id = Date.now();
-        const html = `
-        <div class="item active" data-id="${id}">
-            <div class="item-header" onclick="this.closest('.item').classList.toggle('active')">
-                <span class="drag-handle" title="ลาก">⠿</span>
-                <span class="item-type-dot dot-weekday"></span>
-                <span class="item-name">รายการใหม่</span>
-                <div class="item-meta">
-                    <span class="item-amount">฿0.00</span>
-                    <svg class="item-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
-                        <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="item-body" onclick="event.stopPropagation();">
-                <div class="field-row col-2">
-                    <div class="field">
-                        <label>ช่วงวันที่ทำ OT</label>
-                        <input class="date-range" placeholder="เลือกช่วงวันที่">
-                    </div>
-                    <div class="field">
-                        <label>ประเภทวัน</label>
-                        <div style="display:flex; gap:12px; align-items:center; height:38px;">
-                            <label class="checkbox-custom checked">
-                                <input type="checkbox" class="chk-wd" checked>
-                                <div class="cb-box"></div>
-                                <span>วันทำงาน</span>
-                            </label>
-                            <label class="checkbox-custom">
-                                <input type="checkbox" class="chk-hd">
-                                <div class="cb-box"></div>
-                                <span>วันหยุด</span>
-                            </label>
-                        </div>
-                        <div class="error-text"></div>
-                    </div>
-                </div>
-                <div class="field-row col-2 time-row-wd">
-                    <div class="field">
-                        <label>เวลาเริ่ม (วันทำงาน)</label>
-                        <input class="start-wd" placeholder="เลือกเวลา">
-                    </div>
-                    <div class="field">
-                        <label>เวลาสิ้นสุด (วันทำงาน)</label>
-                        <input class="end-wd" placeholder="เลือกเวลา">
-                    </div>
-                </div>
-                <div class="field-row col-2 time-row-hd" style="display:none;">
-                    <div class="field">
-                        <label>เวลาเริ่ม (วันหยุด)</label>
-                        <input class="start-hd" placeholder="เลือกเวลา">
-                    </div>
-                    <div class="field">
-                        <label>เวลาสิ้นสุด (วันหยุด)</label>
-                        <input class="end-hd" placeholder="เลือกเวลา">
-                    </div>
-                </div>
-                <div class="field-row">
-                    <div class="field">
-                        <label>ชื่อรายการ / หมายเหตุ</label>
-                        <input class="name" placeholder="เช่น โอทีปิดงบ, เข้าเวรวันอาทิตย์…">
-                    </div>
-                </div>
-                <div class="info-strip">
-                    <span class="dot"></span>
-                    <span class="info-text">กำลังรอข้อมูล...</span>
-                </div>
-                <button class="btn-del" onclick="this.closest('.item').remove(); calculate()">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    </svg>
-                    ลบรายการ
-                </button>
-            </div>
-        </div>`;
-
-        document.getElementById("items-container").insertAdjacentHTML("beforeend", html);
-        const el = document.querySelector(`[data-id="${id}"]`);
-
-        const dateRange = el.querySelector(".date-range");
-        const chkWd = el.querySelector(".chk-wd");
-        const chkHd = el.querySelector(".chk-hd");
-        const timeRowWd = el.querySelector(".time-row-wd");
-        const timeRowHd = el.querySelector(".time-row-hd");
-        const startWd = el.querySelector(".start-wd");
-        const endWd = el.querySelector(".end-wd");
-        const startHd = el.querySelector(".start-hd");
-        const endHd = el.querySelector(".end-hd");
-        const name = el.querySelector(".name");
-        const info = el.querySelector(".info-text");
-
-        const fpRange = flatpickr(dateRange, { mode: "range", dateFormat: "Y-m-d" });
-        const fpWdStart = flatpickr(startWd, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "17:00" });
-        const fpWdEnd = flatpickr(endWd, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "21:00" });
-        const fpHdStart = flatpickr(startHd, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "08:30" });
-        const fpHdEnd = flatpickr(endHd, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "17:00" });
-
-        // Set default date range to today
-        const today = new Date().toISOString().split('T')[0];
-        fpRange.setDate(today);
-
-        const updateUI = () => {
-            const dates = getDaysInRange(dateRange.value);
-            let hdCount = 0;
-            let wdCount = 0;
-            dates.forEach(d => {
-                if (isHoliday(d)) hdCount++;
-                else wdCount++;
-            });
-
-            // Validation
-            const errorEl = el.querySelector(".error-text");
-            errorEl.style.display = "none";
-            errorEl.innerText = "";
-
-            if (chkWd.checked && dates.length > 0 && wdCount === 0) {
-                errorEl.innerText = "ไม่มีวันทำงานในช่วงวันที่เลือก!";
-                errorEl.style.display = "block";
-            }
-            if (chkHd.checked && dates.length > 0 && hdCount === 0) {
-                errorEl.innerText = "ไม่มีวันหยุดในช่วงวันที่เลือก!";
-                errorEl.style.display = "block";
-            }
-
-            // Sync visual state of custom checkboxes
-            el.querySelectorAll(".checkbox-custom").forEach(cb => {
-                cb.classList.toggle("checked", cb.querySelector("input").checked);
-            });
-
-            timeRowWd.style.display = chkWd.checked ? "grid" : "none";
-            timeRowHd.style.display = chkHd.checked ? "grid" : "none";
-
-            let valid = false;
-            if (dates.length === 0) {
-                info.innerHTML = 'กรุณาเลือกช่วงวันที่';
-            } else if (!chkWd.checked && !chkHd.checked) {
-                info.innerHTML = 'กรุณาเลือกประเภทวัน';
-            } else {
-                let parts = [];
-                
-                const calcHours = (s_val, e_val, isWd) => {
-                    if (!s_val || !e_val) return null;
-                    let s = toHour(s_val);
-                    let e = toHour(e_val);
-                    if (e <= s) e += 24;
-                    let total = 0, breakTime = 0, h1 = 0, h15 = 0, h3 = 0;
-                    for (let h = s; h < e; h += 0.5) {
-                        let x = h >= 24 ? h - 24 : h;
-                        if (isWd) {
-                            if (x >= 8.5 && x < 16.5) continue;
-                            h15 += 0.5; total += 0.5;
-                        } else {
-                            if (x >= 8.5 && x < 16.5) {
-                                if (x >= 12 && x < 13) { breakTime += 0.5; continue; }
-                                h1 += 0.5;
-                            } else {
-                                h3 += 0.5;
-                            }
-                            total += 0.5;
-                        }
-                    }
-                    return { total, h1, h15, h3, breakTime, s, e };
-                };
-
-                if (chkWd.checked && wdCount > 0) {
-                    const res = calcHours(startWd.value, endWd.value, true);
-                    if (res) {
-                        let subParts = [];
-                        if (res.h15 > 0) subParts.push(`<span style="color:var(--text3)">${fh(res.h15)} ชม. × 1.5 เท่า (เรตวันทำงาน)</span>`);
-                        
-                        let txt = `<div style="margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                            <span class="badge badge-wd" style="font-size:0.65rem; padding:2px 6px;">วันทำงาน ${wdCount} วัน</span>
-                            <span style="font-weight:700; color:var(--text);">${fh(res.total)} ชม.</span>
-                            <span style="color:var(--border2)">·</span>
-                            ${subParts.join(' · ')}
-                        </div>`;
-                        parts.push(txt);
-                    }
-                }
-                if (chkHd.checked && hdCount > 0) {
-                    const res = calcHours(startHd.value, endHd.value, false);
-                    if (res) {
-                        let subParts = [];
-                        if (res.h1 > 0) subParts.push(`<span style="color:var(--text3)">${fh(res.h1)} ชม. × 1 เท่า (เรตช่วง 8.30 - 16.30)</span>`);
-                        if (res.h3 > 0) subParts.push(`<span style="color:var(--text3)">${fh(res.h3)} ชม. × 3 เท่า (เรตช่วง 16.30 - 8.30)</span>`);
-                        if (res.breakTime > 0) subParts.push(`<span style="color:var(--red)">หักพัก ${fh(res.breakTime)} ชม. (12.00 - 13.00)</span>`);
-                        
-                        let txt = `<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                            <span class="badge badge-hd" style="font-size:0.65rem; padding:2px 6px;">วันหยุด ${hdCount} วัน</span>
-                            <span style="font-weight:700; color:var(--text);">${fh(res.total)} ชม.</span>
-                            <span style="color:var(--border2)">·</span>
-                            ${subParts.join(' · ')}
-                        </div>`;
-                        parts.push(txt);
-                    }
-                }
-
-                info.innerHTML = parts.length > 0 ? parts.join('') : 'กรุณาเลือกเวลา';
-                valid = true;
-            }
-
-            const dot = el.querySelector(".item-type-dot");
-            if (chkWd.checked && chkHd.checked) dot.className = "item-type-dot dot-weekday"; 
-            else if (chkHd.checked) dot.className = "item-type-dot dot-holiday";
-            else dot.className = "item-type-dot dot-weekday";
-
-            if (!name.dataset.edited && dates.length > 0) {
-                const d1 = formatThaiDate(dates[0]).short;
-                const d2 = formatThaiDate(dates[dates.length-1]).short;
-                name.value = dates.length > 1 ? `OT ${d1} - ${d2}` : `OT ${d1}`;
-                el.querySelector(".item-name").innerText = name.value;
-            }
-            
-            calculate();
-        };
-
-        name.oninput = () => {
-            name.dataset.edited = "1";
-            el.querySelector(".item-name").innerText = name.value || "รายการใหม่";
-            calculate();
-        };
-
-        [dateRange, chkWd, chkHd, startWd, endWd, startHd, endHd].forEach(inp => {
-            if(inp.type === "checkbox") inp.addEventListener("change", updateUI);
-            else inp.addEventListener("change", updateUI);
-        });
-
-        updateUI();
+    function getAvatarHTML(user) {
+        const type = user.avatarType || "dicebear", style = user.avatarStyle || "avataaars", seed = user.avatar || "Felix", emoji = user.emoji || "😀";
+        if (type === "dicebear") return `<img src="https://api.dicebear.com/7.x/${style}/svg?seed=${seed}" alt="avatar">`;
+        if (type === "initials") return `<span style="color:#000">${user.name ? user.name.charAt(0).toUpperCase() : '?'}</span>`;
+        if (type === "emoji") return `<span>${emoji}</span>`;
+        return `?`;
     }
-
-    function calMoney(money){
-        return Math.round(money * 100) / 100;
-    }
-
-    function calculate() {
-        const salary = +document.getElementById("salary").value || 0;
-        const hourly = calMoney(salary / 30 / 7);   
-        const daily = calMoney(hourly * 7);
-
-        document.getElementById("sumDaily").innerText = fm(daily);
-        document.getElementById("sum1").innerText = fm(hourly);
-        document.getElementById("sum15").innerText = fm(hourly * 1.5);
-        document.getElementById("sum3").innerText = fm(hourly * 3);
-
-        const resultTable = document.getElementById("result-table");
-        let grandTotal = 0;
-        let rows = "";
-
-        const items = document.querySelectorAll(".item");
-        items.forEach(item => {
-            const dateRangeValue = item.querySelector(".date-range").value;
-            const dates = getDaysInRange(dateRangeValue);
-            const name = item.querySelector(".name").value || "รายการไม่มีชื่อ";
-            const chkWd = item.querySelector(".chk-wd").checked;
-            const chkHd = item.querySelector(".chk-hd").checked;
-
-            let wdDates = [], hdDates = [];
-            dates.forEach(d => {
-                if (isHoliday(d)) hdDates.push(d);
-                else wdDates.push(d);
-            });
-
-            const prHrly1 = hourly;
-            const prHrly15 = calMoney(hourly * 1.5);
-            const prHrly3 = calMoney(hourly * 3);
-
-            const calcRow = (isWd, startVal, endVal, count, dateList) => {
-                if (!startVal || !endVal || count === 0) return null;
-                let s = toHour(startVal);
-                let e = toHour(endVal);
-                if (e <= s && s > 0) e += 24;
-                let h1 = 0, h15 = 0, h3 = 0;
-                for (let h = s; h < e; h += 0.5) {
-                    let x = h >= 24 ? h - 24 : h;
-                    if (isWd) {
-                        if (x >= 8.5 && x < 16.5) continue;
-                        h15 += 0.5;
-                    } else {
-                        if (x >= 8.5 && x < 16.5) {
-                            if (x >= 12 && x < 13) continue;
-                            h1 += 0.5;
-                        } else { h3 += 0.5; }
-                    }
-                }
-
-                let hhh1 = calMoney(h1 * hourly);
-                if(h1 >= 7){
-                    hhh1 = calMoney(3.5 * hourly) + calMoney((h1-3.5) * hourly) ;
-                }
-                const hhh15 = calMoney(h15 * prHrly15);
-                const hhh3 = calMoney(h3 * prHrly3);
-
-                const dayValRaw = calMoney(hhh1 + hhh15 + hhh3); 
-                const dayVal = calMoney(dayValRaw);
-                const total = calMoney(dayVal * count);
-
-                const c1 = h1 > 0 ? `<span class="hours-chip x1">${fh(h1)}h × 1.0 = ${fm(hhh1)}</span>` : '';
-                const c15 = h15 > 0 ? `<span class="hours-chip x15">${fh(h15)}h × 1.5 = ${fm(hhh15)}</span>` : '';
-                const c3 = h3 > 0 ? `<span class="hours-chip x3">${fh(h3)}h × 3.0 = ${fm(hhh3)}</span>` : '';
-                const ratesHtml = `${c1}${c15}${c3}`;
-
-                const badgeHtml = isWd ? '<span class="badge badge-wd" style="margin-right:6px;">WD</span>' : '<span class="badge badge-hd" style="margin-right:6px;">HD</span>';
-                const timeHtml = `<div class="text-center mono" style="display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:0.75rem">${badgeHtml}${startVal}–${endVal} ${(e > 24) ? '<span style="font-size:0.6rem;color:var(--blue);background:var(--blue-dim);padding:1px 4px;border-radius:3px;margin-left:4px;">+1</span>' : ''}</div>`;
-                
-                const nameSafe = name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                const datesJson = JSON.stringify(dateList).replace(/"/g, '&quot;');
-                const daysDisplay = `<span class="clickable-days" onclick="showDaysBreakdown('${isWd?'วันทำงาน':'วันหยุด'} - ${nameSafe}', ${datesJson})">${count} วัน</span>`;
-
-                return { total, ratesHtml, timeHtml, dayVal, daysDisplay };
-            };
-
-            let itemTotal = 0;
-            let wdData = null;
-            let hdData = null;
-
-            if (chkWd && wdDates.length > 0) wdData = calcRow(true, item.querySelector(".start-wd").value, item.querySelector(".end-wd").value, wdDates.length, wdDates);
-            if (chkHd && hdDates.length > 0) hdData = calcRow(false, item.querySelector(".start-hd").value, item.querySelector(".end-hd").value, hdDates.length, hdDates);
-
-            if (wdData && hdData) {
-                itemTotal = wdData.total + hdData.total;
-                rows += `
-                <tr>
-                    <td rowspan="2">
-                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                            <span style="font-weight:600;font-size:0.85rem">${name}</span>
-                        </div>
-                    </td>
-                    <td>${wdData.timeHtml}</td>
-                    <td style="white-space:nowrap">${wdData.ratesHtml}</td>
-                    <td class="text-center mono" style="color:var(--text2)">${wdData.daysDisplay}</td>
-                    <td class="text-right"><span class="amount positive">฿${fm(wdData.total)}</span></td>
-                    <td rowspan="2" class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03)"><span class="amount positive" style="font-weight:700">฿${fm(itemTotal)}</span></td>
-                </tr>
-                <tr>
-                    <td>${hdData.timeHtml}</td>
-                    <td style="white-space:nowrap">${hdData.ratesHtml}</td>
-                    <td class="text-center mono" style="color:var(--text2)">${hdData.daysDisplay}</td>
-                    <td class="text-right"><span class="amount positive">฿${fm(hdData.total)}</span></td>
-                </tr>`;
-            } else if (wdData) {
-                itemTotal = wdData.total;
-                rows += `
-                <tr>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                            <span style="font-weight:600;font-size:0.85rem">${name}</span>
-                        </div>
-                    </td>
-                    <td>${wdData.timeHtml}</td>
-                    <td style="white-space:nowrap">${wdData.ratesHtml}</td>
-                    <td class="text-center mono" style="color:var(--text2)">${wdData.daysDisplay}</td>
-                    <td class="text-right"><span class="amount positive">฿${fm(wdData.total)}</span></td>
-                    <td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03)"><span class="amount positive" style="font-weight:700">฿${fm(itemTotal)}</span></td>
-                </tr>`;
-            } else if (hdData) {
-                itemTotal = hdData.total;
-                rows += `
-                <tr>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                            <span style="font-weight:600;font-size:0.85rem">${name}</span>
-                        </div>
-                    </td>
-                    <td>${hdData.timeHtml}</td>
-                    <td style="white-space:nowrap">${hdData.ratesHtml}</td>
-                    <td class="text-center mono" style="color:var(--text2)">${hdData.daysDisplay}</td>
-                    <td class="text-right"><span class="amount positive">฿${fm(hdData.total)}</span></td>
-                    <td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03)"><span class="amount positive" style="font-weight:700">฿${fm(itemTotal)}</span></td>
-                </tr>`;
-            } else {
-                rows += `
-                <tr>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                            <span style="font-weight:600;font-size:0.85rem">${name}</span>
-                        </div>
-                    </td>
-                    <td>—</td>
-                    <td></td>
-                    <td class="text-center mono" style="color:var(--text2)">0 วัน</td>
-                    <td class="text-right"><span class="amount positive">฿0.00</span></td>
-                    <td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03)"><span class="amount positive" style="font-weight:700">฿0.00</span></td>
-                </tr>`;
-            }
-
-            grandTotal += itemTotal;
-            grandTotal = calMoney(grandTotal);
-
-            // Update header amount in item
-            item.querySelector(".item-amount").innerText = `฿${fm(itemTotal)}`;
-        });
-
-        document.getElementById("itemCount").innerText = `${items.length} รายการ`;
-
-        const emptyRow = `<tr><td colspan="6"><div class="empty-state"><div class="icon">📋</div>ยังไม่มีรายการ กด "เพิ่มรายการโอที"</div></td></tr>`;
-
-        document.getElementById("result-table").innerHTML = `
-        <table>
-            <thead>
-                <tr>
-                    <th style="width:25%">รายการ</th>
-                    <th class="text-center">ช่วงเวลา</th>
-                    <th>ชั่วโมง & อัตรา</th>
-                    <th class="text-center">วัน</th>
-                    <th class="text-right">รวม (บาท)</th>
-                    <th class="text-right">รวมทั้งสิ้น</th>
-                </tr>
-            </thead>
-            <tbody>${rows || emptyRow}</tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="5" class="text-right">
-                        <span class="grand-total-text">รวมเงินโอทีทั้งหมด</span>
-                    </td>
-                    <td class="text-right">
-                        <span class="grand-total-num">฿${fm(grandTotal)}</span>
-                    </td>
-                </tr>
-            </tfoot>
-        </table>`;
-
-        document.getElementById("headerTotal").innerText = `฿${fm(grandTotal)}`;
-
-        saveData();
-    }
-    // USER MANAGEMENT
-    let currentUser = null;
-    let userProfiles = [{ name: "Default User", pin: null, color: "#60a5fa" }];
-    let currentPinInput = "";
-    let targetUserForPin = null;
 
     function initUsers() {
-        const storedProfiles = JSON.parse(localStorage.getItem("otUserProfiles_v2"));
-        if (storedProfiles && storedProfiles.length) {
-            userProfiles = storedProfiles;
-        } else {
-            const oldProfiles = JSON.parse(localStorage.getItem("otUserProfiles"));
-            if (oldProfiles) {
-                userProfiles = oldProfiles.map(u => ({ name: u, pin: null, color: getRandomColor() }));
-            }
-        }
+        const stored = JSON.parse(localStorage.getItem("otUserProfiles_v3") || localStorage.getItem("otUserProfiles_v2") || "[]");
+        userProfiles = stored.length ? stored : [
+            { name: "Default User", color: "#60a5fa", avatar: "Felix", avatarStyle: "avataaars", avatarType: "dicebear", emoji: "😀", isGuest: false }
+        ];
         
-        const storedActive = localStorage.getItem("otCurrentUser");
-        if (storedActive && userProfiles.some(u => u.name === storedActive)) {
-            currentUser = storedActive;
-            updateHeaderProfile();
-            loadData();
-        } else {
-            showLanding();
+        if (!userProfiles.some(u => u.name === "Guest")) {
+            userProfiles.push({ name: "Guest", color: "#9ca3af", avatar: "guest", avatarStyle: "bottts", avatarType: "dicebear", emoji: "👤", isGuest: true });
         }
-    }
 
-    function getRandomColor() {
-        const colors = ["#f87171", "#60a5fa", "#34d399", "#f0c040", "#a78bfa", "#f472b6", "#fb923c"];
-        return colors[Math.floor(Math.random() * colors.length)];
+        const active = localStorage.getItem("otCurrentUser");
+        
+        // 1-Hour Expiry for Guest
+        const guestStart = localStorage.getItem("otGuestStartTime");
+        if (active === "Guest" && guestStart && (Date.now() - parseInt(guestStart) > 3600000)) {
+            localStorage.removeItem("otData_Guest");
+            localStorage.removeItem("otGuestStartTime");
+            showToast("เซสชัน Guest หมดอายุ (1 ชม.) ข้อมูลถูกล้างแล้ว", "info");
+        }
+
+        if (active && userProfiles.some(u => u.name === active)) { 
+            completeLogin(active); 
+        } else { 
+            showLanding(); 
+        }
     }
 
     function showLanding() {
-        saveData(true);
-        currentUser = null;
+        if (currentUser) {
+            const u = userProfiles.find(x => x.name === currentUser);
+            if (u && u.isGuest) { 
+                localStorage.removeItem(`otData_${currentUser}`); 
+                showToast("ข้อมูล Guest ถูกล้างเรียบร้อย", "success");
+            } else { 
+                saveData(); 
+            }
+        }
+        currentUser = null; 
         document.getElementById("profileSection").style.display = "none";
-        const landing = document.getElementById("landingScreen");
         const grid = document.getElementById("userGrid");
         
         grid.innerHTML = userProfiles.map(u => `
-            <div class="user-profile-card" onclick="selectProfile('${u.name.replace(/'/g, "\\'")}')">
+            <div class="user-profile-card" onclick="selectProfile('${u.name}')">
                 <div class="user-avatar" style="background:${u.color}">
-                    ${u.name.charAt(0).toUpperCase()}
+                    ${getAvatarHTML(u)}
                     ${u.pin ? '<div class="pin-indicator">🔒</div>' : ''}
+                    ${u.isGuest ? '<div style="position:absolute; top:0; left:0; background:var(--red); color:#fff; font-size:0.6rem; padding:2px 6px; border-bottom-right-radius:8px;">GUEST</div>' : ''}
                 </div>
                 <div class="user-name">${u.name}</div>
             </div>
-        `).join('');
+        `).join('') + `<div class="user-profile-card" onclick="openProfileModal('add')"><div class="user-avatar add-btn">+</div><div class="user-name">เพิ่มโปรไฟล์</div></div>`;
         
-        grid.innerHTML += `
-            <div class="user-profile-card" onclick="openAddUserModal()">
-                <div class="user-avatar add-btn">+</div>
-                <div class="user-name">เพิ่มผู้ใช้</div>
-            </div>
-        `;
-        
-        landing.classList.add("show");
-    }
-
-    function toggleProfileDropdown() {
-        document.getElementById("profileDropdown").classList.toggle("show");
-    }
-
-    window.addEventListener('click', (e) => {
-        if (!document.getElementById("profileSection").contains(e.target)) {
-            document.getElementById("profileDropdown").classList.remove("show");
-        }
-    });
-
-    function updateHeaderProfile() {
-        if (!currentUser) return;
-        const user = userProfiles.find(u => u.name === currentUser);
-        document.getElementById("profileSection").style.display = "block";
-        document.getElementById("topUserName").innerText = user.name;
-        document.getElementById("topUserAvatar").innerText = user.name.charAt(0).toUpperCase();
-        document.getElementById("topUserAvatar").style.background = user.color;
+        document.getElementById("landingScreen").classList.add("show");
     }
 
     function selectProfile(name) {
-        const user = userProfiles.find(u => u.name === name);
-        if (user.pin) {
-            showPinScreen(user);
-        } else {
-            completeLogin(name);
-        }
+        const u = userProfiles.find(x => x.name === name);
+        if (u.pin) { targetUserForPin = u; currentPinInput = ""; updatePinDots(); document.getElementById("pinUserTitle").innerText = u.name; document.getElementById("pinScreen").classList.add("show"); } else { completeLogin(name); }
     }
-
-    function showPinScreen(user) {
-        targetUserForPin = user;
-        currentPinInput = "";
-        updatePinDots();
-        document.getElementById("pinUserTitle").innerText = `${user.name}`;
-        document.getElementById("pinMsg").innerText = "กรุณาใส่รหัสผ่าน 6 หลัก";
-        document.getElementById("pinScreen").classList.add("show");
-    }
-
-    function hidePinScreen() {
-        document.getElementById("pinScreen").classList.remove("show");
-    }
-
-    function pressPin(num) {
-        if (currentPinInput.length < 6) {
-            currentPinInput += num;
-            updatePinDots();
-            if (currentPinInput.length === 6) {
-                if (currentPinInput === targetUserForPin.pin) {
-                    completeLogin(targetUserForPin.name);
-                    hidePinScreen();
-                } else {
-                    currentPinInput = "";
-                    updatePinDots();
-                    document.getElementById("pinMsg").innerText = "รหัสผ่านไม่ถูกต้อง!";
-                    document.getElementById("pinMsg").style.color = "var(--red)";
-                    setTimeout(() => {
-                        document.getElementById("pinMsg").innerText = "กรุณาใส่รหัสผ่าน 6 หลัก";
-                        document.getElementById("pinMsg").style.color = "var(--text3)";
-                    }, 2000);
-                }
-            }
-        }
-    }
-
-    function backspacePin() {
-        currentPinInput = currentPinInput.slice(0, -1);
-        updatePinDots();
-    }
-
-    function updatePinDots() {
-        const dots = document.querySelectorAll(".pin-dot");
-        dots.forEach((dot, i) => {
-            dot.classList.toggle("filled", i < currentPinInput.length);
-        });
-    }
-
-    // KEYBOARD LISTENER FOR PIN
-    window.addEventListener('keydown', (e) => {
-        if (!document.getElementById("pinScreen").classList.contains("show")) return;
-        if (e.key >= '0' && e.key <= '9') pressPin(e.key);
-        if (e.key === 'Backspace') backspacePin();
-    });
 
     function completeLogin(name) {
-        currentUser = name;
-        localStorage.setItem("otCurrentUser", name);
-        document.getElementById("landingScreen").classList.remove("show");
-        document.getElementById("items-container").innerHTML = "";
-        updateHeaderProfile();
+        currentUser = name; localStorage.setItem("otCurrentUser", name); 
+        document.getElementById("landingScreen").classList.remove("show"); 
+        document.getElementById("pinScreen").classList.remove("show");
+        
+        const u = userProfiles.find(x => x.name === name);
+        if (u && u.isGuest) {
+            if (!localStorage.getItem("otGuestStartTime")) {
+                localStorage.setItem("otGuestStartTime", Date.now());
+            }
+        } else {
+            localStorage.removeItem("otGuestStartTime");
+        }
+
+        document.getElementById("items-container").innerHTML = ""; 
+        updateHeaderProfile(); 
         loadData();
     }
 
-    // MODAL ACTIONS
-    function openAddUserModal() {
-        document.getElementById("newUserName").value = "";
-        document.getElementById("newUserPin").value = "";
-        document.getElementById("addUserModal").classList.add("show");
-    }
-    function closeAddUserModal() { document.getElementById("addUserModal").classList.remove("show"); }
-    
-    function confirmAddUser() {
-        const nameInput = document.getElementById("newUserName");
-        const pinInput = document.getElementById("newUserPin");
-        const name = nameInput.value.trim();
-        const pin = pinInput.value.trim();
-
-        if (!name) { alert("กรุณาใส่ชื่อผู้ใช้"); return; }
-        if (userProfiles.some(u => u.name === name)) { alert("ชื่อผู้ใช้นี้มีอยู่แล้ว"); return; }
-        if (pin && !/^\d{6}$/.test(pin)) { alert("รหัสผ่านต้องเป็นตัวเลข 6 หลัก"); return; }
-
-        userProfiles.push({ name: name, pin: pin || null, color: getRandomColor() });
-        localStorage.setItem("otUserProfiles_v2", JSON.stringify(userProfiles));
-        closeAddUserModal();
-        showLanding();
+    function updateHeaderProfile() {
+        const u = userProfiles.find(x => x.name === currentUser); document.getElementById("profileSection").style.display = "block"; document.getElementById("topUserName").innerText = u.name;
+        const av = document.getElementById("topUserAvatar"); av.style.background = u.color; av.innerHTML = getAvatarHTML(u);
     }
 
-    function openPinModal() {
-        const user = userProfiles.find(u => u.name === currentUser);
-        document.getElementById("settingsPin").value = user.pin || "";
-        document.getElementById("pinSettingsModal").classList.add("show");
+    function pressPin(n) {
+        if (currentPinInput.length < 6) { currentPinInput += n; updatePinDots(); if (currentPinInput.length === 6) { if (currentPinInput === targetUserForPin.pin) completeLogin(targetUserForPin.name); else { currentPinInput = ""; updatePinDots(); showToast("รหัสไม่ถูกต้อง", "error"); } } }
     }
-    function closePinModal() { document.getElementById("pinSettingsModal").classList.remove("show"); }
-    
-    function confirmPinChange() {
-        const user = userProfiles.find(u => u.name === currentUser);
-        const pin = document.getElementById("settingsPin").value.trim();
+    function backspacePin() { currentPinInput = currentPinInput.slice(0, -1); updatePinDots(); }
+    function updatePinDots() { document.querySelectorAll(".pin-dot").forEach((d, i) => d.classList.toggle("filled", i < currentPinInput.length)); }
+
+    function openProfileModal(mode) {
+        profileModalMode = mode; 
+        document.getElementById("profileModalTitle").innerText = mode === "add" ? "สร้างโปรไฟล์ใหม่" : "ตั้งค่าโปรไฟล์";
+        dicebearView = "styles";
+
+        if (mode === "add") { 
+            editingUser = null; 
+            document.getElementById("profileName").value = ""; 
+            document.getElementById("profilePin").value = ""; 
+            tempAvatarType = "dicebear"; 
+            tempAvatarSeed = Math.random().toString(36).substring(7); 
+            tempAvatarColor = "#60a5fa"; 
+            tempAvatarEmoji = "😀"; 
+            tempAvatarStyle = "avataaars";
+        } else { 
+            editingUser = userProfiles.find(x => x.name === currentUser); 
+            document.getElementById("profileName").value = editingUser.name; 
+            document.getElementById("profilePin").value = editingUser.pin || ""; 
+            tempAvatarType = editingUser.avatarType || "dicebear"; 
+            tempAvatarSeed = editingUser.avatar; 
+            tempAvatarColor = editingUser.color; 
+            tempAvatarEmoji = editingUser.emoji; 
+            tempAvatarStyle = editingUser.avatarStyle || "avataaars"; 
+        }
+        renderGrids(); 
+        setAvatarType(tempAvatarType); 
+        document.getElementById("profileModal").classList.add("show");
+    }
+    function closeProfileModal() { document.getElementById("profileModal").classList.remove("show"); }
+
+    function renderGrids() {
+        // Color Grid
+        document.getElementById("colorGrid").innerHTML = PRESET_COLORS.map(c => `
+            <div class="color-opt ${c === tempAvatarColor ? 'active' : ''}" style="background:${c}" onclick="setTempColor('${c}')"></div>
+        `).join('');
         
-        if (pin && !/^\d{6}$/.test(pin)) { alert("รหัสผ่านต้องเป็นตัวเลข 6 หลัก"); return; }
-        
-        user.pin = pin || null;
-        localStorage.setItem("otUserProfiles_v2", JSON.stringify(userProfiles));
-        closePinModal();
-        alert("บันทึกการตั้งค่าแล้ว");
-        showLanding(); // Return to select to re-verify
+        // Emoji Grid
+        document.getElementById("emojiGrid").innerHTML = PRESET_EMOJIS.map(e => `
+            <div class="emoji-opt ${e === tempAvatarEmoji ? 'active' : ''}" onclick="setTempEmoji('${e}')">${e}</div>
+        `).join('');
+
+        renderDicebearSection();
     }
 
-    function deleteUser() {
-        if (userProfiles.length <= 1) { alert("ไม่สามารถลบผู้ใช้คนสุดท้ายได้"); return; }
-        if (!confirm(`ลบผู้ใช้ "${currentUser}"? ข้อมูลทั้งหมดจะหายไป`)) return;
-        
-        userProfiles = userProfiles.filter(u => u.name !== currentUser);
-        localStorage.removeItem(`otData_${currentUser}`);
-        localStorage.setItem("otUserProfiles_v2", JSON.stringify(userProfiles));
-        showLanding();
-    }
+    function renderDicebearSection() {
+        const styleView = document.getElementById("dicebearStyleView");
+        const variantView = document.getElementById("dicebearVariantView");
 
-    function saveData(silent = false) {
-        if (!currentUser) return;
-        const data = {
-            version: "2.0",
-            salary: document.getElementById("salary").value,
-            items: []
-        };
-        document.querySelectorAll(".item").forEach(item => {
-            data.items.push({
-                dateRange: item.querySelector(".date-range").value,
-                chkWd: item.querySelector(".chk-wd").checked,
-                chkHd: item.querySelector(".chk-hd").checked,
-                startWd: item.querySelector(".start-wd").value,
-                endWd: item.querySelector(".end-wd").value,
-                startHd: item.querySelector(".start-hd").value,
-                endHd: item.querySelector(".end-hd").value,
-                name: item.querySelector(".name").value,
-                datasetEdited: item.querySelector(".name").dataset.edited
-            });
-        });
-        localStorage.setItem(`otData_${currentUser}`, JSON.stringify(data));
-    }
-
-    function loadData() {
-        if (!currentUser) return;
-        try {
-            const stored = localStorage.getItem(`otData_${currentUser}`);
-            if (!stored) {
-                document.getElementById("salary").value = "30000";
-                addItem();
-                calculate();
-                return;
-            }
-            const data = JSON.parse(stored);
-            if (data.salary) document.getElementById("salary").value = data.salary;
-
-            if (data.items && data.items.length) {
-                document.getElementById("items-container").innerHTML = "";
-                data.items.forEach(it => {
-                    addItem();
-                    const el = document.querySelector("#items-container .item:last-child");
-                    if (it.dateRange !== undefined) {
-                        if (it.dateRange) el.querySelector(".date-range")._flatpickr.setDate(it.dateRange.includes(" to ") ? it.dateRange.split(" to ") : it.dateRange);
-                        el.querySelector(".chk-wd").checked = it.chkWd;
-                        el.querySelector(".chk-hd").checked = it.chkHd;
-                        if(it.startWd) el.querySelector(".start-wd")._flatpickr.setDate(it.startWd);
-                        if(it.endWd) el.querySelector(".end-wd")._flatpickr.setDate(it.endWd);
-                        if(it.startHd) el.querySelector(".start-hd")._flatpickr.setDate(it.startHd);
-                        if(it.endHd) el.querySelector(".end-hd")._flatpickr.setDate(it.endHd);
-                        el.querySelector(".name").value = it.name || "";
-                        if(it.datasetEdited) el.querySelector(".name").dataset.edited = it.datasetEdited;
-                    }
-                    el.querySelector(".chk-wd").dispatchEvent(new Event("change"));
-                });
-            } else { addItem(); calculate(); }
-        } catch (e) {
-            console.error(e);
-            showLanding();
+        if (dicebearView === "styles") {
+            styleView.style.display = "block";
+            variantView.style.display = "none";
+            document.getElementById("styleGrid").innerHTML = DICEBEAR_STYLES.map(s => `
+                <div class="style-opt ${s.id === tempAvatarStyle ? 'active' : ''}" onclick="selectDicebearStyle('${s.id}')" title="${s.name}">
+                    <img src="https://api.dicebear.com/7.x/${s.id}/svg?seed=preview" alt="${s.name}">
+                </div>
+            `).join('');
+        } else {
+            styleView.style.display = "none";
+            variantView.style.display = "block";
+            if (!currentVariants.length) refreshVariants(false);
+            document.getElementById("variantGrid").innerHTML = currentVariants.map(v => `
+                <div class="variant-opt ${v === tempAvatarSeed ? 'active' : ''}" onclick="setTempSeed('${v}')">
+                    <img src="https://api.dicebear.com/7.x/${tempAvatarStyle}/svg?seed=${v}">
+                </div>
+            `).join('');
         }
     }
 
-    function clearAll() {
-        if (!confirm(`ลบรายการทั้งหมดของ "${currentUser}"?`)) return;
-        document.getElementById("items-container").innerHTML = "";
-        localStorage.removeItem(`otData_${currentUser}`);
-        addItem();
-        calculate();
+    function selectDicebearStyle(s) {
+        tempAvatarStyle = s;
+        dicebearView = "variants";
+        currentVariants = [];
+        renderDicebearSection();
+        updateAvatarPreview();
     }
 
-    new Sortable(document.getElementById("items-container"), {
-        animation: 200, handle: ".drag-handle", ghostClass: "sortable-ghost", dragClass: "sortable-drag", onEnd: calculate
-    });
+    function setDicebearView(v) {
+        dicebearView = v;
+        renderDicebearSection();
+    }
+
+    function refreshVariants(shouldRender = true) {
+        currentVariants = Array.from({length: 10}, () => Math.random().toString(36).substring(7));
+        if (shouldRender) renderDicebearSection();
+    }
+
+    function setTempColor(c) { tempAvatarColor = c; renderGrids(); updateAvatarPreview(); }
+    function setTempEmoji(e) { tempAvatarEmoji = e; renderGrids(); updateAvatarPreview(); }
+    function setTempSeed(s) { tempAvatarSeed = s; renderDicebearSection(); updateAvatarPreview(); }
+
+    function setAvatarType(t) { 
+        tempAvatarType = t; 
+        document.querySelectorAll(".avatar-tab").forEach(x => x.classList.toggle("active", x.dataset.type === t)); 
+        document.getElementById("pickerDicebear").style.display = t === "dicebear" ? "block" : "none"; 
+        document.getElementById("pickerEmoji").style.display = t === "emoji" ? "block" : "none"; 
+        updateAvatarPreview(); 
+    }
+    function shuffleSeed() { 
+        tempAvatarSeed = Math.random().toString(36).substring(7); 
+        renderGrids();
+        updateAvatarPreview(); 
+    }
+    function updateAvatarPreview() {
+        const p = document.getElementById("avatarPreviewLarge"), name = document.getElementById("profileName").value;
+        p.style.background = tempAvatarColor; 
+        if (tempAvatarType === "dicebear") {
+            p.innerHTML = `<img src="https://api.dicebear.com/7.x/${tempAvatarStyle}/svg?seed=${tempAvatarSeed}">`;
+        } else if (tempAvatarType === "initials") {
+            p.innerHTML = `<span>${name ? name.charAt(0).toUpperCase() : '?'}</span>`;
+        } else {
+            p.innerHTML = `<span>${tempAvatarEmoji}</span>`;
+        }
+    }
+
+    function saveProfile() {
+        const name = document.getElementById("profileName").value.trim(), pin = document.getElementById("profilePin").value.trim();
+        if (!name) return showToast("กรุณาใส่ชื่อโปรไฟล์", "error");
+        
+        const data = { 
+            name, 
+            pin: pin || null, 
+            color: tempAvatarColor, 
+            avatar: tempAvatarSeed, 
+            avatarStyle: tempAvatarStyle, 
+            avatarType: tempAvatarType, 
+            emoji: tempAvatarEmoji,
+            isGuest: profileModalMode === "edit" ? editingUser.isGuest : false
+        };
+
+        if (profileModalMode === "add") { 
+            if (userProfiles.some(u => u.name === name)) return showToast("ชื่อนี้มีอยู่แล้ว", "error"); 
+            userProfiles.push(data); 
+        } else { 
+            if (name !== editingUser.name) { 
+                const old = localStorage.getItem(`otData_${editingUser.name}`); 
+                if (old) { localStorage.setItem(`otData_${name}`, old); localStorage.removeItem(`otData_${editingUser.name}`); } 
+            } 
+            Object.assign(editingUser, data); 
+        }
+        localStorage.setItem("otUserProfiles_v3", JSON.stringify(userProfiles)); 
+        closeProfileModal(); 
+        completeLogin(name);
+    }
+
+    function deleteUser() {
+        if (userProfiles.length <= 1) return showToast("ลบไม่ได้ (คนสุดท้าย)", "error");
+        showConfirm(`ลบ "${currentUser}"? ข้อมูลจะหายถาวร`, "ลบ", "🗑", () => { const i = userProfiles.findIndex(x => x.name === currentUser); userProfiles.splice(i, 1); localStorage.removeItem(`otData_${currentUser}`); localStorage.setItem("otUserProfiles_v3", JSON.stringify(userProfiles)); showLanding(); });
+    }
+
+    function addItem() {
+        const id = Date.now(), html = `<div class="item" data-id="${id}"><div class="item-header" onclick="this.closest('.item').classList.toggle('active')"><span class="item-name">รายการใหม่</span><span class="item-amount">฿0.00</span></div><div class="item-body"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;"><input type="text" class="date-range" placeholder="วันที่"><div style="display:flex; gap:10px;"><label><input type="checkbox" class="chk-wd" checked> งาน</label><label><input type="checkbox" class="chk-hd"> หยุด</label></div></div><div class="wd-times" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;"><input type="text" class="start-wd" value="16:30"><input type="text" class="end-wd" value="20:30"></div><div class="hd-times" style="display:none; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;"><input type="text" class="start-hd" value="08:30"><input type="text" class="end-hd" value="16:30"></div><input type="text" class="name" placeholder="หมายเหตุ" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--surface2); color:var(--text);"><div class="item-info">...</div><button onclick="this.closest('.item').remove();calculate()" style="margin-top:10px; color:var(--red); background:none; border:none; cursor:pointer">ลบ</button></div></div>`;
+        document.getElementById("items-container").insertAdjacentHTML('beforeend', html); const el = document.querySelector(`[data-id="${id}"]`);
+        flatpickr(el.querySelector(".date-range"), { mode: "range", onChange: () => updateItemUI(el) });
+        el.querySelectorAll(".start-wd, .end-wd, .start-hd, .end-hd").forEach(x => flatpickr(x, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, onChange: () => updateItemUI(el) }));
+        el.querySelectorAll(".chk-wd, .chk-hd").forEach(x => x.onchange = () => { el.querySelector(".wd-times").style.display = el.querySelector(".chk-wd").checked ? "grid" : "none"; el.querySelector(".hd-times").style.display = el.querySelector(".chk-hd").checked ? "grid" : "none"; updateItemUI(el); });
+        el.querySelector(".name").oninput = () => { el.querySelector(".item-name").innerText = el.querySelector(".name").value || "รายการใหม่"; calculate(); };
+        updateItemUI(el);
+    }
+
+    function updateItemUI(el) {
+        const range = el.querySelector(".date-range").value, dates = getDaysInRange(range);
+        let wd = 0, hd = 0; dates.forEach(d => { if (HOLIDAY_2569.some(h => h.date === d)) hd++; else wd++; });
+        let parts = [];
+        if (el.querySelector(".chk-wd").checked && wd > 0) { const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true); parts.push(`<span class="badge badge-wd">งาน ${wd} วัน</span> ${fh(h.total)}ชม. (x1.5)`); }
+        if (el.querySelector(".chk-hd").checked && hd > 0) { const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false); parts.push(`<span class="badge badge-hd">หยุด ${hd} วัน</span> ${fh(h.total)}ชม. (x1,x3)`); }
+        el.querySelector(".item-info").innerHTML = parts.join(' | ') || "ระบุข้อมูล"; calculate();
+    }
+
+    function getDaysInRange(r) { if (!r.includes(" to ")) return r ? [r] : []; const [s, e] = r.split(" to "); let d = [], c = new Date(s), end = new Date(e); while (c <= end) { d.push(c.toISOString().split('T')[0]); c.setDate(c.getDate() + 1); } return d; }
+    function calcH(sv, ev, isW) {
+        let s = toHour(sv), e = toHour(ev); if (e <= s) e += 24;
+        let total = 0, h1 = 0, h15 = 0, h3 = 0;
+        for (let h = s; h < e; h += 0.5) {
+            let x = h >= 24 ? h - 24 : h;
+            if (isW) { if (x >= 8.5 && x < 16.5) continue; h15 += 0.5; total += 0.5; }
+            else { if (x >= 8.5 && x < 16.5) { if (x >= 12 && x < 13) continue; h1 += 0.5; } else h3 += 0.5; total += 0.5; }
+        }
+        return { total, h1, h15, h3 };
+    }
+
+    function calculate() {
+        const salary = +document.getElementById("salary").value || 0, hr = calMoney(salary / 30 / 7);
+        document.getElementById("sumDaily").innerText = fm(hr * 7); document.getElementById("sum1").innerText = fm(hr); document.getElementById("sum15").innerText = fm(hr * 1.5); document.getElementById("sum3").innerText = fm(hr * 3);
+        let total = 0, rows = "";
+        document.querySelectorAll(".item").forEach(el => {
+            const range = el.querySelector(".date-range").value, dates = getDaysInRange(range), name = el.querySelector(".name").value || "OT";
+            let itemT = 0;
+            const calc = (isW, sv, ev, count) => {
+                if (count === 0) return null; const h = calcH(sv, ev, isW);
+                const m = calMoney((calMoney(h.h1 * hr) + calMoney(h.h15 * calMoney(hr * 1.5)) + calMoney(h.h3 * calMoney(hr * 3))) * count);
+                const chips = `${h.h1 ? `<span class="hours-chip x1">${fh(h.h1)}h</span>` : ''}${h.h15 ? `<span class="hours-chip x15">${fh(h.h15)}h</span>` : ''}${h.h3 ? `<span class="hours-chip x3">${fh(h.h3)}h</span>` : ''}`;
+                return { m, chips, count };
+            };
+            let wdD = [], hdD = []; dates.forEach(d => { if (HOLIDAY_2569.some(h => h.date === d)) hdD.push(d); else wdD.push(d); });
+            let w = el.querySelector(".chk-wd").checked ? calc(true, el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, wdD.length) : null;
+            let h = el.querySelector(".chk-hd").checked ? calc(false, el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, hdD.length) : null;
+            if (w) { rows += `<tr><td>${name} (WD)</td><td>${w.chips}</td><td>${w.count} วัน</td><td class="text-right">฿${fm(w.m)}</td></tr>`; itemT += w.m; }
+            if (h) { rows += `<tr><td>${name} (HD)</td><td>${h.chips}</td><td>${h.count} วัน</td><td class="text-right">฿${fm(h.m)}</td></tr>`; itemT += h.m; }
+            el.querySelector(".item-amount").innerText = `฿${fm(itemT)}`; total += itemT;
+        });
+        document.getElementById("result-table").innerHTML = `<table><thead><tr><th>รายการ</th><th>เรต</th><th>จำนวน</th><th class="text-right">รวม</th></tr></thead><tbody>${rows || '<tr><td colspan="4" style="text-align:center">ไม่มีข้อมูล</td></tr>'}</tbody><tfoot><tr><td colspan="3" class="text-right">รวมสุทธิ</td><td class="text-right" style="color:var(--accent)">฿${fm(total)}</td></tr></tfoot></table>`;
+        document.getElementById("headerTotal").innerText = `฿${fm(total)}`; document.getElementById("itemCount").innerText = `${document.querySelectorAll(".item").length} รายการ`; saveData();
+    }
+
+    function saveData() { if (currentUser) { const data = { salary: document.getElementById("salary").value, items: Array.from(document.querySelectorAll(".item")).map(el => ({ range: el.querySelector(".date-range").value, chkWd: el.querySelector(".chk-wd").checked, chkHd: el.querySelector(".chk-hd").checked, startWd: el.querySelector(".start-wd").value, endWd: el.querySelector(".end-wd").value, startHd: el.querySelector(".start-hd").value, endHd: el.querySelector(".end-hd").value, name: el.querySelector(".name").value })) }; localStorage.setItem(`otData_${currentUser}`, JSON.stringify(data)); } }
+    function loadData() {
+        const stored = localStorage.getItem(`otData_${currentUser}`); if (!stored) return addItem();
+        const data = JSON.parse(stored); document.getElementById("salary").value = data.salary;
+        data.items.forEach(it => { addItem(); const el = document.querySelector(".item:last-child"); el.querySelector(".date-range")._flatpickr.setDate(it.range.split(" to ")); el.querySelector(".chk-wd").checked = it.chkWd; el.querySelector(".chk-hd").checked = it.chkHd; el.querySelector(".start-wd")._flatpickr.setDate(it.startWd); el.querySelector(".end-wd")._flatpickr.setDate(it.endWd); el.querySelector(".start-hd")._flatpickr.setDate(it.startHd); el.querySelector(".end-hd")._flatpickr.setDate(it.endHd); el.querySelector(".name").value = it.name; updateItemUI(el); });
+    }
+
+    function clearAll() { showConfirm("ล้างรายการทั้งหมด?", "ล้าง", "🧹", () => { document.getElementById("items-container").innerHTML = ""; calculate(); showToast("ล้างข้อมูลเรียบร้อย", "success"); }); }
+    function showToast(m, t) { 
+        const c = document.getElementById("toastContainer"), e = document.createElement("div"); 
+        e.className = `toast ${t || 'success'}`; 
+        const icon = t === 'error' ? '❌' : (t === 'info' ? 'ℹ️' : '✅');
+        e.innerHTML = `<span>${icon}</span> <span>${m}</span>`; 
+        c.appendChild(e); 
+        setTimeout(() => { e.style.opacity = '0'; setTimeout(() => e.remove(), 300); }, 3000); 
+    }
+    function showConfirm(m, t, i, cb) { document.getElementById("confirmMsg").innerText = m; document.getElementById("confirmTitle").innerText = t; document.getElementById("confirmIcon").innerText = i; window.confirmCallback = cb; document.getElementById("confirmModal").classList.add("show"); }
+    function closeConfirm(v) { document.getElementById("confirmModal").classList.remove("show"); if (v && window.confirmCallback) window.confirmCallback(); }
 
     document.getElementById("salary").oninput = calculate;
     initUsers();
-    calculate();
 </script>
 </body>
 </html>
