@@ -138,27 +138,56 @@
 <!-- Main UI -->
 <div class="main">
     <div class="salary-card">
-        <div>
-            <label style="font-size:0.7rem; color:var(--text3); text-transform:uppercase; font-weight:700;">เงินเดือน</label>
-            <input id="salary" type="number" value="30000" style="width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:1.5rem; padding:10px; font-family:'DM Mono', monospace;">
+        <div class="salary-input-group">
+            <label style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700; letter-spacing:0.8px; margin-bottom:8px; display:block;">ฐานเงินเดือน</label>
+            <div class="salary-input-wrap">
+                <span class="prefix">฿</span>
+                <input id="salary" type="number" value="30000" placeholder="0">
+            </div>
         </div>
         <div class="rate-pills">
-            <div class="rate-pill"><div class="rp-label">วัน</div><div class="rp-mult daily">1 เท่า</div><div class="rp-val" id="sumDaily">0</div></div>
-            <div class="rate-pill"><div class="rp-label">1.0 เท่า</div><div class="rp-mult x1">1 เท่า</div><div class="rp-val" id="sum1">0</div></div>
-            <div class="rate-pill"><div class="rp-label">1.5 เท่า</div><div class="rp-mult x15">1.5 เท่า</div><div class="rp-val" id="sum15">0</div></div>
-            <div class="rate-pill"><div class="rp-label">3.0 เท่า</div><div class="rp-mult x3">3 เท่า</div><div class="rp-val" id="sum3">0</div></div>
+            <div class="rate-pill">
+                <div class="rp-label">ค่าแรงรายวัน (7 ชม.)</div>
+                <div class="rp-mult daily">×1 day</div>
+                <div class="rp-val" id="sumDaily">—</div>
+            </div>
+            <div class="rate-pill">
+                <div class="rp-label">ค่าแรง 1 เท่า / ชม.</div>
+                <div class="rp-mult x1">×1.0</div>
+                <div class="rp-val" id="sum1">—</div>
+            </div>
+            <div class="rate-pill">
+                <div class="rp-label">ค่าแรง 1.5 เท่า / ชม.</div>
+                <div class="rp-mult x15">×1.5</div>
+                <div class="rp-val" id="sum15">—</div>
+            </div>
+            <div class="rate-pill">
+                <div class="rp-label">ค่าแรง 3 เท่า / ชม.</div>
+                <div class="rp-mult x3">×3.0</div>
+                <div class="rp-val" id="sum3">—</div>
+            </div>
         </div>
     </div>
     
     <div id="items-container"></div>
     
-    <button class="btn-add" onclick="addItem()">+ เพิ่มรายการโอที</button>
-    <button class="btn-sec" onclick="clearAll()" style="margin-bottom:32px;">🗑 ล้างทั้งหมด</button>
+    <div class="btn-row">
+        <button class="btn-add" onclick="addItem()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>เพิ่มรายการโอที</span>
+        </button>
+        <button class="btn-clear" onclick="clearAll()">
+            <span>🗑 ล้างทั้งหมด</span>
+        </button>
+    </div>
     
     <div class="results-card">
         <div class="results-header">
-            <span>สรุปรายการ</span> 
-            <span id="itemCount">0 รายการ</span>
+            <span>รายละเอียด</span>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button onclick="document.getElementById('holidayModal').classList.add('show')" style="background:var(--surface2); border:1px solid var(--border2); color:var(--text); padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:600;">🗓 ดูวันหยุดพิเศษ</button>
+                <span id="itemCount" style="color:var(--text2)">0 รายการ</span>
+            </div>
         </div>
         <div id="result-table"></div>
     </div>

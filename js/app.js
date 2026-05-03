@@ -313,30 +313,70 @@ function deleteUser() {
 function addItem() {
     const id = Date.now();
     const html = `
-        <div class="item" data-id="${id}">
+        <div class="item active" data-id="${id}">
             <div class="item-header" onclick="this.closest('.item').classList.toggle('active')">
+                <span class="drag-handle" title="ลาก">⠿</span>
+                <span class="item-type-dot dot-weekday"></span>
                 <span class="item-name">รายการใหม่</span>
-                <span class="item-amount">฿0.00</span>
+                <div class="item-meta">
+                    <span class="item-amount">฿0.00</span>
+                    <svg class="item-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
             </div>
-            <div class="item-body">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <input type="text" class="date-range" placeholder="วันที่">
-                    <div style="display:flex; gap:10px;">
-                        <label><input type="checkbox" class="chk-wd" checked> งาน</label>
-                        <label><input type="checkbox" class="chk-hd"> หยุด</label>
+            <div class="item-body" onclick="event.stopPropagation();">
+                <div class="field-row col-2">
+                    <div class="field">
+                        <label>ช่วงวันที่ทำ OT</label>
+                        <input class="date-range" placeholder="เลือกช่วงวันที่">
+                    </div>
+                    <div class="field">
+                        <label>ประเภทวัน</label>
+                        <div style="display:flex; gap:12px; align-items:center; height:38px;">
+                            <label class="checkbox-custom checked">
+                                <input type="checkbox" class="chk-wd" checked>
+                                <div class="cb-box"></div>
+                                <span>วันทำงาน</span>
+                            </label>
+                            <label class="checkbox-custom">
+                                <input type="checkbox" class="chk-hd">
+                                <div class="cb-box"></div>
+                                <span>วันหยุด</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
-                <div class="wd-times" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <input type="text" class="start-wd" value="16:30">
-                    <input type="text" class="end-wd" value="20:30">
+                <div class="field-row col-2 time-row-wd">
+                    <div class="field">
+                        <label>เวลาเริ่ม (วันทำงาน)</label>
+                        <input class="start-wd" placeholder="เลือกเวลา" value="16:30">
+                    </div>
+                    <div class="field">
+                        <label>เวลาสิ้นสุด (วันทำงาน)</label>
+                        <input class="end-wd" placeholder="เลือกเวลา" value="20:30">
+                    </div>
                 </div>
-                <div class="hd-times" style="display:none; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-                    <input type="text" class="start-hd" value="08:30">
-                    <input type="text" class="end-hd" value="16:30">
+                <div class="field-row col-2 time-row-hd" style="display:none;">
+                    <div class="field">
+                        <label>เวลาเริ่ม (วันหยุด)</label>
+                        <input class="start-hd" placeholder="เลือกเวลา" value="08:30">
+                    </div>
+                    <div class="field">
+                        <label>เวลาสิ้นสุด (วันหยุด)</label>
+                        <input class="end-hd" placeholder="เลือกเวลา" value="16:30">
+                    </div>
                 </div>
-                <input type="text" class="name" placeholder="หมายเหตุ" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--surface2); color:var(--text);">
-                <div class="item-info">...</div>
-                <button onclick="this.closest('.item').remove();calculate()" style="margin-top:10px; color:var(--red); background:none; border:none; cursor:pointer">ลบ</button>
+                <div class="field">
+                    <label>หมายเหตุ / ชื่อรายการ</label>
+                    <input type="text" class="name" placeholder="ระบุหมายเหตุ...">
+                </div>
+                <div class="item-info-container" style="margin-top:12px;"></div>
+                <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+                    <button class="btn-del" onclick="this.closest('.item').remove();calculate()">
+                        <span>🗑 ลบรายการ</span>
+                    </button>
+                </div>
             </div>
         </div>`;
     
@@ -349,8 +389,9 @@ function addItem() {
     );
     
     el.querySelectorAll(".chk-wd, .chk-hd").forEach(x => x.onchange = () => { 
-        el.querySelector(".wd-times").style.display = el.querySelector(".chk-wd").checked ? "grid" : "none"; 
-        el.querySelector(".hd-times").style.display = el.querySelector(".chk-hd").checked ? "grid" : "none"; 
+        x.closest('.checkbox-custom').classList.toggle('checked', x.checked);
+        el.querySelector(".time-row-wd").style.display = el.querySelector(".chk-wd").checked ? "grid" : "none"; 
+        el.querySelector(".time-row-hd").style.display = el.querySelector(".chk-hd").checked ? "grid" : "none"; 
         updateItemUI(el); 
     });
     
@@ -371,21 +412,31 @@ function updateItemUI(el) {
         if (APP_CONFIG.HOLIDAYS_2569.some(h => h.date === d)) hd++; 
         else wd++; 
     });
+
+    const chkWd = el.querySelector(".chk-wd").checked;
+    const chkHd = el.querySelector(".chk-hd").checked;
+    
+    // Update type dot
+    const dot = el.querySelector(".item-type-dot");
+    if (chkWd && chkHd) { dot.className = "item-type-dot dot-weekday"; dot.style.background = "linear-gradient(to right, var(--green), var(--accent))"; }
+    else if (chkWd) { dot.className = "item-type-dot dot-weekday"; dot.style.background = ""; }
+    else if (chkHd) { dot.className = "item-type-dot dot-holiday"; dot.style.background = ""; }
+    else { dot.className = "item-type-dot"; dot.style.background = "var(--text3)"; }
     
     let parts = [];
-    if (el.querySelector(".chk-wd").checked && wd > 0) { 
+    if (chkWd && wd > 0) { 
         const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true); 
-        parts.push(`<span class="badge badge-wd">งาน ${wd} วัน</span> ${fh(h.total * wd)} ชม.  ${fh(h.total)} ชม. × 1.5 เท่า (เรตวันทำงาน)`); 
+        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--green)"></div><div class="info-text"><b>งาน ${wd} วัน</b>: ${fh(h.total * wd)} ชม. (${fh(h.total)} ชม. × 1.5 เท่า)</div></div>`); 
     }
-    if (el.querySelector(".chk-hd").checked && hd > 0) { 
+    if (chkHd && hd > 0) { 
         const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false); 
         let hParts = [];
-        if (h.h1) hParts.push(`${fh(h.h1)} ชม. × 1 เท่า (เรตช่วง 08:30 - 16:30)`);
-        if (h.h3) hParts.push(`${fh(h.h3)} ชม. × 3 เท่า (เรตช่วง 16:30 - 08:30)`);
-        parts.push(`<span class="badge badge-hd">หยุด ${hd} วัน</span> ${fh(h.total * hd)} ชม.  ${hParts.join('  ·  ')}  ·  หักพัก 1 ชม. ช่วง 12.00 - 13.00`); 
+        if (h.h1) hParts.push(`${fh(h.h1)} ชม. × 1.0`);
+        if (h.h3) hParts.push(`${fh(h.h3)} ชม. × 3.0`);
+        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--accent)"></div><div class="info-text"><b>หยุด ${hd} วัน</b>: ${fh(h.total * hd)} ชม. (${hParts.join(' + ')} | หักพัก 1 ชม.)</div></div>`); 
     }
     
-    el.querySelector(".item-info").innerHTML = parts.join(' | ') || "ระบุข้อมูล"; 
+    el.querySelector(".item-info-container").innerHTML = parts.join('') || ""; 
     calculate();
 }
 
@@ -412,51 +463,146 @@ function calcH(sv, ev, isW) {
     return { total, h1, h15, h3 };
 }
 
+const THAI_DAYS = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+const THAI_MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+const formatThaiDate = (dateStr) => {
+    if (!dateStr) return { short: "", full: "" };
+    const d = new Date(dateStr);
+    const day = THAI_DAYS[d.getDay()];
+    const date = d.getDate();
+    const month = THAI_MONTHS[d.getMonth()];
+    const year = d.getFullYear() + 543;
+    return { short: `${date} ${month} ${year}`, full: `${day} ${date} ${month} ${year}`, monthIndex: d.getMonth(), monthName: month, year };
+};
+
+const showDaysBreakdown = (title, dateList) => {
+    const modal = document.getElementById("dayBreakdownModal");
+    const listContainer = document.getElementById("dayBreakdownList");
+    document.getElementById("dayBreakdownTitle").innerText = title;
+    
+    listContainer.innerHTML = dateList.map(d => {
+        const info = formatThaiDate(d);
+        const h = APP_CONFIG.HOLIDAYS_2569.find(x => x.date === d);
+        return `
+            <div class="holiday-item" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-size:0.85rem; font-weight:600;">${info.full}</div>
+                    ${h ? `<div style="font-size:0.7rem; color:var(--accent);">${h.title}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+    modal.classList.add("show");
+};
+
 function calculate() {
     const salary = +document.getElementById("salary").value || 0;
-    const hr = calMoney(salary / 30 / 7);
-    
-    document.getElementById("sumDaily").innerText = fm(hr * 7); 
-    document.getElementById("sum1").innerText = fm(hr); 
-    document.getElementById("sum15").innerText = fm(hr * 1.5); 
-    document.getElementById("sum3").innerText = fm(hr * 3);
-    
+    const hourly = calMoney(salary / 30 / 7);   
+    const daily = calMoney(hourly * 7);
+
+    document.getElementById("sumDaily").innerText = fm(daily);
+    document.getElementById("sum1").innerText = fm(hourly);
+    document.getElementById("sum15").innerText = fm(hourly * 1.5);
+    document.getElementById("sum3").innerText = fm(hourly * 3);
+
+    const prHrly15 = calMoney(hourly * 1.5);
+    const prHrly3 = calMoney(hourly * 3);
+
     let total = 0, rows = "";
-    document.querySelectorAll(".item").forEach(el => {
-        const range = el.querySelector(".date-range").value;
+    document.querySelectorAll(".item").forEach(item => {
+        const range = item.querySelector(".date-range").value;
         const dates = getDaysInRange(range);
-        const name = el.querySelector(".name").value || "OT";
-        let itemT = 0;
-        
-        const calc = (isW, sv, ev, count) => {
-            if (count === 0) return null; 
-            const h = calcH(sv, ev, isW);
-            const m = calMoney((calMoney(h.h1 * hr) + calMoney(h.h15 * calMoney(hr * 1.5)) + calMoney(h.h3 * calMoney(hr * 3))) * count);
-            const chips = `${h.h1 ? `<span class="hours-chip x1">${fh(h.h1)} ชม. × 1 เท่า</span>` : ''}${h.h15 ? `<span class="hours-chip x15">${fh(h.h15)} ชม. × 1.5 เท่า</span>` : ''}${h.h3 ? `<span class="hours-chip x3">${fh(h.h3)} ชม. × 3 เท่า</span>` : ''}`;
-            return { m, chips, count };
-        };
+        const name = item.querySelector(".name").value || "รายการใหม่";
         
         let wdD = [], hdD = []; 
         dates.forEach(d => { 
             if (APP_CONFIG.HOLIDAYS_2569.some(h => h.date === d)) hdD.push(d); 
             else wdD.push(d); 
         });
-        
-        let w = el.querySelector(".chk-wd").checked ? calc(true, el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, wdD.length) : null;
-        let h = el.querySelector(".chk-hd").checked ? calc(false, el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, hdD.length) : null;
-        
-        if (w) { rows += `<tr><td>${name} (WD)</td><td>${w.chips}</td><td>${w.count} วัน</td><td class="text-right">฿${fm(w.m)}</td></tr>`; itemT += w.m; }
-        if (h) { rows += `<tr><td>${name} (HD)</td><td>${h.chips}</td><td>${h.count} วัน</td><td class="text-right">฿${fm(h.m)}</td></tr>`; itemT += h.m; }
-        
-        el.querySelector(".item-amount").innerText = `฿${fm(itemT)}`; 
-        total += itemT;
+
+        const calcRow = (isWd, startVal, endVal, count, dateList) => {
+            if (!startVal || !endVal || count === 0) return null;
+            let s = toHour(startVal);
+            let e = toHour(endVal);
+            if (e <= s && s > 0) e += 24;
+            let h1 = 0, h15 = 0, h3 = 0;
+            for (let h = s; h < e; h += 0.5) {
+                let x = h >= 24 ? h - 24 : h;
+                if (isWd) {
+                    if (x >= 8.5 && x < 16.5) continue;
+                    h15 += 0.5;
+                } else {
+                    if (x >= 8.5 && x < 16.5) {
+                        if (x >= 12 && x < 13) continue;
+                        h1 += 0.5;
+                    } else { h3 += 0.5; }
+                }
+            }
+
+            let hhh1 = calMoney(h1 * hourly);
+            if(h1 >= 7){
+                hhh1 = calMoney(3.5 * hourly) + calMoney((h1-3.5) * hourly) ;
+            }
+            const hhh15 = calMoney(h15 * prHrly15);
+            const hhh3 = calMoney(h3 * prHrly3);
+
+            const dayVal = calMoney(hhh1 + hhh15 + hhh3); 
+            const sumTotal = calMoney(dayVal * count);
+
+            const c1 = h1 > 0 ? `<span class="hours-chip x1">${fh(h1)} ชม. × 1.0 = ${fm(hhh1)}</span>` : '';
+            const c15 = h15 > 0 ? `<span class="hours-chip x15">${fh(h15)} ชม. × 1.5 = ${fm(hhh15)}</span>` : '';
+            const c3 = h3 > 0 ? `<span class="hours-chip x3">${fh(h3)} ชม. × 3.0 = ${fm(hhh3)}</span>` : '';
+            const ratesHtml = `${c1}${c15}${c3}`;
+
+            const badgeHtml = isWd ? '<span class="badge badge-wd" style="margin-right:6px;">WD</span>' : '<span class="badge badge-hd" style="margin-right:6px;">HD</span>';
+            const timeHtml = `<div class="mono" style="display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:0.75rem">${badgeHtml}${startVal}–${endVal} ${(e > 24) ? '<span style="font-size:0.6rem;color:var(--blue);background:var(--blue-dim);padding:1px 4px;border-radius:3px;margin-left:4px;">+1</span>' : ''}</div>`;
+            
+            const nameSafe = name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+            const datesJson = JSON.stringify(dateList).replace(/"/g, '&quot;');
+            const daysDisplay = `<span style="cursor:pointer; text-decoration:underline;" onclick="showDaysBreakdown('${isWd?'วันทำงาน':'วันหยุด'} - ${nameSafe}', ${datesJson})">${count} วัน</span>`;
+
+            return { total: sumTotal, ratesHtml, timeHtml, dayVal, daysDisplay };
+        };
+
+        const w = item.querySelector(".chk-wd").checked ? calcRow(true, item.querySelector(".start-wd").value, item.querySelector(".end-wd").value, wdD.length, wdD) : null;
+        const h = item.querySelector(".chk-hd").checked ? calcRow(false, item.querySelector(".start-hd").value, item.querySelector(".end-hd").value, hdD.length, hdD) : null;
+
+        let itemTotal = 0;
+        if (w && h) {
+            itemTotal = w.total + h.total;
+            rows += `
+            <tr>
+                <td rowspan="2"><span style="font-weight:600;font-size:0.85rem">${name}</span></td>
+                <td>${w.timeHtml}</td>
+                <td style="white-space:nowrap">${w.ratesHtml}</td>
+                <td class="text-center mono" style="color:var(--text2)">${w.daysDisplay}</td>
+                <td class="text-right">฿${fm(w.total)}</td>
+                <td rowspan="2" class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td>
+            </tr>
+            <tr>
+                <td>${h.timeHtml}</td>
+                <td style="white-space:nowrap">${h.ratesHtml}</td>
+                <td class="text-center mono" style="color:var(--text2)">${h.daysDisplay}</td>
+                <td class="text-right">฿${fm(h.total)}</td>
+            </tr>`;
+        } else if (w) {
+            itemTotal = w.total;
+            rows += `<tr><td><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td>${w.timeHtml}</td><td style="white-space:nowrap">${w.ratesHtml}</td><td class="text-center mono" style="color:var(--text2)">${w.daysDisplay}</td><td class="text-right">฿${fm(w.total)}</td><td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
+        } else if (h) {
+            itemTotal = h.total;
+            rows += `<tr><td><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td>${h.timeHtml}</td><td style="white-space:nowrap">${h.ratesHtml}</td><td class="text-center mono" style="color:var(--text2)">${h.daysDisplay}</td><td class="text-right">฿${fm(h.total)}</td><td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
+        }
+
+        item.querySelector(".item-amount").innerText = `฿${fm(itemTotal)}`; 
+        total += itemTotal;
     });
-    
+
     document.getElementById("result-table").innerHTML = `
         <table>
-            <thead><tr><th>รายการ</th><th>เรต</th><th>จำนวน</th><th class="text-right">รวม</th></tr></thead>
-            <tbody>${rows || '<tr><td colspan="4" style="text-align:center">ไม่มีข้อมูล</td></tr>'}</tbody>
-            <tfoot><tr><td colspan="3" class="text-right">รวมสุทธิ</td><td class="text-right" style="color:var(--accent)">฿${fm(total)}</td></tr></tfoot>
+            <thead><tr><th>รายการ</th><th>เวลา</th><th class="text-center">เรต</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th><th class="text-right" style="background:rgba(240,192,64,0.03)">สรุปรายวัน</th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text3)">ไม่มีข้อมูลการคำนวณ</td></tr>'}</tbody>
+            <tfoot><tr><td colspan="5" class="text-right">รายรับรวมสุทธิ</td><td class="text-right" style="color:var(--accent); font-weight:700; font-size:1.1rem;">฿${fm(total)}</td></tr></tfoot>
         </table>`;
         
     document.getElementById("headerTotal").innerText = `฿${fm(total)}`; 
