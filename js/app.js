@@ -22,6 +22,10 @@ const fm = n => (+n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximum
 const fh = n => (n % 1 === 0 ? n : +n.toFixed(2));
 const toHour = t => { if (!t) return 0; const [h, m] = t.split(":").map(Number); return h + m / 60; };
 const calMoney = m => Math.round(m * 100) / 100;
+const isHoliday = dStr => {
+    const d = new Date(dStr);
+    return d.getDay() === 0 || d.getDay() === 6 || APP_CONFIG.HOLIDAYS_2569.some(h => h.date === dStr);
+};
 
 function getAvatarHTML(user) {
     const type = user.avatarType || "dicebear";
@@ -416,7 +420,7 @@ function updateItemUI(el) {
     const dates = getDaysInRange(range);
     let wd = 0, hd = 0; 
     dates.forEach(d => { 
-        if (APP_CONFIG.HOLIDAYS_2569.some(h => h.date === d)) hd++; 
+        if (isHoliday(d)) hd++; 
         else wd++; 
     });
 
@@ -520,7 +524,7 @@ function calculate() {
         
         let wdD = [], hdD = []; 
         dates.forEach(d => { 
-            if (APP_CONFIG.HOLIDAYS_2569.some(h => h.date === d)) hdD.push(d); 
+            if (isHoliday(d)) hdD.push(d); 
             else wdD.push(d); 
         });
 
