@@ -169,9 +169,7 @@ function initUsers() {
         "[]"
     );
     
-    userProfiles = stored.length ? stored : [
-        { name: "Default User", color: "#60a5fa", avatar: "Felix", avatarStyle: "avataaars", avatarType: "dicebear", emoji: "😀", isGuest: false }
-    ];
+    userProfiles = stored;
     
     if (!userProfiles.some(u => u.name === "Guest")) {
         userProfiles.push({ name: "Guest", color: "#9ca3af", avatar: "guest", avatarStyle: "bottts", avatarType: "dicebear", emoji: "👤", isGuest: true });
