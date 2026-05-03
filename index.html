@@ -4,190 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OT Builder Pro</title>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- External Libs -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        :root {
-            --bg: #0d0f14;
-            --surface: #161920;
-            --surface2: #1e2028;
-            --surface3: #252830;
-            --border: rgba(255,255,255,0.06);
-            --border2: rgba(255,255,255,0.1);
-            --text: #eef0f6;
-            --text2: #9399a8;
-            --text3: #5a6072;
-            --accent: #f0c040;
-            --accent2: #f8d878;
-            --accent-dim: rgba(240,192,64,0.12);
-            --green: #34d399;
-            --green-dim: rgba(52,211,153,0.12);
-            --blue: #60a5fa;
-            --blue-dim: rgba(96,165,250,0.12);
-            --red: #f87171;
-            --red-dim: rgba(248,113,113,0.1);
-            --radius: 14px;
-            --radius-sm: 8px;
-        }
-        body {
-            font-family: 'DM Sans', 'Noto Sans Thai', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 0 0 60px;
-        }
-        .header-wrap {
-            background: var(--surface); border-bottom: 1px solid var(--border);
-            padding: 24px 32px; position: sticky; top: 0; z-index: 100;
-            backdrop-filter: blur(20px); display: flex; align-items: center; gap: 16px;
-        }
-        .logo-mark {
-            width: 40px; height: 40px; background: var(--accent); border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-        }
-        .header-text h1 { font-size: 1.1rem; font-weight: 700; color: var(--text); }
-        .header-text p { font-size: 0.98rem; color: var(--text3); }
-        .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-
-        .landing-screen {
-            position: fixed; inset: 0; background: var(--bg); z-index: 2000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.4s;
-        }
-        .landing-screen.show { opacity: 1; pointer-events: auto; }
-        .user-grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; max-width: 900px; padding: 20px; }
-        .user-profile-card { display: flex; flex-direction: column; align-items: center; gap: 15px; cursor: pointer; transition: transform 0.3s; width: 140px; }
-        .user-profile-card:hover { transform: scale(1.1); }
-        .user-avatar {
-            width: 120px; height: 120px; border-radius: 12px; background: var(--surface3);
-            display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 700;
-            position: relative; overflow: hidden; border: 3px solid transparent;
-        }
-        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .user-profile-card:hover .user-avatar { border-color: var(--text); }
-        .user-avatar.add-btn { background: var(--surface2); border: 2px dashed var(--border2); font-size: 2rem; color: var(--text3); }
-        .user-name { font-size: 1.1rem; color: var(--text2); font-weight: 600; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; }
-        .pin-indicator { position: absolute; bottom: -8px; right: -8px; background: var(--accent); color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-
-        .pin-screen {
-            position: fixed; inset: 0; background: rgba(13,15,20,0.95); z-index: 2100;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .pin-screen.show { display: flex; }
-        .pin-dots { display: flex; gap: 15px; margin: 20px 0; }
-        .pin-dot { width: 16px; height: 16px; border: 2px solid var(--text3); border-radius: 50%; }
-        .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.2); }
-        .num-pad { display: grid; grid-template-columns: repeat(3, 70px); gap: 15px; }
-        .num-btn {
-            width: 70px; height: 70px; border-radius: 50%; border: 1px solid var(--border);
-            background: var(--surface2); color: var(--text); font-size: 1.5rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .num-btn:active { transform: scale(0.9); background: var(--accent-dim); }
-
-        .profile-section { position: relative; }
-        .profile-trigger {
-            display: flex; align-items: center; gap: 12px; padding: 6px 14px;
-            background: var(--surface2); border: 1px solid var(--border); border-radius: 30px; cursor: pointer;
-        }
-        .profile-trigger .p-avatar { width: 32px; height: 32px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        .profile-dropdown {
-            position: absolute; top: calc(100% + 10px); right: 0; width: 200px;
-            background: var(--surface); border: 1px solid var(--border2); border-radius: 8px;
-            display: none; flex-direction: column; padding: 8px; z-index: 1500;
-        }
-        .profile-dropdown.show { display: flex; }
-        .dropdown-item { padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text2); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
-        .dropdown-item:hover { background: var(--surface2); color: var(--text); }
-        .dropdown-item.danger { color: var(--red); }
-
-        .glass-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
-            z-index: 2500; display: none; align-items: center; justify-content: center;
-        }
-        .glass-modal.show { display: flex; }
-        .glass-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 14px; padding: 32px; width: 90%; max-width: 420px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-size: 0.75rem; color: var(--text3); margin-bottom: 8px; text-transform: uppercase; }
-        .form-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px; color: var(--text); outline: none; }
-        .btn-prime { background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
-        .btn-sec { background: var(--surface3); color: var(--text2); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
-
-        .preview-large { width: 80px; height: 80px; border-radius: 16px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; overflow: hidden; }
-        .preview-large img { width: 100%; height: 100%; object-fit: cover; }
-        .avatar-tabs { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: 10px; margin-bottom: 16px; }
-        .avatar-tab { flex: 1; padding: 8px; font-size: 0.75rem; border-radius: 7px; cursor: pointer; text-align: center; color: var(--text3); }
-        .avatar-tab.active { background: var(--surface3); color: var(--text); }
-        .emoji-grid, .style-grid, .variant-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; padding: 4px; margin-top: 12px; }
-        .variant-grid { grid-template-columns: repeat(5, 1fr); }
-        .emoji-opt, .style-opt, .variant-opt { 
-            aspect-ratio: 1; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; border-radius: 8px; background: var(--surface2);
-            transition: all 0.2s; border: 2px solid transparent; overflow: hidden;
-        }
-        .emoji-opt { font-size: 1.5rem; }
-        .style-opt img, .variant-opt img { width: 85%; height: 85%; object-fit: contain; }
-        .emoji-opt:hover, .style-opt:hover, .variant-opt:hover { background: var(--surface3); transform: scale(1.05); }
-        .emoji-opt.active, .style-opt.active, .variant-opt.active { border-color: var(--accent); background: var(--accent-dim); transform: scale(1.05); }
-
-        .color-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .color-opt { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
-        .color-opt:hover { transform: scale(1.1); }
-        .color-opt.active { border: 2px solid var(--text); box-shadow: 0 0 0 2px var(--bg); }
-
-        .toast-container { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: var(--surface2); border: 1px solid var(--border2); padding: 12px 20px; border-radius: 30px; color: var(--text); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; animation: toastIn 0.3s; }
-        @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .main { max-width: 1060px; margin: 0 auto; padding: 32px 24px; }
-        .salary-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 24px; display: grid; grid-template-columns: 260px 1fr; gap: 24px; align-items: center; }
-        .rate-pills { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .rate-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
-        .rate-pill .rp-label { font-size: 0.65rem; color: var(--text3); text-transform: uppercase; margin-bottom: 6px; }
-        .rp-mult { font-size: 0.9rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
-        .rp-mult.x1 { background: var(--blue-dim); color: var(--blue); }
-        .rp-mult.x15 { background: var(--green-dim); color: var(--green); }
-        .rp-mult.x3 { background: var(--accent-dim); color: var(--accent); }
-        .rp-mult.daily { background: rgba(255,255,255,0.06); color: var(--text2); }
-        .rp-val { font-family: 'DM Mono', monospace; font-size: 0.95rem; }
-
-        .item { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 10px; }
-        .item-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; }
-        .item-name { flex: 1; font-weight: 600; font-size: 0.9rem; }
-        .item-amount { font-family: 'DM Mono', monospace; color: var(--accent); font-size: 0.9rem; }
-        .item-body { display: none; padding: 18px; border-top: 1px solid var(--border); }
-        .item.active .item-body { display: block; }
-        .item-info { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 0.8rem; color: var(--text2); }
-        .badge { padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
-        .badge-wd { background: var(--green-dim); color: var(--green); }
-        .badge-hd { background: var(--accent-dim); color: var(--accent); }
-
-        .results-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-        .results-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text3); text-transform: uppercase; font-weight: 700; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th { padding: 12px 16px; text-align: left; background: var(--surface2); color: var(--text3); border-bottom: 1px solid var(--border); }
-        td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
-        .hours-chip { display: inline-block; padding: 2px 6px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 0.75rem; margin-right: 4px; }
-        .hours-chip.x1 { background: var(--blue-dim); color: var(--blue); }
-        .hours-chip.x15 { background: var(--green-dim); color: var(--green); }
-        .hours-chip.x3 { background: var(--accent-dim); color: var(--accent); }
-
-        .btn-add { width: 100%; background: transparent; border: 1.5px dashed var(--border2); border-radius: 14px; padding: 14px; color: var(--accent); cursor: pointer; margin-bottom: 20px; font-weight: 600; }
-        .btn-add:hover { background: var(--accent-dim); border-color: var(--accent); }
-        
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; }
-        .modal-overlay.show { display: flex; }
-        .modal-content { background: var(--surface); border-radius: 14px; width: 90%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; }
-        .modal-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-        .modal-body { padding: 20px 24px; overflow-y: auto; }
-        .holiday-item { background: var(--surface2); padding: 12px; border-radius: 8px; margin-bottom: 8px; }
-        .holiday-date { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.8rem; }
-    </style>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -217,6 +46,7 @@
     </div>
 </header>
 
+<!-- Screens -->
 <div id="landingScreen" class="landing-screen">
     <h1>เลือกโปรไฟล์</h1>
     <div id="userGrid" class="user-grid"></div>
@@ -240,6 +70,7 @@
     </div>
 </div>
 
+<!-- Modals -->
 <div id="profileModal" class="glass-modal">
     <div class="glass-card">
         <h2 id="profileModalTitle">โปรไฟล์</h2>
@@ -249,6 +80,7 @@
             <div class="avatar-tab" data-type="initials" onclick="setAvatarType('initials')">Initials</div>
             <div class="avatar-tab" data-type="emoji" onclick="setAvatarType('emoji')">Emoji</div>
         </div>
+        
         <div id="pickerDicebear">
             <div id="dicebearStyleView">
                 <div class="style-grid" id="styleGrid"></div>
@@ -262,7 +94,10 @@
                 <button class="btn-sec" style="margin-top:12px;" onclick="refreshVariants()">🔄 สุ่มใหม่ (Refresh)</button>
             </div>
         </div>
-        <div id="pickerEmoji" style="display:none"><div class="emoji-grid" id="emojiGrid"></div></div>
+        
+        <div id="pickerEmoji" style="display:none">
+            <div class="emoji-grid" id="emojiGrid"></div>
+        </div>
         
         <div class="form-group" style="margin-top:20px;">
             <label>สีพื้นหลัง (Background Color)</label>
@@ -278,6 +113,7 @@
             <label>PIN 6 หลัก (ถ้ามี)</label>
             <input type="password" id="profilePin" class="form-input" maxlength="6" placeholder="ใส่รหัส 6 หลักเพื่อความปลอดภัย">
         </div>
+        
         <div style="display:flex; gap:10px;">
             <button class="btn-sec" onclick="closeProfileModal()">ปิด</button>
             <button class="btn-prime" onclick="saveProfile()">บันทึก</button>
@@ -299,6 +135,7 @@
 
 <div id="toastContainer" class="toast-container"></div>
 
+<!-- Main UI -->
 <div class="main">
     <div class="salary-card">
         <div>
@@ -306,21 +143,28 @@
             <input id="salary" type="number" value="30000" style="width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:1.5rem; padding:10px; font-family:'DM Mono', monospace;">
         </div>
         <div class="rate-pills">
-            <div class="rate-pill"><div class="rp-label">วัน</div><div class="rp-mult daily">×1</div><div class="rp-val" id="sumDaily">0</div></div>
-            <div class="rate-pill"><div class="rp-label">1.0x</div><div class="rp-mult x1">×1</div><div class="rp-val" id="sum1">0</div></div>
-            <div class="rate-pill"><div class="rp-label">1.5x</div><div class="rp-mult x15">×1.5</div><div class="rp-val" id="sum15">0</div></div>
-            <div class="rate-pill"><div class="rp-label">3.0x</div><div class="rp-mult x3">×3</div><div class="rp-val" id="sum3">0</div></div>
+            <div class="rate-pill"><div class="rp-label">วัน</div><div class="rp-mult daily">1 เท่า</div><div class="rp-val" id="sumDaily">0</div></div>
+            <div class="rate-pill"><div class="rp-label">1.0 เท่า</div><div class="rp-mult x1">1 เท่า</div><div class="rp-val" id="sum1">0</div></div>
+            <div class="rate-pill"><div class="rp-label">1.5 เท่า</div><div class="rp-mult x15">1.5 เท่า</div><div class="rp-val" id="sum15">0</div></div>
+            <div class="rate-pill"><div class="rp-label">3.0 เท่า</div><div class="rp-mult x3">3 เท่า</div><div class="rp-val" id="sum3">0</div></div>
         </div>
     </div>
+    
     <div id="items-container"></div>
+    
     <button class="btn-add" onclick="addItem()">+ เพิ่มรายการโอที</button>
     <button class="btn-sec" onclick="clearAll()" style="margin-bottom:32px;">🗑 ล้างทั้งหมด</button>
+    
     <div class="results-card">
-        <div class="results-header"><span>สรุปรายการ</span> <span id="itemCount">0 รายการ</span></div>
+        <div class="results-header">
+            <span>สรุปรายการ</span> 
+            <span id="itemCount">0 รายการ</span>
+        </div>
         <div id="result-table"></div>
     </div>
 </div>
 
+<!-- Modals for details -->
 <div id="holidayModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
     <div class="modal-content">
         <div class="modal-header"><h3>วันหยุดพิเศษ</h3><button onclick="document.getElementById('holidayModal').classList.remove('show')" style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer">&times;</button></div>
@@ -335,357 +179,9 @@
     </div>
 </div>
 
-<script>
-    const HOLIDAY_2569 = [
-        {"date":"2026-01-01","title":"วันขึ้นปีใหม่"},{"date":"2026-01-02","title":"วันหยุดกรณีพิเศษ"},{"date":"2026-02-02","title":"วันมาฆบูชา"},{"date":"2026-04-06","title":"วันจักรี"},{"date":"2026-04-13","title":"วันสงกรานต์"},{"date":"2026-04-14","title":"วันสงกรานต์"},{"date":"2026-04-15","title":"วันสงกรานต์"},{"date":"2026-05-01","title":"วันแรงงาน"},{"date":"2026-05-04","title":"วันฉัตรมงคล"},{"date":"2026-05-11","title":"วันหยุดกรณีพิเศษ"},{"date":"2026-05-31","title":"วันวิสาขบูชา"},{"date":"2026-06-01","title":"ชดเชยวันวิสาขบูชา"},{"date":"2026-06-03","title":"วันเฉลิมฯ พระบรมราชินี"},{"date":"2026-07-28","title":"วันเฉลิมฯ ร.10"},{"date":"2026-07-29","title":"วันอาสาฬหบูชา"},{"date":"2026-07-30","title":"วันเข้าพรรษา"},{"date":"2026-08-12","title":"วันแม่แห่งชาติ"},{"date":"2026-10-13","title":"วันนวมินทรมหาราช"},{"date":"2026-10-23","title":"วันปิยมหาราช"},{"date":"2026-12-05","title":"วันพ่อแห่งชาติ"},{"date":"2026-12-07","title":"ชดเชยวันพ่อ"},{"date":"2026-12-10","title":"วันรัฐธรรมนูญ"},{"date":"2026-12-31","title":"วันสิ้นปี"}
-    ];
-    const PRESET_COLORS = ["#f87171", "#60a5fa", "#34d399", "#fbbf24", "#a78bfa", "#f472b6", "#fb923c", "#9ca3af", "#4ade80", "#2dd4bf", "#818cf8", "#e879f9", "#ffffff", "#000000"];
-    const PRESET_EMOJIS = ["😀", "😎", "🦊", "🚀", "⚡", "🔥", "🌈", "🎨", "🍔", "⚽", "🎮", "🌟", "🐱", "🐶", "🦁", "🐧", "🦄", "🌈", "💎", "🍺", "🍕", "🦾", "👾"];
-    const DICEBEAR_STYLES = [
-        { id: "avataaars", name: "People" },
-        { id: "bottts", name: "Robots" },
-        { id: "pixel-art", name: "Pixel" },
-        { id: "lorelei", name: "Cute" },
-        { id: "notionists", name: "Notion" },
-        { id: "personas", name: "Personas" },
-        { id: "adventurer", name: "Adventurer" },
-        { id: "thumbs", name: "Thumbs (Pets/Fun)" },
-        { id: "icons", name: "Icons" },
-        { id: "shapes", name: "Shapes" }
-    ];
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
 
-    let currentUser = null, userProfiles = [], currentPinInput = "", targetUserForPin = null;
-    let profileModalMode = "add", editingUser = null, tempAvatarType = "dicebear", tempAvatarSeed = "Felix", tempAvatarColor = "#60a5fa", tempAvatarEmoji = "😀", tempAvatarStyle = "avataaars";
-    let dicebearView = "styles", currentVariants = [];
-
-    const fm = n => (+n).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const fh = n => (n % 1 === 0 ? n : +n.toFixed(2));
-    const toHour = t => { if (!t) return 0; const [h, m] = t.split(":").map(Number); return h + m / 60; };
-    const calMoney = m => Math.round(m * 100) / 100;
-
-    function getAvatarHTML(user) {
-        const type = user.avatarType || "dicebear", style = user.avatarStyle || "avataaars", seed = user.avatar || "Felix", emoji = user.emoji || "😀";
-        if (type === "dicebear") return `<img src="https://api.dicebear.com/7.x/${style}/svg?seed=${seed}" alt="avatar">`;
-        if (type === "initials") return `<span style="color:#000">${user.name ? user.name.charAt(0).toUpperCase() : '?'}</span>`;
-        if (type === "emoji") return `<span>${emoji}</span>`;
-        return `?`;
-    }
-
-    function initUsers() {
-        const stored = JSON.parse(localStorage.getItem("otUserProfiles_v3") || localStorage.getItem("otUserProfiles_v2") || "[]");
-        userProfiles = stored.length ? stored : [
-            { name: "Default User", color: "#60a5fa", avatar: "Felix", avatarStyle: "avataaars", avatarType: "dicebear", emoji: "😀", isGuest: false }
-        ];
-        
-        if (!userProfiles.some(u => u.name === "Guest")) {
-            userProfiles.push({ name: "Guest", color: "#9ca3af", avatar: "guest", avatarStyle: "bottts", avatarType: "dicebear", emoji: "👤", isGuest: true });
-        }
-
-        const active = localStorage.getItem("otCurrentUser");
-        
-        // 1-Hour Expiry for Guest
-        const guestStart = localStorage.getItem("otGuestStartTime");
-        if (active === "Guest" && guestStart && (Date.now() - parseInt(guestStart) > 3600000)) {
-            localStorage.removeItem("otData_Guest");
-            localStorage.removeItem("otGuestStartTime");
-            showToast("เซสชัน Guest หมดอายุ (1 ชม.) ข้อมูลถูกล้างแล้ว", "info");
-        }
-
-        if (active && userProfiles.some(u => u.name === active)) { 
-            completeLogin(active); 
-        } else { 
-            showLanding(); 
-        }
-    }
-
-    function showLanding() {
-        if (currentUser) {
-            const u = userProfiles.find(x => x.name === currentUser);
-            if (u && u.isGuest) { 
-                localStorage.removeItem(`otData_${currentUser}`); 
-                showToast("ข้อมูล Guest ถูกล้างเรียบร้อย", "success");
-            } else { 
-                saveData(); 
-            }
-        }
-        currentUser = null; 
-        document.getElementById("profileSection").style.display = "none";
-        const grid = document.getElementById("userGrid");
-        
-        grid.innerHTML = userProfiles.map(u => `
-            <div class="user-profile-card" onclick="selectProfile('${u.name}')">
-                <div class="user-avatar" style="background:${u.color}">
-                    ${getAvatarHTML(u)}
-                    ${u.pin ? '<div class="pin-indicator">🔒</div>' : ''}
-                    ${u.isGuest ? '<div style="position:absolute; top:0; left:0; background:var(--red); color:#fff; font-size:0.6rem; padding:2px 6px; border-bottom-right-radius:8px;">GUEST</div>' : ''}
-                </div>
-                <div class="user-name">${u.name}</div>
-            </div>
-        `).join('') + `<div class="user-profile-card" onclick="openProfileModal('add')"><div class="user-avatar add-btn">+</div><div class="user-name">เพิ่มโปรไฟล์</div></div>`;
-        
-        document.getElementById("landingScreen").classList.add("show");
-    }
-
-    function selectProfile(name) {
-        const u = userProfiles.find(x => x.name === name);
-        if (u.pin) { targetUserForPin = u; currentPinInput = ""; updatePinDots(); document.getElementById("pinUserTitle").innerText = u.name; document.getElementById("pinScreen").classList.add("show"); } else { completeLogin(name); }
-    }
-
-    function completeLogin(name) {
-        currentUser = name; localStorage.setItem("otCurrentUser", name); 
-        document.getElementById("landingScreen").classList.remove("show"); 
-        document.getElementById("pinScreen").classList.remove("show");
-        
-        const u = userProfiles.find(x => x.name === name);
-        if (u && u.isGuest) {
-            if (!localStorage.getItem("otGuestStartTime")) {
-                localStorage.setItem("otGuestStartTime", Date.now());
-            }
-        } else {
-            localStorage.removeItem("otGuestStartTime");
-        }
-
-        document.getElementById("items-container").innerHTML = ""; 
-        updateHeaderProfile(); 
-        loadData();
-    }
-
-    function updateHeaderProfile() {
-        const u = userProfiles.find(x => x.name === currentUser); document.getElementById("profileSection").style.display = "block"; document.getElementById("topUserName").innerText = u.name;
-        const av = document.getElementById("topUserAvatar"); av.style.background = u.color; av.innerHTML = getAvatarHTML(u);
-    }
-
-    function pressPin(n) {
-        if (currentPinInput.length < 6) { currentPinInput += n; updatePinDots(); if (currentPinInput.length === 6) { if (currentPinInput === targetUserForPin.pin) completeLogin(targetUserForPin.name); else { currentPinInput = ""; updatePinDots(); showToast("รหัสไม่ถูกต้อง", "error"); } } }
-    }
-    function backspacePin() { currentPinInput = currentPinInput.slice(0, -1); updatePinDots(); }
-    function updatePinDots() { document.querySelectorAll(".pin-dot").forEach((d, i) => d.classList.toggle("filled", i < currentPinInput.length)); }
-
-    function openProfileModal(mode) {
-        profileModalMode = mode; 
-        document.getElementById("profileModalTitle").innerText = mode === "add" ? "สร้างโปรไฟล์ใหม่" : "ตั้งค่าโปรไฟล์";
-        dicebearView = "styles";
-
-        if (mode === "add") { 
-            editingUser = null; 
-            document.getElementById("profileName").value = ""; 
-            document.getElementById("profilePin").value = ""; 
-            tempAvatarType = "dicebear"; 
-            tempAvatarSeed = Math.random().toString(36).substring(7); 
-            tempAvatarColor = "#60a5fa"; 
-            tempAvatarEmoji = "😀"; 
-            tempAvatarStyle = "avataaars";
-        } else { 
-            editingUser = userProfiles.find(x => x.name === currentUser); 
-            document.getElementById("profileName").value = editingUser.name; 
-            document.getElementById("profilePin").value = editingUser.pin || ""; 
-            tempAvatarType = editingUser.avatarType || "dicebear"; 
-            tempAvatarSeed = editingUser.avatar; 
-            tempAvatarColor = editingUser.color; 
-            tempAvatarEmoji = editingUser.emoji; 
-            tempAvatarStyle = editingUser.avatarStyle || "avataaars"; 
-        }
-        renderGrids(); 
-        setAvatarType(tempAvatarType); 
-        document.getElementById("profileModal").classList.add("show");
-    }
-    function closeProfileModal() { document.getElementById("profileModal").classList.remove("show"); }
-
-    function renderGrids() {
-        // Color Grid
-        document.getElementById("colorGrid").innerHTML = PRESET_COLORS.map(c => `
-            <div class="color-opt ${c === tempAvatarColor ? 'active' : ''}" style="background:${c}" onclick="setTempColor('${c}')"></div>
-        `).join('');
-        
-        // Emoji Grid
-        document.getElementById("emojiGrid").innerHTML = PRESET_EMOJIS.map(e => `
-            <div class="emoji-opt ${e === tempAvatarEmoji ? 'active' : ''}" onclick="setTempEmoji('${e}')">${e}</div>
-        `).join('');
-
-        renderDicebearSection();
-    }
-
-    function renderDicebearSection() {
-        const styleView = document.getElementById("dicebearStyleView");
-        const variantView = document.getElementById("dicebearVariantView");
-
-        if (dicebearView === "styles") {
-            styleView.style.display = "block";
-            variantView.style.display = "none";
-            document.getElementById("styleGrid").innerHTML = DICEBEAR_STYLES.map(s => `
-                <div class="style-opt ${s.id === tempAvatarStyle ? 'active' : ''}" onclick="selectDicebearStyle('${s.id}')" title="${s.name}">
-                    <img src="https://api.dicebear.com/7.x/${s.id}/svg?seed=preview" alt="${s.name}">
-                </div>
-            `).join('');
-        } else {
-            styleView.style.display = "none";
-            variantView.style.display = "block";
-            if (!currentVariants.length) refreshVariants(false);
-            document.getElementById("variantGrid").innerHTML = currentVariants.map(v => `
-                <div class="variant-opt ${v === tempAvatarSeed ? 'active' : ''}" onclick="setTempSeed('${v}')">
-                    <img src="https://api.dicebear.com/7.x/${tempAvatarStyle}/svg?seed=${v}">
-                </div>
-            `).join('');
-        }
-    }
-
-    function selectDicebearStyle(s) {
-        tempAvatarStyle = s;
-        dicebearView = "variants";
-        currentVariants = [];
-        renderDicebearSection();
-        updateAvatarPreview();
-    }
-
-    function setDicebearView(v) {
-        dicebearView = v;
-        renderDicebearSection();
-    }
-
-    function refreshVariants(shouldRender = true) {
-        currentVariants = Array.from({length: 10}, () => Math.random().toString(36).substring(7));
-        if (shouldRender) renderDicebearSection();
-    }
-
-    function setTempColor(c) { tempAvatarColor = c; renderGrids(); updateAvatarPreview(); }
-    function setTempEmoji(e) { tempAvatarEmoji = e; renderGrids(); updateAvatarPreview(); }
-    function setTempSeed(s) { tempAvatarSeed = s; renderDicebearSection(); updateAvatarPreview(); }
-
-    function setAvatarType(t) { 
-        tempAvatarType = t; 
-        document.querySelectorAll(".avatar-tab").forEach(x => x.classList.toggle("active", x.dataset.type === t)); 
-        document.getElementById("pickerDicebear").style.display = t === "dicebear" ? "block" : "none"; 
-        document.getElementById("pickerEmoji").style.display = t === "emoji" ? "block" : "none"; 
-        updateAvatarPreview(); 
-    }
-    function shuffleSeed() { 
-        tempAvatarSeed = Math.random().toString(36).substring(7); 
-        renderGrids();
-        updateAvatarPreview(); 
-    }
-    function updateAvatarPreview() {
-        const p = document.getElementById("avatarPreviewLarge"), name = document.getElementById("profileName").value;
-        p.style.background = tempAvatarColor; 
-        if (tempAvatarType === "dicebear") {
-            p.innerHTML = `<img src="https://api.dicebear.com/7.x/${tempAvatarStyle}/svg?seed=${tempAvatarSeed}">`;
-        } else if (tempAvatarType === "initials") {
-            p.innerHTML = `<span>${name ? name.charAt(0).toUpperCase() : '?'}</span>`;
-        } else {
-            p.innerHTML = `<span>${tempAvatarEmoji}</span>`;
-        }
-    }
-
-    function saveProfile() {
-        const name = document.getElementById("profileName").value.trim(), pin = document.getElementById("profilePin").value.trim();
-        if (!name) return showToast("กรุณาใส่ชื่อโปรไฟล์", "error");
-        
-        const data = { 
-            name, 
-            pin: pin || null, 
-            color: tempAvatarColor, 
-            avatar: tempAvatarSeed, 
-            avatarStyle: tempAvatarStyle, 
-            avatarType: tempAvatarType, 
-            emoji: tempAvatarEmoji,
-            isGuest: profileModalMode === "edit" ? editingUser.isGuest : false
-        };
-
-        if (profileModalMode === "add") { 
-            if (userProfiles.some(u => u.name === name)) return showToast("ชื่อนี้มีอยู่แล้ว", "error"); 
-            userProfiles.push(data); 
-        } else { 
-            if (name !== editingUser.name) { 
-                const old = localStorage.getItem(`otData_${editingUser.name}`); 
-                if (old) { localStorage.setItem(`otData_${name}`, old); localStorage.removeItem(`otData_${editingUser.name}`); } 
-            } 
-            Object.assign(editingUser, data); 
-        }
-        localStorage.setItem("otUserProfiles_v3", JSON.stringify(userProfiles)); 
-        closeProfileModal(); 
-        completeLogin(name);
-    }
-
-    function deleteUser() {
-        if (userProfiles.length <= 1) return showToast("ลบไม่ได้ (คนสุดท้าย)", "error");
-        showConfirm(`ลบ "${currentUser}"? ข้อมูลจะหายถาวร`, "ลบ", "🗑", () => { const i = userProfiles.findIndex(x => x.name === currentUser); userProfiles.splice(i, 1); localStorage.removeItem(`otData_${currentUser}`); localStorage.setItem("otUserProfiles_v3", JSON.stringify(userProfiles)); showLanding(); });
-    }
-
-    function addItem() {
-        const id = Date.now(), html = `<div class="item" data-id="${id}"><div class="item-header" onclick="this.closest('.item').classList.toggle('active')"><span class="item-name">รายการใหม่</span><span class="item-amount">฿0.00</span></div><div class="item-body"><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;"><input type="text" class="date-range" placeholder="วันที่"><div style="display:flex; gap:10px;"><label><input type="checkbox" class="chk-wd" checked> งาน</label><label><input type="checkbox" class="chk-hd"> หยุด</label></div></div><div class="wd-times" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;"><input type="text" class="start-wd" value="16:30"><input type="text" class="end-wd" value="20:30"></div><div class="hd-times" style="display:none; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;"><input type="text" class="start-hd" value="08:30"><input type="text" class="end-hd" value="16:30"></div><input type="text" class="name" placeholder="หมายเหตุ" style="width:100%; padding:8px; border-radius:6px; border:1px solid var(--border); background:var(--surface2); color:var(--text);"><div class="item-info">...</div><button onclick="this.closest('.item').remove();calculate()" style="margin-top:10px; color:var(--red); background:none; border:none; cursor:pointer">ลบ</button></div></div>`;
-        document.getElementById("items-container").insertAdjacentHTML('beforeend', html); const el = document.querySelector(`[data-id="${id}"]`);
-        flatpickr(el.querySelector(".date-range"), { mode: "range", onChange: () => updateItemUI(el) });
-        el.querySelectorAll(".start-wd, .end-wd, .start-hd, .end-hd").forEach(x => flatpickr(x, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, onChange: () => updateItemUI(el) }));
-        el.querySelectorAll(".chk-wd, .chk-hd").forEach(x => x.onchange = () => { el.querySelector(".wd-times").style.display = el.querySelector(".chk-wd").checked ? "grid" : "none"; el.querySelector(".hd-times").style.display = el.querySelector(".chk-hd").checked ? "grid" : "none"; updateItemUI(el); });
-        el.querySelector(".name").oninput = () => { el.querySelector(".item-name").innerText = el.querySelector(".name").value || "รายการใหม่"; calculate(); };
-        updateItemUI(el);
-    }
-
-    function updateItemUI(el) {
-        const range = el.querySelector(".date-range").value, dates = getDaysInRange(range);
-        let wd = 0, hd = 0; dates.forEach(d => { if (HOLIDAY_2569.some(h => h.date === d)) hd++; else wd++; });
-        let parts = [];
-        if (el.querySelector(".chk-wd").checked && wd > 0) { const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true); parts.push(`<span class="badge badge-wd">งาน ${wd} วัน</span> ${fh(h.total)}ชม. (x1.5)`); }
-        if (el.querySelector(".chk-hd").checked && hd > 0) { const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false); parts.push(`<span class="badge badge-hd">หยุด ${hd} วัน</span> ${fh(h.total)}ชม. (x1,x3)`); }
-        el.querySelector(".item-info").innerHTML = parts.join(' | ') || "ระบุข้อมูล"; calculate();
-    }
-
-    function getDaysInRange(r) { if (!r.includes(" to ")) return r ? [r] : []; const [s, e] = r.split(" to "); let d = [], c = new Date(s), end = new Date(e); while (c <= end) { d.push(c.toISOString().split('T')[0]); c.setDate(c.getDate() + 1); } return d; }
-    function calcH(sv, ev, isW) {
-        let s = toHour(sv), e = toHour(ev); if (e <= s) e += 24;
-        let total = 0, h1 = 0, h15 = 0, h3 = 0;
-        for (let h = s; h < e; h += 0.5) {
-            let x = h >= 24 ? h - 24 : h;
-            if (isW) { if (x >= 8.5 && x < 16.5) continue; h15 += 0.5; total += 0.5; }
-            else { if (x >= 8.5 && x < 16.5) { if (x >= 12 && x < 13) continue; h1 += 0.5; } else h3 += 0.5; total += 0.5; }
-        }
-        return { total, h1, h15, h3 };
-    }
-
-    function calculate() {
-        const salary = +document.getElementById("salary").value || 0, hr = calMoney(salary / 30 / 7);
-        document.getElementById("sumDaily").innerText = fm(hr * 7); document.getElementById("sum1").innerText = fm(hr); document.getElementById("sum15").innerText = fm(hr * 1.5); document.getElementById("sum3").innerText = fm(hr * 3);
-        let total = 0, rows = "";
-        document.querySelectorAll(".item").forEach(el => {
-            const range = el.querySelector(".date-range").value, dates = getDaysInRange(range), name = el.querySelector(".name").value || "OT";
-            let itemT = 0;
-            const calc = (isW, sv, ev, count) => {
-                if (count === 0) return null; const h = calcH(sv, ev, isW);
-                const m = calMoney((calMoney(h.h1 * hr) + calMoney(h.h15 * calMoney(hr * 1.5)) + calMoney(h.h3 * calMoney(hr * 3))) * count);
-                const chips = `${h.h1 ? `<span class="hours-chip x1">${fh(h.h1)}h</span>` : ''}${h.h15 ? `<span class="hours-chip x15">${fh(h.h15)}h</span>` : ''}${h.h3 ? `<span class="hours-chip x3">${fh(h.h3)}h</span>` : ''}`;
-                return { m, chips, count };
-            };
-            let wdD = [], hdD = []; dates.forEach(d => { if (HOLIDAY_2569.some(h => h.date === d)) hdD.push(d); else wdD.push(d); });
-            let w = el.querySelector(".chk-wd").checked ? calc(true, el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, wdD.length) : null;
-            let h = el.querySelector(".chk-hd").checked ? calc(false, el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, hdD.length) : null;
-            if (w) { rows += `<tr><td>${name} (WD)</td><td>${w.chips}</td><td>${w.count} วัน</td><td class="text-right">฿${fm(w.m)}</td></tr>`; itemT += w.m; }
-            if (h) { rows += `<tr><td>${name} (HD)</td><td>${h.chips}</td><td>${h.count} วัน</td><td class="text-right">฿${fm(h.m)}</td></tr>`; itemT += h.m; }
-            el.querySelector(".item-amount").innerText = `฿${fm(itemT)}`; total += itemT;
-        });
-        document.getElementById("result-table").innerHTML = `<table><thead><tr><th>รายการ</th><th>เรต</th><th>จำนวน</th><th class="text-right">รวม</th></tr></thead><tbody>${rows || '<tr><td colspan="4" style="text-align:center">ไม่มีข้อมูล</td></tr>'}</tbody><tfoot><tr><td colspan="3" class="text-right">รวมสุทธิ</td><td class="text-right" style="color:var(--accent)">฿${fm(total)}</td></tr></tfoot></table>`;
-        document.getElementById("headerTotal").innerText = `฿${fm(total)}`; document.getElementById("itemCount").innerText = `${document.querySelectorAll(".item").length} รายการ`; saveData();
-    }
-
-    function saveData() { if (currentUser) { const data = { salary: document.getElementById("salary").value, items: Array.from(document.querySelectorAll(".item")).map(el => ({ range: el.querySelector(".date-range").value, chkWd: el.querySelector(".chk-wd").checked, chkHd: el.querySelector(".chk-hd").checked, startWd: el.querySelector(".start-wd").value, endWd: el.querySelector(".end-wd").value, startHd: el.querySelector(".start-hd").value, endHd: el.querySelector(".end-hd").value, name: el.querySelector(".name").value })) }; localStorage.setItem(`otData_${currentUser}`, JSON.stringify(data)); } }
-    function loadData() {
-        const stored = localStorage.getItem(`otData_${currentUser}`); if (!stored) return addItem();
-        const data = JSON.parse(stored); document.getElementById("salary").value = data.salary;
-        data.items.forEach(it => { addItem(); const el = document.querySelector(".item:last-child"); el.querySelector(".date-range")._flatpickr.setDate(it.range.split(" to ")); el.querySelector(".chk-wd").checked = it.chkWd; el.querySelector(".chk-hd").checked = it.chkHd; el.querySelector(".start-wd")._flatpickr.setDate(it.startWd); el.querySelector(".end-wd")._flatpickr.setDate(it.endWd); el.querySelector(".start-hd")._flatpickr.setDate(it.startHd); el.querySelector(".end-hd")._flatpickr.setDate(it.endHd); el.querySelector(".name").value = it.name; updateItemUI(el); });
-    }
-
-    function clearAll() { showConfirm("ล้างรายการทั้งหมด?", "ล้าง", "🧹", () => { document.getElementById("items-container").innerHTML = ""; calculate(); showToast("ล้างข้อมูลเรียบร้อย", "success"); }); }
-    function showToast(m, t) { 
-        const c = document.getElementById("toastContainer"), e = document.createElement("div"); 
-        e.className = `toast ${t || 'success'}`; 
-        const icon = t === 'error' ? '❌' : (t === 'info' ? 'ℹ️' : '✅');
-        e.innerHTML = `<span>${icon}</span> <span>${m}</span>`; 
-        c.appendChild(e); 
-        setTimeout(() => { e.style.opacity = '0'; setTimeout(() => e.remove(), 300); }, 3000); 
-    }
-    function showConfirm(m, t, i, cb) { document.getElementById("confirmMsg").innerText = m; document.getElementById("confirmTitle").innerText = t; document.getElementById("confirmIcon").innerText = i; window.confirmCallback = cb; document.getElementById("confirmModal").classList.add("show"); }
-    function closeConfirm(v) { document.getElementById("confirmModal").classList.remove("show"); if (v && window.confirmCallback) window.confirmCallback(); }
-
-    document.getElementById("salary").oninput = calculate;
-    initUsers();
-</script>
 </body>
 </html>
