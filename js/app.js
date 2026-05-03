@@ -26,7 +26,7 @@ const isHoliday = dStr => {
     const d = new Date(dStr);
     return d.getDay() === 0 || d.getDay() === 6 || APP_CONFIG.HOLIDAYS_2569.some(h => h.date === dStr);
 };
-const getGrad = c => `linear-gradient(135deg, ${c} 0%, ${c}aa 100%)`;
+const getGrad = c => `linear-gradient(135deg, color-mix(in srgb, ${c}, white 0%), color-mix(in srgb, ${c}, black 25%))`;
 
 // --- UI COMPONENTS ---
 const UI = {
@@ -337,7 +337,7 @@ function closeProfileModal() { document.getElementById("profileModal").classList
 function renderGrids() {
     // Color Grid
     document.getElementById("colorGrid").innerHTML = APP_CONFIG.PRESET_COLORS.map(c => `
-        <div class="color-opt ${c === tempAvatarColor ? 'active' : ''}" style="background:${c}" onclick="setTempColor('${c}')"></div>
+        <div class="color-opt ${c === tempAvatarColor ? 'active' : ''}" style="background:${getGrad(c)}" onclick="setTempColor('${c}')"></div>
     `).join('');
 
     // Emoji Grid

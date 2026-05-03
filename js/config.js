@@ -39,7 +39,11 @@ const APP_CONFIG = {
         }
     },
     GUEST_EXPIRY_MS: 3600000, // 1 Hour
-    PRESET_COLORS: ["#f87171", "#60a5fa", "#34d399", "#fbbf24", "#a78bfa", "#f472b6", "#fb923c", "#9ca3af", "#4ade80", "#2dd4bf", "#818cf8", "#e879f9", "#ffffff", "#000000"],
+    PRESET_COLORS: [
+        "#FF3B30", "#FF7F50", "#FF9500", "#FFCC00", "#D4FF00", "#28CD41", "#00E676", "#00D2FF", 
+        "#00A2FF", "#007AFF", "#5856D6", "#AF52DE", "#F06292", "#FF2D55", "#E91E63", "#9C27B0",
+        "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#8BC34A", "#CDDC39", "#FFC107"
+    ],
     PRESET_EMOJIS: ["😀", "😎", "🦊", "🚀", "⚡", "🔥", "🌈", "🎨", "🍔", "⚽", "🎮", "🌟", "🐱", "🐶", "🦁", "🐧", "🦄", "🌈", "💎", "🍺", "🍕", "🦾", "👾"],
     DICEBEAR_STYLES: [
         { id: "notionists", name: "Notion" },
