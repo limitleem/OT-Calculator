@@ -109,7 +109,7 @@ function showLanding() {
 function selectProfile(name) {
     const u = userProfiles.find(x => x.name === name);
     if (u.isGuest) {
-        showConfirm("โหมด Guest ข้อมูลจะถูกลบเมื่อปิดแอปหรือครบ 1 ชั่วโมง ยืนยันการใช้งาน?", "ยืนยัน", "👤", () => {
+        showConfirm(APP_CONFIG.TEXT.GUEST_WARNING, "ยืนยัน", "👤", () => {
             completeLogin(name);
         });
         return;
@@ -341,7 +341,7 @@ function addItem() {
             <div class="item-header" onclick="this.closest('.item').classList.toggle('active')">
                 <span class="drag-handle" title="ลาก">⠿</span>
                 <span class="item-type-dot dot-weekday"></span>
-                <span class="item-name">รายการใหม่</span>
+                <span class="item-name">${APP_CONFIG.TEXT.DEFAULT_ITEM_NAME}</span>
                 <div class="item-meta">
                     <span class="item-amount">฿0.00</span>
                     <svg class="item-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -352,54 +352,54 @@ function addItem() {
             <div class="item-body" onclick="event.stopPropagation();">
                 <div class="field-row col-2">
                     <div class="field">
-                        <label>ช่วงวันที่ทำ OT</label>
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_RANGE}</label>
                         <input class="date-range" placeholder="เลือกช่วงวันที่">
                     </div>
                     <div class="field">
-                        <label>ประเภทวัน</label>
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_TYPE}</label>
                         <div style="display:flex; gap:12px; align-items:center; height:38px;">
                             <label class="checkbox-custom checked">
                                 <input type="checkbox" class="chk-wd" checked>
                                 <div class="cb-box"></div>
-                                <span>วันทำงาน</span>
+                                <span>${APP_CONFIG.TEXT.INPUT_LABEL_WD}</span>
                             </label>
                             <label class="checkbox-custom">
                                 <input type="checkbox" class="chk-hd">
                                 <div class="cb-box"></div>
-                                <span>วันหยุด</span>
+                                <span>${APP_CONFIG.TEXT.INPUT_LABEL_HD}</span>
                             </label>
                         </div>
                     </div>
                 </div>
                 <div class="field-row col-2 time-row-wd">
                     <div class="field">
-                        <label>เวลาเริ่ม (วันทำงาน)</label>
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_START_WD}</label>
                         <input class="start-wd" placeholder="เลือกเวลา" value="16:30">
                     </div>
                     <div class="field">
-                        <label>เวลาสิ้นสุด (วันทำงาน)</label>
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_END_WD}</label>
                         <input class="end-wd" placeholder="เลือกเวลา" value="20:30">
                     </div>
                 </div>
                 <div class="field-row col-2 time-row-hd" style="display:none;">
                     <div class="field">
-                        <label>เวลาเริ่ม (วันหยุด)</label>
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_START_HD}</label>
                         <input class="start-hd" placeholder="เลือกเวลา" value="08:30">
                     </div>
                     <div class="field">
-                        <label>เวลาสิ้นสุด (วันหยุด)</label>
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_END_HD}</label>
                         <input class="end-hd" placeholder="เลือกเวลา" value="16:30">
                     </div>
                 </div>
                 <div class="field">
-                    <label>หมายเหตุ / ชื่อรายการ</label>
-                    <input type="text" class="name" placeholder="ระบุหมายเหตุ..." onfocus="this.dataset.edited='1'">
+                    <label>${APP_CONFIG.TEXT.INPUT_LABEL_NOTE}</label>
+                    <input type="text" class="name" placeholder="${APP_CONFIG.TEXT.INPUT_PLACEHOLDER_NOTE}" onfocus="this.dataset.edited='1'">
                 </div>
                 <div class="error-text" style="color:var(--red); font-size:0.75rem; margin-top:8px; display:none;"></div>
                 <div class="item-info-container" style="margin-top:12px;"></div>
                 <div style="display:flex; justify-content:flex-end; margin-top:16px;">
                     <button class="btn-del" onclick="this.closest('.item').remove();calculate()">
-                        <span>🗑 ลบรายการ</span>
+                        <span>${APP_CONFIG.TEXT.BTN_DELETE_ITEM}</span>
                     </button>
                 </div>
             </div>
@@ -421,7 +421,7 @@ function addItem() {
     });
     
     el.querySelector(".name").oninput = () => { 
-        el.querySelector(".item-name").innerText = el.querySelector(".name").value || "รายการใหม่"; 
+        el.querySelector(".item-name").innerText = el.querySelector(".name").value || APP_CONFIG.TEXT.DEFAULT_ITEM_NAME; 
         calculate(); 
     };
     
@@ -444,8 +444,8 @@ function updateItemUI(el) {
 
     // Warnings
     errorEl.style.display = "none";
-    if (chkWd && dates.length > 0 && wd === 0) { errorEl.innerText = "⚠️ ไม่มีวันทำงานในช่วงวันที่เลือก!"; errorEl.style.display = "block"; }
-    if (chkHd && dates.length > 0 && hd === 0) { errorEl.innerText = "⚠️ ไม่มีวันหยุดในช่วงวันที่เลือก!"; errorEl.style.display = "block"; }
+    if (chkWd && dates.length > 0 && wd === 0) { errorEl.innerText = APP_CONFIG.TEXT.WARN_NO_WD; errorEl.style.display = "block"; }
+    if (chkHd && dates.length > 0 && hd === 0) { errorEl.innerText = APP_CONFIG.TEXT.WARN_NO_HD; errorEl.style.display = "block"; }
 
     // Auto naming
     if (!nameInput.dataset.edited && dates.length > 0) {
@@ -464,14 +464,14 @@ function updateItemUI(el) {
     let parts = [];
     if (chkWd && wd > 0) { 
         const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true); 
-        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--green)"></div><div class="info-text"><b>วันทำงาน ${wd} วัน</b>: ${fh(h.total * wd)} ชม. (${fh(h.total)} ชม. × 1.5 เท่า)</div></div>`); 
+        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--green)"></div><div class="info-text"><b>${APP_CONFIG.TEXT.LABEL_WD_DAYS(wd)}</b>: ${fh(h.total * wd)} ชม. (${fh(h.total)} ชม. × 1.5 เท่า)</div></div>`); 
     }
     if (chkHd && hd > 0) { 
         const h = calcH(el.querySelector(".start-hd").value, el.querySelector(".end-hd").value, false); 
         let hParts = [];
         if (h.h1) hParts.push(`${fh(h.h1)} ชม. × 1.0`);
         if (h.h3) hParts.push(`${fh(h.h3)} ชม. × 3.0`);
-        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--accent)"></div><div class="info-text"><b>วันหยุด ${hd} วัน</b>: ${fh(h.total * hd)} ชม. (${hParts.join(' + ')} | หักพัก 1 ชม.)</div></div>`); 
+        parts.push(`<div class="info-strip"><div class="dot" style="background:var(--accent)"></div><div class="info-text"><b>${APP_CONFIG.TEXT.LABEL_HD_DAYS(hd)}</b>: ${fh(h.total * hd)} ชม. (${hParts.join(' + ')} | หักพัก 1 ชม.)</div></div>`); 
     }
     el.querySelector(".item-info-container").innerHTML = parts.join('') || ""; 
     calculate();
@@ -622,12 +622,12 @@ function calculate() {
     document.getElementById("result-table").innerHTML = `
         <table>
             <thead><tr><th>รายการ</th><th>เวลา</th><th class="text-center">เรต</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th><th class="text-right" style="background:rgba(240,192,64,0.03)">สรุปรายวัน</th></tr></thead>
-            <tbody>${rows || '<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text3)">ไม่มีข้อมูลการคำนวณ</td></tr>'}</tbody>
-            <tfoot><tr><td colspan="5" class="text-right">รายรับรวมสุทธิ</td><td class="text-right" style="color:var(--accent); font-weight:700; font-size:1.1rem;">฿${fm(total)}</td></tr></tfoot>
+            <tbody>${rows || `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text3)">${APP_CONFIG.TEXT.NO_CALC_DATA}</td></tr>`}</tbody>
+            <tfoot><tr><td colspan="5" class="text-right">${APP_CONFIG.TEXT.TOTAL_INCOME}</td><td class="text-right" style="color:var(--accent); font-weight:700; font-size:1.1rem;">฿${fm(total)}</td></tr></tfoot>
         </table>`;
         
     document.getElementById("headerTotal").innerText = `฿${fm(total)}`; 
-    document.getElementById("itemCount").innerText = `${document.querySelectorAll(".item").length} รายการ`; 
+    document.getElementById("itemCount").innerText = APP_CONFIG.TEXT.ITEM_COUNT(document.querySelectorAll(".item").length); 
     saveData();
 }
 
@@ -733,7 +733,7 @@ const showDaysBreakdown = (title, dateList) => {
         return new Date(g[0]).getDate() + "-" + new Date(g[g.length-1]).getDate();
     }).join(", ");
     
-    listContainer.innerHTML = `<div style="font-weight:700; color:var(--accent); margin-bottom:12px;">ช่วงวันที่: ${summary}</div>`;
+    listContainer.innerHTML = `<div style="font-weight:700; color:var(--accent); margin-bottom:12px;">${APP_CONFIG.TEXT.PERIOD} ${summary}</div>`;
     listContainer.innerHTML += dateList.map(d => {
         const info = formatThaiDate(d);
         const h = APP_CONFIG.HOLIDAYS_2569.find(x => x.date === d);
@@ -786,5 +786,5 @@ const renderHolidays = () => {
                 </div>
             </div>`;
     });
-    list.innerHTML = html || '<div style="text-align:center; padding:20px; color:var(--text3)">ไม่มีข้อมูลวันหยุดในปีนี้</div>';
+    list.innerHTML = html || `<div style="text-align:center; padding:20px; color:var(--text3)">${APP_CONFIG.TEXT.NO_HOLIDAY_DATA}</div>`;
 };
