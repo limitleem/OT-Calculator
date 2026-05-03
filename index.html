@@ -1358,6 +1358,7 @@
 
         // SAVE
         const data = {
+            version: "2.0",
             salary: document.getElementById("salary").value,
             items: []
         };
@@ -1380,48 +1381,59 @@
     }
 
     function loadData() {
-        const data = JSON.parse(localStorage.getItem("otData") || "{}");
+        try {
+            const stored = localStorage.getItem("otData");
+            if (!stored) return;
+            const data = JSON.parse(stored);
 
-        if (data.salary) {
-            document.getElementById("salary").value = data.salary;
-        }
+            if (data.salary) {
+                document.getElementById("salary").value = data.salary;
+            }
 
-        if (data.items && data.items.length) {
-            document.getElementById("items-container").innerHTML = "";
-            data.items.forEach(it => {
-                addItem();
-                const el = document.querySelector("#items-container .item:last-child");
+            if (data.items && data.items.length) {
+                document.getElementById("items-container").innerHTML = "";
+                data.items.forEach(it => {
+                    addItem();
+                    const el = document.querySelector("#items-container .item:last-child");
 
-                if (it.dateRange !== undefined) {
-                    // New format
-                    el.querySelector(".date-range")._flatpickr.setDate(it.dateRange.includes(" to ") ? it.dateRange.split(" to ") : it.dateRange);
-                    el.querySelector(".chk-wd").checked = it.chkWd;
-                    el.querySelector(".chk-hd").checked = it.chkHd;
-                    if(it.startWd) el.querySelector(".start-wd")._flatpickr.setDate(it.startWd);
-                    if(it.endWd) el.querySelector(".end-wd")._flatpickr.setDate(it.endWd);
-                    if(it.startHd) el.querySelector(".start-hd")._flatpickr.setDate(it.startHd);
-                    if(it.endHd) el.querySelector(".end-hd")._flatpickr.setDate(it.endHd);
-                    el.querySelector(".name").value = it.name || "";
-                    if(it.datasetEdited) el.querySelector(".name").dataset.edited = it.datasetEdited;
-                } else {
-                    // Legacy format
-                    el.querySelector(".name").value = it.name || "";
-                    if (it.type === "weekday") {
-                        el.querySelector(".chk-wd").checked = true;
-                        el.querySelector(".chk-hd").checked = false;
-                        el.querySelector(".start-wd")._flatpickr.setDate(it.start || "17:00");
-                        el.querySelector(".end-wd")._flatpickr.setDate(it.end || "21:00");
+                    if (it.dateRange !== undefined) {
+                        // New format
+                        if (it.dateRange) {
+                             el.querySelector(".date-range")._flatpickr.setDate(it.dateRange.includes(" to ") ? it.dateRange.split(" to ") : it.dateRange);
+                        }
+                        el.querySelector(".chk-wd").checked = it.chkWd;
+                        el.querySelector(".chk-hd").checked = it.chkHd;
+                        if(it.startWd) el.querySelector(".start-wd")._flatpickr.setDate(it.startWd);
+                        if(it.endWd) el.querySelector(".end-wd")._flatpickr.setDate(it.endWd);
+                        if(it.startHd) el.querySelector(".start-hd")._flatpickr.setDate(it.startHd);
+                        if(it.endHd) el.querySelector(".end-hd")._flatpickr.setDate(it.endHd);
+                        el.querySelector(".name").value = it.name || "";
+                        if(it.datasetEdited) el.querySelector(".name").dataset.edited = it.datasetEdited;
                     } else {
-                        el.querySelector(".chk-wd").checked = false;
-                        el.querySelector(".chk-hd").checked = true;
-                        el.querySelector(".start-hd")._flatpickr.setDate(it.start || "08:30");
-                        el.querySelector(".end-hd")._flatpickr.setDate(it.end || "17:00");
+                        // Legacy format
+                        el.querySelector(".name").value = it.name || "";
+                        if (it.type === "weekday") {
+                            el.querySelector(".chk-wd").checked = true;
+                            el.querySelector(".chk-hd").checked = false;
+                            el.querySelector(".start-wd")._flatpickr.setDate(it.start || "17:00");
+                            el.querySelector(".end-wd")._flatpickr.setDate(it.end || "21:00");
+                        } else {
+                            el.querySelector(".chk-wd").checked = false;
+                            el.querySelector(".chk-hd").checked = true;
+                            el.querySelector(".start-hd")._flatpickr.setDate(it.start || "08:30");
+                            el.querySelector(".end-hd")._flatpickr.setDate(it.end || "17:00");
+                        }
                     }
-                }
 
-                // trigger update
-                el.querySelector(".chk-wd").dispatchEvent(new Event("change"));
-            });
+                    // trigger update
+                    el.querySelector(".chk-wd").dispatchEvent(new Event("change"));
+                });
+            }
+        } catch (e) {
+            console.error("Data Load Error:", e);
+            alert("พบข้อผิดพลาดในการโหลดข้อมูล (โครงสร้างข้อมูลไม่รองรับ) ระบบจะรีเซ็ตข้อมูลเพื่อเริ่มใหม่");
+            localStorage.removeItem("otData");
+            location.reload();
         }
     }
 
