@@ -949,8 +949,9 @@ td {
     height: 38px;
 }
 
-.ot-row-info b {
+.ot-row-info b, .ot-row-info .c-cnt {
     color: var(--accent);
+    font-weight: 800;
 }
 
 .ot-grid.disabled .field:not(:first-child) {

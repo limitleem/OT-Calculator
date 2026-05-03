@@ -66,9 +66,15 @@ const UI = {
                 </div>
             </div>
             <div class="item-body" onclick="event.stopPropagation();">
-                <div class="field" style="margin-bottom:20px;">
-                    <label>${APP_CONFIG.TEXT.INPUT_LABEL_RANGE}</label>
-                    <input class="date-range" placeholder="เลือกช่วงวันที่">
+                <div class="field-row col-2" style="margin-bottom:20px;">
+                    <div class="field">
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_RANGE}</label>
+                        <input class="date-range" placeholder="เลือกช่วงวันที่">
+                    </div>
+                    <div class="field">
+                        <label>${APP_CONFIG.TEXT.INPUT_LABEL_NOTE}</label>
+                        <input type="text" class="name" placeholder="${APP_CONFIG.TEXT.INPUT_PLACEHOLDER_NOTE}" onfocus="this.dataset.edited='1'">
+                    </div>
                 </div>
 
                 <!-- WD Row -->
@@ -93,7 +99,7 @@ const UI = {
                         <label>สรุปวันทำงาน</label>
                         <div class="ot-row-info wd-sum">
                             <span class="d-cnt">0 วัน</span>
-                            <span class="h-cnt"><b>0</b> ชม.</span>
+                            <span class="h-cnt"><b>0</b> ชม.  ·  <span class="c-cnt">฿0.00</span></span>
                         </div>
                     </div>
                 </div>
@@ -121,16 +127,12 @@ const UI = {
                         <label>สรุปวันหยุด</label>
                         <div class="ot-row-info hd-sum">
                             <span class="d-cnt">0 วัน</span>
-                            <span class="h-cnt"><b>0</b> ชม.</span>
+                            <span class="h-cnt"><b>0</b> ชม.  ·  <span class="c-cnt">฿0.00</span></span>
                         </div>
                     </div>
                 </div>
                 <div class="hd-info-container" style="margin: -8px 0 20px;"></div>
 
-                <div class="field" style="margin-top:12px;">
-                    <label>${APP_CONFIG.TEXT.INPUT_LABEL_NOTE}</label>
-                    <input type="text" class="name" placeholder="${APP_CONFIG.TEXT.INPUT_PLACEHOLDER_NOTE}" onfocus="this.dataset.edited='1'">
-                </div>
                 <div class="error-text" style="color:var(--red); font-size:0.75rem; margin-top:8px; display:none;"></div>
                 <div style="display:flex; justify-content:flex-end; margin-top:16px;">
                     <button class="btn-del" onclick="this.closest('.item').remove();calculate()">
@@ -581,6 +583,9 @@ function updateItemUI(el) {
 
     let parts = [];
 
+    const salary = +document.getElementById("salary").value || 0;
+    const hourlyRate = salary / APP_CONFIG.CALC.DAYS_PER_MONTH / APP_CONFIG.CALC.WORK_HOURS_PER_DAY;
+
     // WD Update
     const rowWd = el.querySelector(".row-wd");
     const canWd = wd > 0;
@@ -602,17 +607,24 @@ function updateItemUI(el) {
         const h = calcH(el.querySelector(".start-wd").value, el.querySelector(".end-wd").value, true);
         wdSum.querySelector(".d-cnt").innerText = `${wd} วัน`;
         wdSum.querySelector(".h-cnt b").innerText = isWdValid ? fh(h.total * wd) : "0";
+        
+        const costDay = h.total * 1.5 * hourlyRate;
+        wdSum.querySelector(".c-cnt").innerText = isWdValid ? `฿${fm(costDay * wd)}` : "฿0.00";
 
         if (isWdValid) {
             const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
             const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
-            const totalBadge = `<span class="info-badge total">${fh(h.total * wd)} ชม.</span>`;
+            
+            const totalText = `<span style="color:var(--text); font-weight:700; font-size:0.85rem; margin-right:12px;">${fh(h.total)} ชม. / วัน</span>`;
             const part = `<span class="info-badge rate-1-5">${fh(h.total)} ชม. × 1.5 เท่า (${e_std} - ${s_std})</span>`;
-            wdInfo.innerHTML = UI.renderInfoStrip('wd', APP_CONFIG.TEXT.LABEL_WD_DAYS(wd), `${totalBadge} ${part}`);
+            const costText = `<span style="margin-left:auto; color:var(--accent); font-weight:800; font-family:'DM Mono', monospace; font-size:0.85rem;">฿${fm(costDay)} / วัน</span>`;
+            
+            wdInfo.innerHTML = `<div class="info-detail" style="display:flex; width:100%; align-items:center;">${totalText} ${part} ${costText}</div>`;
         }
     } else {
         wdSum.querySelector(".d-cnt").innerText = "0 วัน";
         wdSum.querySelector(".h-cnt b").innerText = "0";
+        wdSum.querySelector(".c-cnt").innerText = "฿0.00";
     }
 
     // HD Update
@@ -637,22 +649,29 @@ function updateItemUI(el) {
         hdSum.querySelector(".d-cnt").innerText = `${hd} วัน`;
         hdSum.querySelector(".h-cnt b").innerText = isHdValid ? fh(h.total * hd) : "0";
 
+        const costDay = (h.h1 * 1.0 * hourlyRate) + (h.h3 * 3.0 * hourlyRate);
+        hdSum.querySelector(".c-cnt").innerText = isHdValid ? `฿${fm(costDay * hd)}` : "฿0.00";
+
         if (isHdValid) {
             const s_std = fmtT(APP_CONFIG.CALC.STANDARD.start);
             const e_std = fmtT(APP_CONFIG.CALC.STANDARD.end);
             const s_lun = fmtT(APP_CONFIG.CALC.LUNCH.start);
             const e_lun = fmtT(APP_CONFIG.CALC.LUNCH.end);
-
+            
             let hParts = [];
             if (h.h1) hParts.push(`<span class="info-badge rate-1">${fh(h.h1)} ชม. × 1 เท่า (${s_std} - ${e_std})</span>`);
             if (h.h3) hParts.push(`<span class="info-badge rate-3">${fh(h.h3)} ชม. × 3 เท่า (${e_std} - ${s_std})</span>`);
-            const totalBadge = `<span class="info-badge total">${fh(h.total * hd)} ชม.</span>`;
+            
+            const totalText = `<span style="color:var(--text); font-weight:700; font-size:0.85rem; margin-right:12px;">${fh(h.total)} ชม. / วัน</span>`;
             const lunchBadge = `<span class="info-badge deduct">หักพัก 1 ชม. (${s_lun} - ${e_lun})</span>`;
-            hdInfo.innerHTML = UI.renderInfoStrip('hd', APP_CONFIG.TEXT.LABEL_HD_DAYS(hd), `${totalBadge} ${hParts.join('')} ${lunchBadge}`);
+            const costText = `<span style="margin-left:auto; color:var(--accent); font-weight:800; font-family:'DM Mono', monospace; font-size:0.85rem;">฿${fm(costDay)} / วัน</span>`;
+            
+            hdInfo.innerHTML = `<div class="info-detail" style="display:flex; width:100%; align-items:center;">${totalText} ${hParts.join('')} ${lunchBadge} ${costText}</div>`;
         }
     } else {
         hdSum.querySelector(".d-cnt").innerText = "0 วัน";
         hdSum.querySelector(".h-cnt b").innerText = "0";
+        hdSum.querySelector(".c-cnt").innerText = "฿0.00";
     }
     calculate();
 }
