@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
@@ -401,22 +402,50 @@
         .flatpickr-time .arrowDown::after { border-top-color: var(--text2) !important; }
         .flatpickr-time input.cur-value { color: var(--accent) !important; font-weight: 600; }
 
+        /* CHECKBOX CUSTOM */
+        .checkbox-custom {
+            display: flex; align-items: center; gap: 8px; cursor: pointer;
+            padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+            background: var(--surface2); transition: all 0.2s; user-select: none;
+        }
+        .checkbox-custom:hover { background: var(--surface3); border-color: var(--border2); }
+        .checkbox-custom.checked { background: var(--accent-dim); border-color: var(--accent); }
+        .checkbox-custom input { display: none; }
+        .cb-box {
+            width: 18px; height: 18px; border: 2px solid var(--text3); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .checkbox-custom.checked .cb-box { background: var(--accent); border-color: var(--accent); }
+        .checkbox-custom.checked .cb-box::after {
+            content: '✓'; color: #000; font-size: 12px; font-weight: 900;
+        }
+        .error-text { color: var(--red); font-size: 0.75rem; margin-top: 4px; display: none; font-weight: 500; }
+
+        .clickable-days {
+            cursor: pointer; color: var(--blue); border-bottom: 1px dashed var(--blue);
+            transition: opacity 0.2s; display: inline-block;
+        }
+        .clickable-days:hover { opacity: 0.7; }
+
         /* INFO STRIP */
         .info-strip {
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            padding: 10px 14px;
+            padding: 12px 14px;
             margin-bottom: 12px;
             display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.82rem;
-            color: var(--text2);
-            min-height: 38px;
+            align-items: flex-start;
+            gap: 12px;
         }
-        .info-strip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-        .info-strip .hours { font-family: 'DM Mono', monospace; font-weight: 500; color: var(--accent); }
+        .info-strip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; margin-top: 6px; }
+        .info-strip .info-text {
+            font-size: 0.78rem;
+            color: var(--text2);
+            font-weight: 500;
+            line-height: 1.6;
+            flex: 1;
+        }
 
         /* DELETE BTN */
         .btn-del {
@@ -584,6 +613,51 @@
         /* Sortable ghost */
         .sortable-ghost { opacity: 0.3; }
         .sortable-drag { opacity: 0.9; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: 90%; max-width: 500px;
+            max-height: 80vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transform: translateY(20px); transition: transform 0.2s;
+        }
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-header h3 { font-size: 1.1rem; color: var(--text); }
+        .modal-close {
+            background: transparent; border: none; color: var(--text3);
+            font-size: 1.5rem; cursor: pointer; transition: color 0.2s;
+        }
+        .modal-close:hover { color: var(--text); }
+        .modal-body {
+            padding: 20px 24px; overflow-y: auto; flex: 1;
+        }
+        .holiday-list { display: flex; flex-direction: column; gap: 12px; }
+        .holiday-item {
+            background: var(--surface2); border: 1px solid var(--border2);
+            border-radius: var(--radius-sm); padding: 12px 16px;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .holiday-date { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 0.85rem; font-weight: 500; }
+        .holiday-title { color: var(--text); font-size: 0.9rem; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -661,14 +735,194 @@
     <div class="results-card">
         <div class="results-header">
             <span>รายละเอียด</span>
-            <span id="itemCount" style="color:var(--text2)">0 รายการ</span>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <button onclick="document.getElementById('holidayModal').classList.add('show')" style="background:var(--surface2); border:1px solid var(--border2); color:var(--text); padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:600;">🗓 ดูวันหยุดพิเศษ</button>
+                <span id="itemCount" style="color:var(--text2)">0 รายการ</span>
+            </div>
         </div>
         <div class="table-wrap" id="result-table"></div>
     </div>
 
 </div>
 
+<div id="holidayModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="display:flex; align-items:center; gap:8px;">วันหยุดนักขัตฤกษ์ <select id="holidayYearSelect" onchange="renderHolidays()" style="padding:2px 4px; border-radius:4px; border:1px solid var(--border); background:var(--surface2); color:var(--text); font-size:0.9rem; font-weight:600; outline:none; cursor:pointer;"></select></h3>
+            <button class="modal-close" onclick="document.getElementById('holidayModal').classList.remove('show')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="holiday-list" id="holidayListContainer"></div>
+        </div>
+    </div>
+</div>
+
+<div id="dayBreakdownModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="dayBreakdownTitle">รายละเอียดวัน</h3>
+            <button class="modal-close" onclick="document.getElementById('dayBreakdownModal').classList.remove('show')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="dayBreakdownList" class="holiday-list"></div>
+        </div>
+    </div>
+</div>
+
 <script>
+    const HOLIDAY_2569 = [
+        {"date":"2026-01-01","title":"วันขึ้นปีใหม่"},
+        {"date":"2026-01-02","title":"วันหยุดราชการเพิ่มเติมเป็นกรณีพิเศษ"},
+        {"date":"2026-03-03","title":"วันมาฆบูชา"},
+        {"date":"2026-04-06","title":"วันพระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช และวันที่ระลึกมหาจักรีบรมราชวงศ์"},
+        {"date":"2026-04-13","title":"วันสงกรานต์"},
+        {"date":"2026-04-14","title":"วันสงกรานต์"},
+        {"date":"2026-04-15","title":"วันสงกรานต์"},
+        {"date":"2026-05-01","title":"วันแรงงานแห่งชาติ"},
+        {"date":"2026-05-04","title":"วันฉัตรมงคล"},
+        {"date":"2026-05-13","title":"วันพระราชพิธีจรดพระนังคัลแรกนาขวัญ"},
+        {"date":"2026-06-01","title":"ชดเชยวันวิสาขบูชา"},
+        {"date":"2026-06-03","title":"วันเฉลิมพระชนพรรษาสมเด็จพระนางเจ้าฯ พระบรมราชินี"},
+        {"date":"2026-07-28","title":"วันเฉลิมพระชนพรรษาพระบาทสมเด็จพระปรเมนทรรามาธิบดีศรีสินทรมหาวชิราลงกรณ พระวชิรเกล้าเจ้าอยู่หัว"},
+        {"date":"2026-07-29","title":"วันอาสาฬหบูชา"},
+        {"date":"2026-07-30","title":"วันเข้าพรรษา"},
+        {"date":"2026-08-12","title":"วันเฉลิมพระชนพรรษาสมเด็จพระบรมราชชนนีพันปีหลวงและวันแม่แห่งชาติ"},
+        {"date":"2026-10-13","title":"วันคล้ายวันสวรรคตของพระบาทสมเด็จพระบรมชนกาธิเบศรมหาภูมิพลอดุลยเดชมหาราช บรมนาถบพิตร"},
+        {"date":"2026-10-23","title":"วันปิยมหาราช"},
+        {"date":"2026-12-07","title":"ชดเชยวันพ่อแห่งชาติ"},
+        {"date":"2026-12-10","title":"วันรัฐธรรมนูญ"},
+        {"date":"2026-12-31","title":"วันสิ้นปี"}
+    ];
+
+    const isHoliday = (dateStr) => {
+        const d = new Date(dateStr);
+        const day = d.getDay();
+        if (day === 0 || day === 6) return true; // Sunday or Saturday
+        return HOLIDAY_2569.some(h => h.date === dateStr);
+    };
+
+    const getHolidayTitle = (dateStr) => {
+        const h = HOLIDAY_2569.find(h => h.date === dateStr);
+        if (h) return h.title;
+        const d = new Date(dateStr);
+        const day = d.getDay();
+        if (day === 0) return "วันอาทิตย์";
+        if (day === 6) return "วันเสาร์";
+        return "";
+    };
+
+    const THAI_MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    const THAI_DAYS = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
+
+    const formatThaiDate = (dateStr) => {
+        if (!dateStr) return { short: "", full: "" };
+        const d = new Date(dateStr);
+        const day = THAI_DAYS[d.getDay()];
+        const date = d.getDate();
+        const month = THAI_MONTHS[d.getMonth()];
+        const year = d.getFullYear() + 543;
+        return { short: `${date} ${month} ${year}`, full: `${day} ${date} ${month} ${year}`, monthIndex: d.getMonth(), monthName: month, year };
+    };
+
+    const showDaysBreakdown = (title, dateList) => {
+        const modal = document.getElementById("dayBreakdownModal");
+        const listContainer = document.getElementById("dayBreakdownList");
+        document.getElementById("dayBreakdownTitle").innerText = title;
+        
+        // Grouping logic for "1 - 5 , 9 - 10"
+        let groups = [];
+        if (dateList.length > 0) {
+            let temp = [dateList[0]];
+            for (let i = 1; i < dateList.length; i++) {
+                let prev = new Date(dateList[i-1]);
+                let curr = new Date(dateList[i]);
+                prev.setDate(prev.getDate() + 1);
+                if (prev.toISOString().split('T')[0] === dateList[i]) {
+                    temp.push(dateList[i]);
+                } else {
+                    groups.push(temp);
+                    temp = [dateList[i]];
+                }
+            }
+            groups.push(temp);
+        }
+
+        let summaryText = dateList.length + " วัน (";
+        summaryText += groups.map(g => {
+            if (g.length === 1) return new Date(g[0]).getDate();
+            return new Date(g[0]).getDate() + "-" + new Date(g[g.length-1]).getDate();
+        }).join(", ");
+        summaryText += ")";
+
+        listContainer.innerHTML = `<div style="font-weight:700; color:var(--accent); margin-bottom:12px;">${summaryText}</div>`;
+        
+        listContainer.innerHTML += dateList.map(d => {
+            const fd = formatThaiDate(d);
+            const holidayTitle = getHolidayTitle(d);
+            return `
+                <div class="holiday-item">
+                    <div class="holiday-date">${fd.full}</div>
+                    <div class="holiday-title">${holidayTitle}</div>
+                </div>
+            `;
+        }).join('');
+        
+        modal.classList.add("show");
+    };
+
+    window.addEventListener('DOMContentLoaded', () => renderHolidays());
+
+    const renderHolidays = () => {
+        const list = document.getElementById("holidayListContainer");
+        const select = document.getElementById("holidayYearSelect");
+        if(!list) return;
+
+        const years = [...new Set(HOLIDAY_2569.map(h => new Date(h.date).getFullYear()))].sort();
+        if(select && select.options.length === 0) {
+            years.forEach(y => {
+                const opt = document.createElement("option");
+                opt.value = y;
+                opt.text = y + 543;
+                select.appendChild(opt);
+            });
+            if(years.length > 0) select.value = years[0];
+        }
+
+        const filterYear = select ? parseInt(select.value) : (years[0] || new Date().getFullYear());
+        const filtered = HOLIDAY_2569.filter(h => new Date(h.date).getFullYear() === filterYear);
+        
+        let html = '';
+        let currentMonth = -1;
+
+        filtered.forEach(h => {
+            const fd = formatThaiDate(h.date);
+            if (fd.monthIndex !== currentMonth) {
+                html += `<div style="color:var(--text3); font-size:0.8rem; font-weight:700; margin-top:12px; margin-bottom:4px; border-bottom:1px solid var(--border); padding-bottom:4px;">${fd.monthName} ${fd.year}</div>`;
+                currentMonth = fd.monthIndex;
+            }
+            html += `
+                <div class="holiday-item">
+                    <div class="holiday-date">${fd.full}</div>
+                    <div class="holiday-title">${h.title}</div>
+                </div>
+            `;
+        });
+        list.innerHTML = html || '<div class="empty-state" style="padding:20px;">ไม่มีวันหยุดในปีที่เลือก</div>';
+    };
+
+    const getDaysInRange = (rangeStr) => {
+        if (!rangeStr) return [];
+        const parts = rangeStr.split(" to ");
+        const dates = [];
+        let curr = new Date(parts[0]);
+        const end = new Date(parts.length > 1 ? parts[1] : parts[0]);
+        while (curr <= end) {
+            dates.push(curr.toISOString().split('T')[0]);
+            curr.setDate(curr.getDate() + 1);
+        }
+        return dates;
+    };
+
     const toHour = t => {
         if (!t) return 0;
         const [h, m] = t.split(":").map(Number);
@@ -693,29 +947,50 @@
                     </svg>
                 </div>
             </div>
-            <div class="item-body">
-                <div class="field-row col-3">
-                    <div class="field">
-                        <label>ประเภทวัน</label>
-                        <select class="type">
-                            <option value="weekday">วันทำงาน</option>
-                            <option value="holiday">วันหยุด (ส-อา/นักขัต)</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>เวลาเริ่ม</label>
-                        <input class="start" placeholder="เลือกเวลา">
-                    </div>
-                    <div class="field">
-                        <label>เวลาสิ้นสุด</label>
-                        <input class="end" placeholder="เลือกเวลา">
-                    </div>
-                </div>
+            <div class="item-body" onclick="event.stopPropagation();">
                 <div class="field-row col-2">
                     <div class="field">
-                        <label>จำนวนวัน</label>
-                        <input class="days" type="number" value="1" min="1">
+                        <label>ช่วงวันที่ทำ OT</label>
+                        <input class="date-range" placeholder="เลือกช่วงวันที่">
                     </div>
+                    <div class="field">
+                        <label>ประเภทวัน</label>
+                        <div style="display:flex; gap:12px; align-items:center; height:38px;">
+                            <label class="checkbox-custom checked">
+                                <input type="checkbox" class="chk-wd" checked>
+                                <div class="cb-box"></div>
+                                <span>วันทำงาน</span>
+                            </label>
+                            <label class="checkbox-custom">
+                                <input type="checkbox" class="chk-hd">
+                                <div class="cb-box"></div>
+                                <span>วันหยุด</span>
+                            </label>
+                        </div>
+                        <div class="error-text"></div>
+                    </div>
+                </div>
+                <div class="field-row col-2 time-row-wd">
+                    <div class="field">
+                        <label>เวลาเริ่ม (วันทำงาน)</label>
+                        <input class="start-wd" placeholder="เลือกเวลา">
+                    </div>
+                    <div class="field">
+                        <label>เวลาสิ้นสุด (วันทำงาน)</label>
+                        <input class="end-wd" placeholder="เลือกเวลา">
+                    </div>
+                </div>
+                <div class="field-row col-2 time-row-hd" style="display:none;">
+                    <div class="field">
+                        <label>เวลาเริ่ม (วันหยุด)</label>
+                        <input class="start-hd" placeholder="เลือกเวลา">
+                    </div>
+                    <div class="field">
+                        <label>เวลาสิ้นสุด (วันหยุด)</label>
+                        <input class="end-hd" placeholder="เลือกเวลา">
+                    </div>
+                </div>
+                <div class="field-row">
                     <div class="field">
                         <label>ชื่อรายการ / หมายเหตุ</label>
                         <input class="name" placeholder="เช่น โอทีปิดงบ, เข้าเวรวันอาทิตย์…">
@@ -737,61 +1012,140 @@
         document.getElementById("items-container").insertAdjacentHTML("beforeend", html);
         const el = document.querySelector(`[data-id="${id}"]`);
 
-        const type = el.querySelector(".type");
-        const start = el.querySelector(".start");
-        const end = el.querySelector(".end");
-        const days = el.querySelector(".days");
+        const dateRange = el.querySelector(".date-range");
+        const chkWd = el.querySelector(".chk-wd");
+        const chkHd = el.querySelector(".chk-hd");
+        const timeRowWd = el.querySelector(".time-row-wd");
+        const timeRowHd = el.querySelector(".time-row-hd");
+        const startWd = el.querySelector(".start-wd");
+        const endWd = el.querySelector(".end-wd");
+        const startHd = el.querySelector(".start-hd");
+        const endHd = el.querySelector(".end-hd");
         const name = el.querySelector(".name");
         const info = el.querySelector(".info-text");
 
-        const fp1 = flatpickr(start, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
-        const fp2 = flatpickr(end, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
+        const fpRange = flatpickr(dateRange, { mode: "range", dateFormat: "Y-m-d" });
+        const fpWdStart = flatpickr(startWd, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "17:00" });
+        const fpWdEnd = flatpickr(endWd, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "21:00" });
+        const fpHdStart = flatpickr(startHd, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "08:30" });
+        const fpHdEnd = flatpickr(endHd, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "17:00" });
+
+        // Set default date range to today
+        const today = new Date().toISOString().split('T')[0];
+        fpRange.setDate(today);
 
         const updateUI = () => {
-            let s = toHour(start.value);
-            let e = toHour(end.value);
-            if (!start.value || !end.value) { info.innerHTML = 'กรุณาเลือกเวลา'; calculate(); return; }
-            // Overnight: if end <= start, push end to next day
-            const overnight = e <= s;
-            if (overnight) e += 24;
+            const dates = getDaysInRange(dateRange.value);
+            let hdCount = 0;
+            let wdCount = 0;
+            dates.forEach(d => {
+                if (isHoliday(d)) hdCount++;
+                else wdCount++;
+            });
 
-            let total = 0, breakTime = 0;
-            let h1 = 0, h15 = 0, h3 = 0;
+            // Validation
+            const errorEl = el.querySelector(".error-text");
+            errorEl.style.display = "none";
+            errorEl.innerText = "";
 
-            for (let h = s; h < e; h += 0.5) {
-                let x = h >= 24 ? h - 24 : h;
-                if (type.value === "weekday") {
-                    if (x >= 8.5 && x < 16.5) continue;
-                    h15 += 0.5; total += 0.5;
-                } else {
-                    if (x >= 8.5 && x < 16.5) {
-                        if (x >= 12 && x < 13) { breakTime += 0.5; continue; }
-                        h1 += 0.5;
-                    } else {
-                        h3 += 0.5;
+            if (chkWd.checked && dates.length > 0 && wdCount === 0) {
+                errorEl.innerText = "ไม่มีวันทำงานในช่วงวันที่เลือก!";
+                errorEl.style.display = "block";
+            }
+            if (chkHd.checked && dates.length > 0 && hdCount === 0) {
+                errorEl.innerText = "ไม่มีวันหยุดในช่วงวันที่เลือก!";
+                errorEl.style.display = "block";
+            }
+
+            // Sync visual state of custom checkboxes
+            el.querySelectorAll(".checkbox-custom").forEach(cb => {
+                cb.classList.toggle("checked", cb.querySelector("input").checked);
+            });
+
+            timeRowWd.style.display = chkWd.checked ? "grid" : "none";
+            timeRowHd.style.display = chkHd.checked ? "grid" : "none";
+
+            let valid = false;
+            if (dates.length === 0) {
+                info.innerHTML = 'กรุณาเลือกช่วงวันที่';
+            } else if (!chkWd.checked && !chkHd.checked) {
+                info.innerHTML = 'กรุณาเลือกประเภทวัน';
+            } else {
+                let parts = [];
+                
+                const calcHours = (s_val, e_val, isWd) => {
+                    if (!s_val || !e_val) return null;
+                    let s = toHour(s_val);
+                    let e = toHour(e_val);
+                    if (e <= s) e += 24;
+                    let total = 0, breakTime = 0, h1 = 0, h15 = 0, h3 = 0;
+                    for (let h = s; h < e; h += 0.5) {
+                        let x = h >= 24 ? h - 24 : h;
+                        if (isWd) {
+                            if (x >= 8.5 && x < 16.5) continue;
+                            h15 += 0.5; total += 0.5;
+                        } else {
+                            if (x >= 8.5 && x < 16.5) {
+                                if (x >= 12 && x < 13) { breakTime += 0.5; continue; }
+                                h1 += 0.5;
+                            } else {
+                                h3 += 0.5;
+                            }
+                            total += 0.5;
+                        }
                     }
-                    total += 0.5;
+                    return { total, h1, h15, h3, breakTime, s, e };
+                };
+
+                if (chkWd.checked && wdCount > 0) {
+                    const res = calcHours(startWd.value, endWd.value, true);
+                    if (res) {
+                        let subParts = [];
+                        if (res.h15 > 0) subParts.push(`<span style="color:var(--text3)">${fh(res.h15)} ชม. × 1.5 เท่า (เรตวันทำงาน)</span>`);
+                        
+                        let txt = `<div style="margin-bottom:6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span class="badge badge-wd" style="font-size:0.65rem; padding:2px 6px;">วันทำงาน ${wdCount} วัน</span>
+                            <span style="font-weight:700; color:var(--text);">${fh(res.total)} ชม.</span>
+                            <span style="color:var(--border2)">·</span>
+                            ${subParts.join(' · ')}
+                        </div>`;
+                        parts.push(txt);
+                    }
                 }
+                if (chkHd.checked && hdCount > 0) {
+                    const res = calcHours(startHd.value, endHd.value, false);
+                    if (res) {
+                        let subParts = [];
+                        if (res.h1 > 0) subParts.push(`<span style="color:var(--text3)">${fh(res.h1)} ชม. × 1 เท่า (เรตช่วง 8.30 - 16.30)</span>`);
+                        if (res.h3 > 0) subParts.push(`<span style="color:var(--text3)">${fh(res.h3)} ชม. × 3 เท่า (เรตช่วง 16.30 - 8.30)</span>`);
+                        if (res.breakTime > 0) subParts.push(`<span style="color:var(--red)">หักพัก ${fh(res.breakTime)} ชม. (12.00 - 13.00)</span>`);
+                        
+                        let txt = `<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <span class="badge badge-hd" style="font-size:0.65rem; padding:2px 6px;">วันหยุด ${hdCount} วัน</span>
+                            <span style="font-weight:700; color:var(--text);">${fh(res.total)} ชม.</span>
+                            <span style="color:var(--border2)">·</span>
+                            ${subParts.join(' · ')}
+                        </div>`;
+                        parts.push(txt);
+                    }
+                }
+
+                info.innerHTML = parts.length > 0 ? parts.join('') : 'กรุณาเลือกเวลา';
+                valid = true;
             }
 
             const dot = el.querySelector(".item-type-dot");
-            dot.className = `item-type-dot ${type.value === 'weekday' ? 'dot-weekday' : 'dot-holiday'}`;
+            if (chkWd.checked && chkHd.checked) dot.className = "item-type-dot dot-weekday"; 
+            else if (chkHd.checked) dot.className = "item-type-dot dot-holiday";
+            else dot.className = "item-type-dot dot-weekday";
 
-            let parts = [];
-            if (overnight) parts.push(`<span style="color:var(--blue);font-size:0.72rem;font-weight:700;background:var(--blue-dim);padding:2px 6px;border-radius:4px">+วันถัดไป</span>`);
-            if (h1 > 0) parts.push(`${fh(h1)} ชม. × 1 เท่า (เรตช่วง 8.30 - 16.30)`);
-            if (h15 > 0) parts.push(`${fh(h15)} ชม. × 1.5 เท่า (เรตวันทำงาน)`);
-            if (h3 > 0) parts.push(`${fh(h3)} ชม. × 3 เท่า (เรตช่วง 16.30 - 8.30) `);
-            if (breakTime > 0) parts.push(`หักพัก ${fh(breakTime)} ชม. ช่วง 12.00 - 13.00`);
-
-            info.innerHTML = parts.length > 0
-                ? `<span class="hours">${fh(total)} ชม.</span>&nbsp;&nbsp;${parts.join(' &nbsp;·&nbsp; ')}`
-                : 'กรุณาเลือกเวลา';
-
-            if (!name.dataset.edited) {
-                name.value = `${type.value === "weekday" ? "OT วันทำงาน" : "OT วันหยุด"} ${start.value}–${end.value}`;
+            if (!name.dataset.edited && dates.length > 0) {
+                const d1 = formatThaiDate(dates[0]).short;
+                const d2 = formatThaiDate(dates[dates.length-1]).short;
+                name.value = dates.length > 1 ? `OT ${d1} - ${d2}` : `OT ${d1}`;
+                el.querySelector(".item-name").innerText = name.value;
             }
-            el.querySelector(".item-name").innerText = name.value || "รายการใหม่";
+            
             calculate();
         };
 
@@ -801,31 +1155,16 @@
             calculate();
         };
 
-        type.onchange = () => {
-            updateUI(); // just recalc, don't touch time
-        };
+        [dateRange, chkWd, chkHd, startWd, endWd, startHd, endHd].forEach(inp => {
+            if(inp.type === "checkbox") inp.addEventListener("change", updateUI);
+            else inp.addEventListener("change", updateUI);
+        });
 
-        [start, end, days].forEach(inp => inp.onchange = updateUI);
-
-        //type.dispatchEvent(new Event("change"));
-        // set default only once on create
-        if (type.value === "weekday") {
-            fp1.setDate("17:00");
-            fp2.setDate("21:00");
-        } else {
-            fp1.setDate("08:30");
-            fp2.setDate("17:00");
-        }
         updateUI();
     }
 
     function calMoney(money){
         return Math.round(money * 100) / 100;
-        //return Number((money).toFixed(2));
-    }
-
-    function calMoney2(money){
-        return money;
     }
 
     function calculate() {
@@ -838,92 +1177,174 @@
         document.getElementById("sum15").innerText = fm(hourly * 1.5);
         document.getElementById("sum3").innerText = fm(hourly * 3);
 
-        let rows = "";
+        const resultTable = document.getElementById("result-table");
         let grandTotal = 0;
+        let rows = "";
+
         const items = document.querySelectorAll(".item");
-
         items.forEach(item => {
-            const type = item.querySelector(".type").value;
+            const dateRangeValue = item.querySelector(".date-range").value;
+            const dates = getDaysInRange(dateRangeValue);
             const name = item.querySelector(".name").value || "รายการไม่มีชื่อ";
-            const dayCount = +item.querySelector(".days").value || 0;
-            const s = toHour(item.querySelector(".start").value);
-            let e = toHour(item.querySelector(".end").value);
-            if (e <= s && s > 0) e += 24; // overnight
-            let h1 = 0, h15 = 0, h3 = 0;
+            const chkWd = item.querySelector(".chk-wd").checked;
+            const chkHd = item.querySelector(".chk-hd").checked;
 
-            for (let h = s; h < e; h += 0.5) {
-                let x = h >= 24 ? h - 24 : h;
-                if (type === "weekday") {
-                    if (x >= 8.5 && x < 16.5) continue;
-                    h15 += 0.5;
-                } else {
-                    if (x >= 8.5 && x < 16.5) {
-                        if (x >= 12 && x < 13) continue;
-                        h1 += 0.5;
-                    } else { h3 += 0.5; }
-                }
-            }
+            let wdDates = [], hdDates = [];
+            dates.forEach(d => {
+                if (isHoliday(d)) hdDates.push(d);
+                else wdDates.push(d);
+            });
 
             const prHrly1 = hourly;
             const prHrly15 = calMoney(hourly * 1.5);
             const prHrly3 = calMoney(hourly * 3);
 
-            let hhh1 = calMoney(h1 * hourly);
-            if(h1 >= 7){
-                hhh1 = calMoney(3.5 * hourly) + calMoney(
-                    (h1-3.5) * hourly) ;
+            const calcRow = (isWd, startVal, endVal, count, dateList) => {
+                if (!startVal || !endVal || count === 0) return null;
+                let s = toHour(startVal);
+                let e = toHour(endVal);
+                if (e <= s && s > 0) e += 24;
+                let h1 = 0, h15 = 0, h3 = 0;
+                for (let h = s; h < e; h += 0.5) {
+                    let x = h >= 24 ? h - 24 : h;
+                    if (isWd) {
+                        if (x >= 8.5 && x < 16.5) continue;
+                        h15 += 0.5;
+                    } else {
+                        if (x >= 8.5 && x < 16.5) {
+                            if (x >= 12 && x < 13) continue;
+                            h1 += 0.5;
+                        } else { h3 += 0.5; }
+                    }
+                }
+
+                let hhh1 = calMoney(h1 * hourly);
+                if(h1 >= 7){
+                    hhh1 = calMoney(3.5 * hourly) + calMoney((h1-3.5) * hourly) ;
+                }
+                const hhh15 = calMoney(h15 * prHrly15);
+                const hhh3 = calMoney(h3 * prHrly3);
+
+                const dayValRaw = calMoney(hhh1 + hhh15 + hhh3); 
+                const dayVal = calMoney(dayValRaw);
+                const total = calMoney(dayVal * count);
+
+                const c1 = h1 > 0 ? `<span class="hours-chip x1">${fh(h1)}h × 1.0 = ${fm(hhh1)}</span>` : '';
+                const c15 = h15 > 0 ? `<span class="hours-chip x15">${fh(h15)}h × 1.5 = ${fm(hhh15)}</span>` : '';
+                const c3 = h3 > 0 ? `<span class="hours-chip x3">${fh(h3)}h × 3.0 = ${fm(hhh3)}</span>` : '';
+                const ratesHtml = `${c1}${c15}${c3}`;
+
+                const badgeHtml = isWd ? '<span class="badge badge-wd" style="margin-right:6px;">WD</span>' : '<span class="badge badge-hd" style="margin-right:6px;">HD</span>';
+                const timeHtml = `<div class="text-center mono" style="display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:0.75rem">${badgeHtml}${startVal}–${endVal} ${(e > 24) ? '<span style="font-size:0.6rem;color:var(--blue);background:var(--blue-dim);padding:1px 4px;border-radius:3px;margin-left:4px;">+1</span>' : ''}</div>`;
+                
+                const nameSafe = name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                const datesJson = JSON.stringify(dateList).replace(/"/g, '&quot;');
+                const daysDisplay = `<span class="clickable-days" onclick="showDaysBreakdown('${isWd?'วันทำงาน':'วันหยุด'} - ${nameSafe}', ${datesJson})">${count} วัน</span>`;
+
+                return { total, ratesHtml, timeHtml, dayVal, daysDisplay };
+            };
+
+            let itemTotal = 0;
+            let wdData = null;
+            let hdData = null;
+
+            if (chkWd && wdDates.length > 0) wdData = calcRow(true, item.querySelector(".start-wd").value, item.querySelector(".end-wd").value, wdDates.length, wdDates);
+            if (chkHd && hdDates.length > 0) hdData = calcRow(false, item.querySelector(".start-hd").value, item.querySelector(".end-hd").value, hdDates.length, hdDates);
+
+            if (wdData && hdData) {
+                itemTotal = wdData.total + hdData.total;
+                rows += `
+                <tr>
+                    <td rowspan="2">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                            <span style="font-weight:600;font-size:0.85rem">${name}</span>
+                        </div>
+                    </td>
+                    <td>${wdData.timeHtml}</td>
+                    <td style="white-space:nowrap">${wdData.ratesHtml}</td>
+                    <td class="text-center mono" style="color:var(--text2)">${wdData.daysDisplay}</td>
+                    <td class="text-right"><span class="amount positive">฿${fm(wdData.total)}</span></td>
+                    <td rowspan="2" class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03)"><span class="amount positive" style="font-weight:700">฿${fm(itemTotal)}</span></td>
+                </tr>
+                <tr>
+                    <td>${hdData.timeHtml}</td>
+                    <td style="white-space:nowrap">${hdData.ratesHtml}</td>
+                    <td class="text-center mono" style="color:var(--text2)">${hdData.daysDisplay}</td>
+                    <td class="text-right"><span class="amount positive">฿${fm(hdData.total)}</span></td>
+                </tr>`;
+            } else if (wdData) {
+                itemTotal = wdData.total;
+                rows += `
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                            <span style="font-weight:600;font-size:0.85rem">${name}</span>
+                        </div>
+                    </td>
+                    <td>${wdData.timeHtml}</td>
+                    <td style="white-space:nowrap">${wdData.ratesHtml}</td>
+                    <td class="text-center mono" style="color:var(--text2)">${wdData.daysDisplay}</td>
+                    <td class="text-right"><span class="amount positive">฿${fm(wdData.total)}</span></td>
+                    <td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03)"><span class="amount positive" style="font-weight:700">฿${fm(itemTotal)}</span></td>
+                </tr>`;
+            } else if (hdData) {
+                itemTotal = hdData.total;
+                rows += `
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                            <span style="font-weight:600;font-size:0.85rem">${name}</span>
+                        </div>
+                    </td>
+                    <td>${hdData.timeHtml}</td>
+                    <td style="white-space:nowrap">${hdData.ratesHtml}</td>
+                    <td class="text-center mono" style="color:var(--text2)">${hdData.daysDisplay}</td>
+                    <td class="text-right"><span class="amount positive">฿${fm(hdData.total)}</span></td>
+                    <td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03)"><span class="amount positive" style="font-weight:700">฿${fm(itemTotal)}</span></td>
+                </tr>`;
+            } else {
+                rows += `
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                            <span style="font-weight:600;font-size:0.85rem">${name}</span>
+                        </div>
+                    </td>
+                    <td>—</td>
+                    <td></td>
+                    <td class="text-center mono" style="color:var(--text2)">0 วัน</td>
+                    <td class="text-right"><span class="amount positive">฿0.00</span></td>
+                    <td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03)"><span class="amount positive" style="font-weight:700">฿0.00</span></td>
+                </tr>`;
             }
 
-            const hhh15 = calMoney(h15 * prHrly15);
-            const hhh3 = calMoney(h3 * prHrly3);
-
-            const dayValRaw = calMoney(hhh1 + hhh15 + hhh3); //452.3666666666667
-            const dayVal = calMoney(dayValRaw);//Math.round(dayValRaw * 100) / 100; //452.37 but i want //452.38
-            const total = calMoney(dayVal * dayCount);
-            grandTotal += total;
+            grandTotal += itemTotal;
             grandTotal = calMoney(grandTotal);
 
             // Update header amount in item
-            item.querySelector(".item-amount").innerText = `${dayCount} วัน x ${dayVal} = ฿${fm(total)}`;
-
-            const c1 = h1 > 0 ? `<span class="hours-chip x1">${fh(h1)}h × 1.0 = ${fm(hhh1)}</span>` : '';
-            const c15 = h15 > 0 ? `<span class="hours-chip x15">${fh(h15)}h × 1.5 = ${fm(hhh15)}</span>` : '';
-            const c3 = h3 > 0 ? `<span class="hours-chip x3">${fh(h3)}h × 3.0 = ${fm(hhh3)}</span>` : '';
-
-            rows += `
-            <tr>
-                <td>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                        <span class="badge ${type === 'weekday' ? 'badge-wd' : 'badge-hd'}">${type === 'weekday' ? 'WD' : 'HD'}</span>
-                        <span style="font-weight:600;font-size:0.85rem">${name}</span>
-                    </div>
-                </td>
-                <td class="text-center mono" style="color:var(--text2)">${item.querySelector(".start").value || '—'}–${item.querySelector(".end").value || '—'}${(toHour(item.querySelector(".end").value) <= s && s > 0) ? ' <span style="font-size:0.65rem;color:var(--blue);background:var(--blue-dim);padding:1px 5px;border-radius:3px;font-family:DM Sans,sans-serif;font-weight:700">+1</span>' : ''}</td>
-                <td style="white-space:nowrap">${c1}${c15}${c3}</td>
-                <td class="text-center mono" style="color:var(--text2)">${dayCount}</td>
-                <td class="text-right"><span class="amount positive">฿${fm(total)}</span></td>
-            </tr>`;
+            item.querySelector(".item-amount").innerText = `฿${fm(itemTotal)}`;
         });
 
         document.getElementById("itemCount").innerText = `${items.length} รายการ`;
 
-        const emptyRow = `<tr><td colspan="5"><div class="empty-state"><div class="icon">📋</div>ยังไม่มีรายการ กด "เพิ่มรายการโอที"</div></td></tr>`;
+        const emptyRow = `<tr><td colspan="6"><div class="empty-state"><div class="icon">📋</div>ยังไม่มีรายการ กด "เพิ่มรายการโอที"</div></td></tr>`;
 
         document.getElementById("result-table").innerHTML = `
         <table>
             <thead>
                 <tr>
-                    <th style="width:30%">รายการ</th>
+                    <th style="width:25%">รายการ</th>
                     <th class="text-center">ช่วงเวลา</th>
                     <th>ชั่วโมง & อัตรา</th>
                     <th class="text-center">วัน</th>
                     <th class="text-right">รวม (บาท)</th>
+                    <th class="text-right">รวมทั้งสิ้น</th>
                 </tr>
             </thead>
             <tbody>${rows || emptyRow}</tbody>
             <tfoot>
                 <tr>
-                    <td colspan="4" class="text-right">
+                    <td colspan="5" class="text-right">
                         <span class="grand-total-text">รวมเงินโอทีทั้งหมด</span>
                     </td>
                     <td class="text-right">
@@ -943,11 +1364,15 @@
 
         document.querySelectorAll(".item").forEach(item => {
             data.items.push({
-                type: item.querySelector(".type").value,
-                start: item.querySelector(".start").value,
-                end: item.querySelector(".end").value,
-                days: item.querySelector(".days").value,
-                name: item.querySelector(".name").value
+                dateRange: item.querySelector(".date-range").value,
+                chkWd: item.querySelector(".chk-wd").checked,
+                chkHd: item.querySelector(".chk-hd").checked,
+                startWd: item.querySelector(".start-wd").value,
+                endWd: item.querySelector(".end-wd").value,
+                startHd: item.querySelector(".start-hd").value,
+                endHd: item.querySelector(".end-hd").value,
+                name: item.querySelector(".name").value,
+                datasetEdited: item.querySelector(".name").dataset.edited
             });
         });
 
@@ -965,30 +1390,46 @@
             document.getElementById("items-container").innerHTML = "";
             data.items.forEach(it => {
                 addItem();
-
                 const el = document.querySelector("#items-container .item:last-child");
 
-                el.querySelector(".type").value = it.type;
-                el.querySelector(".start").value = it.start;
-                el.querySelector(".end").value = it.end;
-                el.querySelector(".days").value = it.days;
-                el.querySelector(".name").value = it.name || "";
+                if (it.dateRange !== undefined) {
+                    // New format
+                    el.querySelector(".date-range")._flatpickr.setDate(it.dateRange.includes(" to ") ? it.dateRange.split(" to ") : it.dateRange);
+                    el.querySelector(".chk-wd").checked = it.chkWd;
+                    el.querySelector(".chk-hd").checked = it.chkHd;
+                    if(it.startWd) el.querySelector(".start-wd")._flatpickr.setDate(it.startWd);
+                    if(it.endWd) el.querySelector(".end-wd")._flatpickr.setDate(it.endWd);
+                    if(it.startHd) el.querySelector(".start-hd")._flatpickr.setDate(it.startHd);
+                    if(it.endHd) el.querySelector(".end-hd")._flatpickr.setDate(it.endHd);
+                    el.querySelector(".name").value = it.name || "";
+                    if(it.datasetEdited) el.querySelector(".name").dataset.edited = it.datasetEdited;
+                } else {
+                    // Legacy format
+                    el.querySelector(".name").value = it.name || "";
+                    if (it.type === "weekday") {
+                        el.querySelector(".chk-wd").checked = true;
+                        el.querySelector(".chk-hd").checked = false;
+                        el.querySelector(".start-wd")._flatpickr.setDate(it.start || "17:00");
+                        el.querySelector(".end-wd")._flatpickr.setDate(it.end || "21:00");
+                    } else {
+                        el.querySelector(".chk-wd").checked = false;
+                        el.querySelector(".chk-hd").checked = true;
+                        el.querySelector(".start-hd")._flatpickr.setDate(it.start || "08:30");
+                        el.querySelector(".end-hd")._flatpickr.setDate(it.end || "17:00");
+                    }
+                }
 
                 // trigger update
-                el.querySelector(".type").dispatchEvent(new Event("change"));
+                el.querySelector(".chk-wd").dispatchEvent(new Event("change"));
             });
         }
     }
 
     function clearAll() {
-    if (!confirm("ลบรายการโอทีทั้งหมดใช่ไหม?")) return;
-
-    document.getElementById("items-container").innerHTML = "";
-
-    // clear storage
-    localStorage.removeItem("otData");
-    //addItem(); // 👈 add this
-    calculate();
+        if (!confirm("ลบรายการโอทีทั้งหมดใช่ไหม?")) return;
+        document.getElementById("items-container").innerHTML = "";
+        localStorage.removeItem("otData");
+        calculate();
     }
 
     new Sortable(document.getElementById("items-container"), {
