@@ -33,9 +33,9 @@ const UI = {
     renderProfileCard: (u) => `
         <div class="user-profile-card" onclick="selectProfile('${u.name}')">
             <div class="user-avatar" style="background:${getGrad(u.color)}">
-                ${getAvatarHTML(u)}
-                ${u.pin ? '<div class="pin-indicator">🔒</div>' : ''}
-                ${u.isGuest ? '<div style="position:absolute; top:0; left:0; background:var(--red); color:#fff; font-size:0.6rem; padding:2px 6px; border-bottom-right-radius:8px;">GUEST</div>' : ''}
+                <div class="avatar-content">${getAvatarHTML(u)}</div>
+                ${u.pin ? '<div class="pin-indicator" title="PIN Protected">🔒</div>' : ''}
+                ${u.isGuest ? '<div class="guest-badge">GUEST</div>' : ''}
             </div>
             <div class="user-name">${u.name}</div>
         </div>`,
