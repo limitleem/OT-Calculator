@@ -185,8 +185,10 @@ function initUsers() {
         showToast(APP_CONFIG.TEXT.GUEST_SESSION_EXPIRED, "info");
     }
 
-    if (active && userProfiles.some(u => u.name === active)) { 
-        completeLogin(active); 
+    if (active) { 
+        const u = userProfiles.find(x => x.name === active);
+        if (u && !u.pin) { completeLogin(active); }
+        else { showLanding(); }
     } else { 
         showLanding(); 
     }
@@ -203,7 +205,10 @@ function showLanding() {
         }
     }
     currentUser = null; 
+    localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.CURRENT_USER);
     document.getElementById("profileSection").style.display = "none";
+    document.getElementById("appHeader").style.display = "none";
+    document.getElementById("appMain").style.display = "none";
     const grid = document.getElementById("userGrid");
     
     // Sort profiles: Non-guest first, then Guest
@@ -250,6 +255,8 @@ function completeLogin(name) {
     localStorage.setItem(APP_CONFIG.STORAGE_KEYS.CURRENT_USER, name); 
     document.getElementById("landingScreen").classList.remove("show"); 
     document.getElementById("pinScreen").classList.remove("show");
+    document.getElementById("appHeader").style.display = "flex";
+    document.getElementById("appMain").style.display = "block";
     
     const u = userProfiles.find(x => x.name === name);
     if (u && u.isGuest) {
