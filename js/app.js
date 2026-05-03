@@ -511,10 +511,12 @@ function deleteUser() {
     });
 }
 
+let itemCounter = 0;
 function addItem() {
-    const id = Date.now();
-    document.getElementById("items-container").insertAdjacentHTML('beforeend', UI.renderOTItem(id));
-    const el = document.querySelector(`[data-id="${id}"]`);
+    const id = Date.now() + "_" + (itemCounter++);
+    const container = document.getElementById("items-container");
+    container.insertAdjacentHTML('beforeend', UI.renderOTItem(id));
+    const el = container.querySelector(`[data-id="${id}"]`);
 
     flatpickr(el.querySelector(".date-range"), { mode: "range", onChange: () => updateItemUI(el) });
     el.querySelectorAll(".start-wd, .end-wd, .start-hd, .end-hd").forEach(x =>
@@ -522,7 +524,6 @@ function addItem() {
     );
 
     el.querySelectorAll(".chk-wd, .chk-hd").forEach(x => x.onchange = () => {
-        x.closest('.checkbox-custom').classList.toggle('checked', x.checked);
         updateItemUI(el);
     });
 
@@ -532,6 +533,7 @@ function addItem() {
     };
 
     updateItemUI(el);
+    return el;
 }
 
 function updateItemUI(el) {
@@ -543,8 +545,13 @@ function updateItemUI(el) {
         else wd++;
     });
 
-    const chkWd = el.querySelector(".chk-wd").checked;
-    const chkHd = el.querySelector(".chk-hd").checked;
+    const chkBoxWd = el.querySelector(".chk-wd");
+    const chkBoxHd = el.querySelector(".chk-hd");
+    const chkWd = chkBoxWd.checked;
+    const chkHd = chkBoxHd.checked;
+    
+    chkBoxWd.closest('.checkbox-custom').classList.toggle('checked', chkWd);
+    chkBoxHd.closest('.checkbox-custom').classList.toggle('checked', chkHd);
     const nameInput = el.querySelector(".name");
     const errorEl = el.querySelector(".error-text");
 
@@ -589,7 +596,6 @@ function updateItemUI(el) {
     // WD Update
     const rowWd = el.querySelector(".row-wd");
     const canWd = wd > 0;
-    const chkBoxWd = el.querySelector(".chk-wd");
     const wdInfo = el.querySelector(".wd-info-container");
 
     chkBoxWd.disabled = !canWd;
@@ -630,7 +636,6 @@ function updateItemUI(el) {
     // HD Update
     const rowHd = el.querySelector(".row-hd");
     const canHd = hd > 0;
-    const chkBoxHd = el.querySelector(".chk-hd");
     const hdInfo = el.querySelector(".hd-info-container");
 
     chkBoxHd.disabled = !canHd;
@@ -869,8 +874,7 @@ function loadData() {
         if (data.salary) document.getElementById("salary").value = data.salary;
         if (data.items && Array.isArray(data.items)) {
             data.items.forEach(it => {
-                addItem();
-                const el = document.querySelector(".item:last-child");
+                const el = addItem();
                 if (it.range) el.querySelector(".date-range")._flatpickr.setDate(it.range.includes(" to ") ? it.range.split(" to ") : it.range);
                 el.querySelector(".chk-wd").checked = it.chkWd;
                 el.querySelector(".chk-hd").checked = it.chkHd;
