@@ -806,20 +806,9 @@ td {
     margin-right: 6px;
 }
 
-.hours-chip.x1 {
-    background: var(--blue-dim);
-    color: var(--blue);
-}
-
-.hours-chip.x15 {
-    background: var(--green-dim);
-    color: var(--green);
-}
-
-.hours-chip.x3 {
-    background: var(--accent-dim);
-    color: var(--accent);
-}
+.hours-chip.x1 { background: var(--blue-dim); color: var(--blue); }
+.hours-chip.x15 { background: var(--accent-dim); color: var(--accent); }
+.hours-chip.x3 { background: var(--green-dim); color: var(--green); }
 
 .modal-overlay {
     position: fixed;
