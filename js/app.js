@@ -776,6 +776,15 @@ function closeConfirm(v) {
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("salary").oninput = calculate;
     initUsers();
+
+    window.addEventListener("keydown", (e) => {
+        const pinScreen = document.getElementById("pinScreen");
+        if (pinScreen.classList.contains("show")) {
+            if (e.key >= "0" && e.key <= "9") pressPin(e.key);
+            else if (e.key === "Backspace") backspacePin();
+            else if (e.key === "Escape") pinScreen.classList.remove("show");
+        }
+    });
 });
 
 const showDaysBreakdown = (title, dateList) => {
