@@ -810,6 +810,16 @@ td {
 .hours-chip.x15 { background: var(--accent-dim); color: var(--accent); }
 .hours-chip.x3 { background: var(--green-dim); color: var(--green); }
 
+.badge {
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+.badge-wd { background: var(--blue-dim); color: var(--blue); }
+.badge-hd { background: var(--accent-dim); color: var(--accent); }
+
 .modal-overlay {
     position: fixed;
     inset: 0;

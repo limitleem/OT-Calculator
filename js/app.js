@@ -931,34 +931,60 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+const groupDatesToRanges = (dates) => {
+    if (!dates.length) return [];
+    const sorted = [...dates].sort((a, b) => new Date(a) - new Date(b));
+    let groups = [];
+    let start = sorted[0], prev = sorted[0];
+    const shortDays = ["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."];
+    const flush = (sDate, eDate) => {
+        const s = new Date(sDate), e = new Date(eDate);
+        const sInfo = formatThaiDate(sDate), eInfo = formatThaiDate(eDate);
+        const sDay = shortDays[s.getDay()], eDay = shortDays[e.getDay()];
+        const sYear = s.getFullYear() + 543;
+        
+        let hList = [];
+        let curr = new Date(sDate);
+        while(curr <= e) {
+            const dStr = curr.toISOString().split('T')[0];
+            const h = APP_CONFIG.HOLIDAYS_2569.find(x => x.date === dStr);
+            if (h) hList.push(`${curr.getDate()} - ${h.title}`);
+            curr.setDate(curr.getDate() + 1);
+        }
+
+        let rangeStr = "";
+        if (sDate === eDate) rangeStr = `${sDay} ${s.getDate()} ${sInfo.monthName} ${sYear}`;
+        else if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()) {
+            rangeStr = `${sDay} ${s.getDate()} - ${eDay} ${e.getDate()} ${sInfo.monthName} ${sYear}`;
+        } else {
+            rangeStr = `${sDay} ${s.getDate()} ${sInfo.monthName} - ${eDay} ${e.getDate()} ${eInfo.monthName} ${sYear}`;
+        }
+
+        if (hList.length > 0) {
+            rangeStr += `<div style="font-size:0.75rem; color:var(--accent); margin-top:6px; font-weight:500;">${hList.join('<br>')}</div>`;
+        }
+        return rangeStr;
+    };
+    for (let i = 1; i <= sorted.length; i++) {
+        const curr = sorted[i];
+        if (curr && (new Date(curr) - new Date(prev) === 86400000)) { prev = curr; }
+        else { groups.push(flush(start, prev)); start = curr; prev = curr; }
+    }
+    return groups;
+};
+
 const showDaysBreakdown = (title, dateList) => {
     const modal = document.getElementById("dayBreakdownModal");
     const listContainer = document.getElementById("dayBreakdownList");
     document.getElementById("dayBreakdownTitle").innerText = title;
 
-    // Grouping logic
-    let groups = [];
-    if (dateList.length > 0) {
-        let temp = [dateList[0]];
-        for (let i = 1; i < dateList.length; i++) {
-            let p = new Date(dateList[i - 1]);
-            let c = new Date(dateList[i]);
-            if ((c - p) / 86400000 === 1) temp.push(dateList[i]);
-            else { groups.push(temp); temp = [dateList[i]]; }
-        }
-        groups.push(temp);
-    }
-    let summary = groups.map(g => {
-        if (g.length === 1) return new Date(g[0]).getDate();
-        return new Date(g[0]).getDate() + "-" + new Date(g[g.length - 1]).getDate();
-    }).join(", ");
-
-    listContainer.innerHTML = UI.renderBreakdownHeader(summary);
-    listContainer.innerHTML += dateList.map(d => {
-        const info = formatThaiDate(d);
-        const h = APP_CONFIG.HOLIDAYS_2569.find(x => x.date === d);
-        return UI.renderBreakdownItem(info.full, h ? h.title : null);
-    }).join('');
+    const rangeStrings = groupDatesToRanges(dateList);
+    listContainer.innerHTML = rangeStrings.map(r => `
+        <div class="holiday-item" style="padding:16px; margin-bottom:12px; border-left:3px solid var(--accent);">
+            <div style="font-weight:700; color:var(--text); font-size:1rem;">${r}</div>
+        </div>
+    `).join('');
+    
     modal.classList.add("show");
 };
 
