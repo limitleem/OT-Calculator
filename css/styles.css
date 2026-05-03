@@ -310,6 +310,22 @@ body {
     position: relative;
 }
 
+.ot-row-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+
+.ot-row-info:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border2);
+}
+
 .profile-trigger {
     display: flex;
     align-items: center;
@@ -701,6 +717,7 @@ body {
 .item.active {
     background: linear-gradient(165deg, var(--surface) 0%, #1c1f26 100%);
     border-color: color-mix(in srgb, var(--accent), transparent 50%);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px color-mix(in srgb, var(--accent), transparent 90%);
 }
 
 .item-header {
@@ -776,14 +793,18 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    margin-top: 20px;
 }
 
 th {
+    background: var(--surface2);
     padding: 16px 20px;
     text-align: left;
-    background: var(--surface2);
-    color: var(--text3);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
     border-bottom: 1px solid var(--border);
 }
 
@@ -791,6 +812,15 @@ td {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border);
     color: var(--text);
+}
+
+tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+tfoot td {
+    background: rgba(255, 255, 255, 0.02);
+    border-top: 2px solid var(--border2);
 }
 
 .hours-chip {
