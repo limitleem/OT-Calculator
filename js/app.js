@@ -540,13 +540,22 @@ function getDaysInRange(r) {
 }
 
 function calcH(sv, ev, isW) {
+    const { STANDARD, LUNCH, RATES } = APP_CONFIG.CALC;
     let s = toHour(sv), e = toHour(ev); 
     if (e <= s) e += 24;
     let total = 0, h1 = 0, h15 = 0, h3 = 0;
     for (let h = s; h < e; h += 0.5) {
         let x = h >= 24 ? h - 24 : h;
-        if (isW) { if (x >= 8.5 && x < 16.5) continue; h15 += 0.5; total += 0.5; }
-        else { if (x >= 8.5 && x < 16.5) { if (x >= 12 && x < 13) continue; h1 += 0.5; } else h3 += 0.5; total += 0.5; }
+        if (isW) { 
+            if (x >= STANDARD.start && x < STANDARD.end) continue; 
+            h15 += 0.5; total += 0.5; 
+        } else { 
+            if (x >= STANDARD.start && x < STANDARD.end) { 
+                if (x >= LUNCH.start && x < LUNCH.end) continue; 
+                h1 += 0.5; 
+            } else { h3 += 0.5; }
+            total += 0.5; 
+        }
     }
     return { total, h1, h15, h3 };
 }
@@ -569,17 +578,18 @@ const formatThaiDate = (dateStr) => {
 
 
 function calculate() {
+    const { STANDARD, LUNCH, RATES, WORK_HOURS_PER_DAY, DAYS_PER_MONTH } = APP_CONFIG.CALC;
     const salary = +document.getElementById("salary").value || 0;
-    const hourly = calMoney(salary / 30 / 7);   
-    const daily = calMoney(hourly * 7);
+    const hourly = calMoney(salary / DAYS_PER_MONTH / WORK_HOURS_PER_DAY);   
+    const daily = calMoney(hourly * WORK_HOURS_PER_DAY);
 
     document.getElementById("sumDaily").innerText = fm(daily);
     document.getElementById("sum1").innerText = fm(hourly);
-    document.getElementById("sum15").innerText = fm(hourly * 1.5);
-    document.getElementById("sum3").innerText = fm(hourly * 3);
+    document.getElementById("sum15").innerText = fm(hourly * RATES.WD.ot);
+    document.getElementById("sum3").innerText = fm(hourly * RATES.HD.ot);
 
-    const prHrly15 = calMoney(hourly * 1.5);
-    const prHrly3 = calMoney(hourly * 3);
+    const prHrly15 = calMoney(hourly * RATES.WD.ot);
+    const prHrly3 = calMoney(hourly * RATES.HD.ot);
 
     let total = 0, rows = "";
     document.querySelectorAll(".item").forEach(item => {
@@ -602,11 +612,11 @@ function calculate() {
             for (let h = s; h < e; h += 0.5) {
                 let x = h >= 24 ? h - 24 : h;
                 if (isWd) {
-                    if (x >= 8.5 && x < 16.5) continue;
+                    if (x >= STANDARD.start && x < STANDARD.end) continue;
                     h15 += 0.5;
                 } else {
-                    if (x >= 8.5 && x < 16.5) {
-                        if (x >= 12 && x < 13) continue;
+                    if (x >= STANDARD.start && x < STANDARD.end) {
+                        if (x >= LUNCH.start && x < LUNCH.end) continue;
                         h1 += 0.5;
                     } else { h3 += 0.5; }
                 }
@@ -622,9 +632,9 @@ function calculate() {
             const dayVal = calMoney(hhh1 + hhh15 + hhh3); 
             const sumTotal = calMoney(dayVal * count);
 
-            const c1 = h1 > 0 ? `<span class="hours-chip x1">${fh(h1)} ชม. × 1.0 = ${fm(hhh1)}</span>` : '';
-            const c15 = h15 > 0 ? `<span class="hours-chip x15">${fh(h15)} ชม. × 1.5 = ${fm(hhh15)}</span>` : '';
-            const c3 = h3 > 0 ? `<span class="hours-chip x3">${fh(h3)} ชม. × 3.0 = ${fm(hhh3)}</span>` : '';
+            const c1 = h1 > 0 ? `<span class="hours-chip x1">${fh(h1)} ชม. × ${RATES.HD.standard.toFixed(1)} = ${fm(hhh1)}</span>` : '';
+            const c15 = h15 > 0 ? `<span class="hours-chip x15">${fh(h15)} ชม. × ${RATES.WD.ot.toFixed(1)} = ${fm(hhh15)}</span>` : '';
+            const c3 = h3 > 0 ? `<span class="hours-chip x3">${fh(h3)} ชม. × ${RATES.HD.ot.toFixed(1)} = ${fm(hhh3)}</span>` : '';
             const ratesHtml = `${c1}${c15}${c3}`;
 
             const badgeHtml = isWd ? '<span class="badge badge-wd" style="margin-right:6px;">WD</span>' : '<span class="badge badge-hd" style="margin-right:6px;">HD</span>';

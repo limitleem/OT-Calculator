@@ -10,6 +10,16 @@ const APP_CONFIG = {
         GUEST_START_TIME: "otGuestStartTime",
         DATA_PREFIX: "otData_"
     },
+    CALC: {
+        STANDARD: { start: 8.5, end: 16.5 },
+        LUNCH: { start: 12, end: 13 },
+        RATES: {
+            WD: { standard: 0, ot: 1.5 },
+            HD: { standard: 1.0, ot: 3.0 }
+        },
+        WORK_HOURS_PER_DAY: 7,
+        DAYS_PER_MONTH: 30
+    },
     GUEST_EXPIRY_MS: 3600000, // 1 Hour
     PRESET_COLORS: ["#f87171", "#60a5fa", "#34d399", "#fbbf24", "#a78bfa", "#f472b6", "#fb923c", "#9ca3af", "#4ade80", "#2dd4bf", "#818cf8", "#e879f9", "#ffffff", "#000000"],
     PRESET_EMOJIS: ["😀", "😎", "🦊", "🚀", "⚡", "🔥", "🌈", "🎨", "🍔", "⚽", "🎮", "🌟", "🐱", "🐶", "🦁", "🐧", "🦄", "🌈", "💎", "🍺", "🍕", "🦾", "👾"],
