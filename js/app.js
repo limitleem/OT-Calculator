@@ -85,7 +85,14 @@ function showLanding() {
     document.getElementById("profileSection").style.display = "none";
     const grid = document.getElementById("userGrid");
     
-    grid.innerHTML = userProfiles.map(u => `
+    // Sort profiles: Non-guest first, then Guest
+    const sorted = [...userProfiles].sort((a, b) => {
+        if (a.isGuest && !b.isGuest) return 1;
+        if (!a.isGuest && b.isGuest) return -1;
+        return 0;
+    });
+    
+    grid.innerHTML = sorted.map(u => `
         <div class="user-profile-card" onclick="selectProfile('${u.name}')">
             <div class="user-avatar" style="background:${u.color}">
                 ${getAvatarHTML(u)}
@@ -101,6 +108,12 @@ function showLanding() {
 
 function selectProfile(name) {
     const u = userProfiles.find(x => x.name === name);
+    if (u.isGuest) {
+        showConfirm("โหมด Guest ข้อมูลจะถูกลบเมื่อปิดแอปหรือครบ 1 ชั่วโมง ยืนยันการใช้งาน?", "ยืนยัน", "👤", () => {
+            completeLogin(name);
+        });
+        return;
+    }
     if (u.pin) { 
         targetUserForPin = u; 
         currentPinInput = ""; 
