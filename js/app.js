@@ -489,6 +489,7 @@ function calcH(sv, ev, isW) {
 
 const THAI_DAYS = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 const THAI_MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+const THAI_MONTHS_FULL = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
 
 const formatThaiDate = (dateStr) => {
     if (!dateStr) return { short: "", full: "" };
@@ -753,12 +754,24 @@ const renderHolidays = () => {
     const filterYear = select ? parseInt(select.value) : (years[0] || new Date().getFullYear());
     const filtered = APP_CONFIG.HOLIDAYS_2569.filter(h => new Date(h.date).getFullYear() === filterYear);
     
-    list.innerHTML = filtered.map(h => {
+    let html = '';
+    let currentMonth = -1;
+
+    filtered.forEach(h => {
+        const d = new Date(h.date);
+        const mon = d.getMonth();
+        if (mon !== currentMonth) {
+            currentMonth = mon;
+            html += `<div style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700; margin:16px 0 8px 4px; letter-spacing:0.5px; border-bottom:1px solid var(--border); padding-bottom:4px;">${THAI_MONTHS_FULL[mon]}</div>`;
+        }
         const fd = formatThaiDate(h.date);
-        return `
-            <div class="holiday-item" style="background:var(--surface2); padding:12px; border-radius:8px; margin-bottom:8px;">
-                <div style="font-size:0.85rem; font-weight:600;">${fd.full}</div>
-                <div style="font-size:0.75rem; color:var(--accent);">${h.title}</div>
+        html += `
+            <div class="holiday-item" style="background:var(--surface2); padding:12px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-size:0.85rem; font-weight:600;">${fd.full}</div>
+                    <div style="font-size:0.75rem; color:var(--accent);">${h.title}</div>
+                </div>
             </div>`;
-    }).join('');
+    });
+    list.innerHTML = html || '<div style="text-align:center; padding:20px; color:var(--text3)">ไม่มีข้อมูลวันหยุดในปีนี้</div>';
 };
