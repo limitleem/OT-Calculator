@@ -240,3 +240,12 @@ td { padding: 16px 20px; border-bottom: 1px solid var(--border); color: var(--te
 .salary-input-wrap input { padding-left: 32px !important; width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-size: 1.5rem; padding: 10px; font-family: 'DM Mono', monospace; outline: none; }
 
 @media(max-width:640px){ .salary-card { grid-template-columns: 1fr; } }
+
+/* Landing Screen Enhancements */
+.landing-header { text-align: center; margin-bottom: 40px; }
+.landing-icon { font-size: 3.5rem; margin-bottom: 16px; filter: drop-shadow(0 0 20px var(--accent-dim)); }
+.landing-header h1 { font-size: 2.2rem; margin-bottom: 8px; background: linear-gradient(135deg, #fff 0%, var(--text2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.landing-header p { color: var(--text3); font-size: 0.95rem; }
+
+.landing-footer { margin-top: 60px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border); max-width: 500px; margin-left: auto; margin-right: auto; }
+.landing-footer p { font-size: 0.8rem; color: var(--text2); line-height: 1.6; text-align: center; }
