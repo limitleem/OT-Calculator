@@ -705,9 +705,9 @@ function calcH(sv, ev, isW, hourly) {
             total += 0.5;
         }
     }
-    const m1 = calMoney(h1 * hourly * 1.0);
-    const m15 = calMoney(h15 * hourly * 1.5);
-    const m3 = calMoney(h3 * hourly * 3.0);
+    const m1 = calMoney(h1 * hourly * RATES.HD.standard);
+    const m15 = calMoney(h15 * hourly * RATES.WD.ot);
+    const m3 = calMoney(h3 * hourly * RATES.HD.ot);
     const costDay = calMoney(m1 + m15 + m3);
     return { total, h1, h15, h3, m1, m15, m3, costDay };
 }
@@ -766,9 +766,9 @@ function calculate() {
         const formatRow = (res, isWd, count, dateList) => {
             if (!res || count === 0) return null;
             const total = calMoney(res.costDay * count);
-            const c1 = res.h1 > 0 ? `<span class="hours-chip x1">${fh(res.h1)} ชม. × 1.0 = ${fm(res.m1)}</span>` : '';
-            const c15 = res.h15 > 0 ? `<span class="hours-chip x15">${fh(res.h15)} ชม. × 1.5 = ${fm(res.m15)}</span>` : '';
-            const c3 = res.h3 > 0 ? `<span class="hours-chip x3">${fh(res.h3)} ชม. × 3.0 = ${fm(res.m3)}</span>` : '';
+            const c1 = res.h1 > 0 ? `<span class="hours-chip x1">${fh(res.h1)} ชม. × ${APP_CONFIG.CALC.RATES.HD.standard.toFixed(1)} = ${fm(res.m1)}</span>` : '';
+            const c15 = res.h15 > 0 ? `<span class="hours-chip x15">${fh(res.h15)} ชม. × ${APP_CONFIG.CALC.RATES.WD.ot.toFixed(1)} = ${fm(res.m15)}</span>` : '';
+            const c3 = res.h3 > 0 ? `<span class="hours-chip x3">${fh(res.h3)} ชม. × ${APP_CONFIG.CALC.RATES.HD.ot.toFixed(1)} = ${fm(res.m3)}</span>` : '';
             const ratesHtml = `${c1}${c15}${c3}`;
             const badgeHtml = isWd ? '<span class="badge badge-wd" style="margin-right:6px;">WD</span>' : '<span class="badge badge-hd" style="margin-right:6px;">HD</span>';
             const sVal = isWd ? item.querySelector(".start-wd").value : item.querySelector(".start-hd").value;
