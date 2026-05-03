@@ -239,6 +239,14 @@ function selectProfile(name) {
     }
 }
 
+function resetAllData() {
+    showConfirm(APP_CONFIG.TEXT.RESET_ALL_CONFIRM, "ยืนยันล้างข้อมูล", "⚠️", () => {
+        localStorage.clear();
+        showToast(APP_CONFIG.TEXT.RESET_SUCCESS, "success");
+        setTimeout(() => location.reload(), 1000);
+    });
+}
+
 function completeLogin(name) {
     currentUser = name; 
     localStorage.setItem(APP_CONFIG.STORAGE_KEYS.CURRENT_USER, name); 
