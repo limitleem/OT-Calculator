@@ -111,7 +111,7 @@ const APP_CONFIG = {
         MODAL_TITLE_DAYS: "รายละเอียดวัน",
         MODAL_TITLE_HOLIDAYS: "วันหยุดนักขัตฤกษ์",
         NO_CALC_DATA: "ไม่มีข้อมูลการคำนวณ",
-        TOTAL_INCOME: "รายรับรวมสุทธิ",
+        TOTAL_INCOME: "รวมโอทีทั้งหมด",
         ITEM_COUNT: (n) => `${n} รายการ`,
         PERIOD: "ช่วงวันที่:",
         NO_HOLIDAY_DATA: "ไม่มีข้อมูลวันหยุดในปีนี้",

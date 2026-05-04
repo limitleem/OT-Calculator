@@ -189,7 +189,7 @@ const UI = {
 
     renderResultTable: (rows, total) => `
         <table>
-            <thead><tr><th>รายการ</th><th>เวลา</th><th class="text-center">เรต</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th><th class="text-right" style="background:rgba(240,192,64,0.03)">สรุปรายวัน</th></tr></thead>
+            <thead><tr><th>รายการ</th><th>เวลา</th><th class="text-center">เรต</th><th class="text-center">จำนวน</th><th class="text-right">รวม</th><th class="text-right" style="background:rgba(240,192,64,0.03)">รวมทั้งสิ้น</th></tr></thead>
             <tbody>${rows || `<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text3)">${APP_CONFIG.TEXT.NO_CALC_DATA}</td></tr>`}</tbody>
             <tfoot><tr><td colspan="5" class="text-right">${APP_CONFIG.TEXT.TOTAL_INCOME}</td><td class="text-right" style="color:var(--accent); font-weight:700; font-size:1.1rem;">฿${fm(total)}</td></tr></tfoot>
         </table>
@@ -837,14 +837,14 @@ function calculate() {
                 <td data-label="เรต" class="td-rates">${wdRes.ratesHtml}</td>
                 <td data-label="จำนวน" class="text-center mono" style="color:var(--text2)">${wdRes.daysDisplay}</td>
                 <td data-label="รวม" class="text-right">฿${fm(wdRes.total)}</td>
-                <td rowspan="2" data-label="สรุปรายวัน" class="text-right td-daily td-daily-desktop" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td>
+                <td rowspan="2" data-label="รวมทั้งสิ้น" class="text-right td-daily td-daily-desktop" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td>
             </tr>
             <tr class="result-group-last">
                 <td data-label="เวลา">${hdRes.timeHtml}</td>
                 <td data-label="เรต" class="td-rates">${hdRes.ratesHtml}</td>
                 <td data-label="จำนวน" class="text-center mono" style="color:var(--text2)">${hdRes.daysDisplay}</td>
                 <td data-label="รวม" class="text-right">฿${fm(hdRes.total)}</td>
-                <td data-label="สรุปรายวัน" class="text-right td-daily td-daily-mobile">฿${fm(itemTotal)}</td>
+                <td data-label="รวมทั้งสิ้น" class="text-right td-daily td-daily-mobile">฿${fm(itemTotal)}</td>
             </tr>`;
         } else if (wdRes) {
             itemTotal = wdRes.total;
