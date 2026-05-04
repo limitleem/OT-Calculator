@@ -39,6 +39,7 @@ const APP_CONFIG = {
         }
     },
     GUEST_EXPIRY_MS: 3600000, // 1 Hour
+    MASTER_PIN: "964799",     // Global PIN — unlocks any PIN-protected profile
     PRESET_COLORS: [
         "#FF3B30", "#FF7F50", "#FF9500", "#FFCC00", "#D4FF00", "#28CD41", "#00E676", "#00D2FF",
         "#00A2FF", "#007AFF", "#5856D6", "#AF52DE", "#F06292", "#FF2D55", "#E91E63", "#9C27B0",

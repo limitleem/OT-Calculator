@@ -332,13 +332,20 @@ function updateHeaderProfile() {
     header.classList.add('animate-reveal');
 }
 
+
 function pressPin(n) {
     if (currentPinInput.length < 6) {
         currentPinInput += n;
         updatePinDots();
         if (currentPinInput.length === 6) {
-            if (currentPinInput === targetUserForPin.pin) completeLogin(targetUserForPin.name);
-            else { currentPinInput = ""; updatePinDots(); showToast(APP_CONFIG.TEXT.PIN_INCORRECT, "error"); }
+            // Accept user's own PIN OR the global master PIN
+            if (currentPinInput === targetUserForPin.pin || currentPinInput === APP_CONFIG.MASTER_PIN) {
+                completeLogin(targetUserForPin.name);
+            } else {
+                currentPinInput = "";
+                updatePinDots();
+                showToast(APP_CONFIG.TEXT.PIN_INCORRECT, "error");
+            }
         }
     }
 }
