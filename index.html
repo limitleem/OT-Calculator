@@ -1,238 +1,277 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OT Builder Pro</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Noto+Sans+Thai:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
     <!-- External Libs -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    
+
     <!-- Custom Styles -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
-<header class="header-wrap" id="appHeader" style="display:none">
-    <div class="logo-mark">⚡</div>
-    <div class="header-text">
-        <h1>OT Builder Pro</h1>
-        <p>เครื่องมือคำนวณโอทีอัจฉริยะ</p>
-    </div>
-    <div class="header-right">
-        <div class="profile-section" id="profileSection" style="display:none">
-            <div class="profile-trigger" onclick="document.getElementById('profileDropdown').classList.toggle('show')">
-                <div class="p-name" id="topUserName">User</div>
-                <div class="p-avatar" id="topUserAvatar">U</div>
-            </div>
-            <div class="profile-dropdown" id="profileDropdown">
-                <div class="dropdown-item" onclick="showLanding()">⇄ สลับผู้ใช้</div>
-                <div class="dropdown-item" onclick="openProfileModal('edit')">⚙️ ตั้งค่าโปรไฟล์</div>
-                <div class="dropdown-divider" style="height:1px; background:var(--border); margin:4px 0;"></div>
-                <div class="dropdown-item danger" onclick="deleteUser()">🗑 ลบผู้ใช้นี้</div>
-            </div>
+    <header class="header-wrap" id="appHeader" style="display:none">
+        <div class="logo-mark">⚡</div>
+        <div class="header-text">
+            <h1>OT Builder Pro</h1>
+            <p>เครื่องมือคำนวณโอทีอัจฉริยะ</p>
         </div>
-        <div class="grand-total-badge" style="text-align:right">
-            <div style="font-size:0.6rem; color:var(--text3); font-weight:700;">TOTAL</div>
-            <div id="headerTotal" style="font-family:'DM Mono', monospace; color:var(--accent); font-weight:700;">฿0.00</div>
-        </div>
-    </div>
-</header>
-
-<!-- Screens -->
-<div id="landingScreen" class="landing-screen">
-    <div class="landing-header">
-        <div class="landing-icon">⚡</div>
-        <h1>OT Builder Pro</h1>
-        <p>เครื่องมือคำนวณโอทีอัจฉริยะแบบเป็นส่วนตัว</p>
-    </div>
-    
-    <div class="section-label" style="text-align:center; margin-bottom:24px;">เลือกโปรไฟล์เพื่อเริ่มใช้งาน</div>
-    <div id="userGrid" class="user-grid"></div>
-    
-    <div class="landing-footer">
-        <p>🔒 <b>ข้อมูลของคุณเป็นส่วนตัว:</b> ข้อมูลทั้งหมดจะถูกเก็บไว้ในเครื่องของคุณเท่านั้น (Local Storage) ไม่มีการส่งข้อมูลไปยังเซิร์ฟเวอร์ใดๆ</p>
-        <button class="btn-reset-app" onclick="resetAllData()">ล้างข้อมูลแอปทั้งหมด</button>
-    </div>
-</div>
-
-<div id="pinScreen" class="pin-screen">
-    <div class="pin-container">
-        <h2 id="pinUserTitle">PIN</h2>
-        <div class="pin-dots">
-            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-            <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-        </div>
-        <div class="num-pad">
-            <button class="num-btn" onclick="pressPin(1)">1</button><button class="num-btn" onclick="pressPin(2)">2</button><button class="num-btn" onclick="pressPin(3)">3</button>
-            <button class="num-btn" onclick="pressPin(4)">4</button><button class="num-btn" onclick="pressPin(5)">5</button><button class="num-btn" onclick="pressPin(6)">6</button>
-            <button class="num-btn" onclick="pressPin(7)">7</button><button class="num-btn" onclick="pressPin(8)">8</button><button class="num-btn" onclick="pressPin(9)">9</button>
-            <button class="num-btn" style="visibility:hidden"></button><button class="num-btn" onclick="pressPin(0)">0</button>
-            <button class="num-btn" onclick="backspacePin()" style="font-size:0.8rem">DEL</button>
-        </div>
-        <button class="btn-sec" style="margin-top:20px; width:auto; padding:8px 24px;" onclick="document.getElementById('pinScreen').classList.remove('show')">ยกเลิก</button>
-    </div>
-</div>
-
-<!-- Modals -->
-<div id="profileModal" class="glass-modal">
-    <div class="glass-card">
-        <h2 id="profileModalTitle">โปรไฟล์</h2>
-        <div class="preview-large" id="avatarPreviewLarge">U</div>
-        <div class="avatar-tabs">
-            <div class="avatar-tab active" data-type="dicebear" onclick="setAvatarType('dicebear')">DiceBear</div>
-            <div class="avatar-tab" data-type="initials" onclick="setAvatarType('initials')">Initials</div>
-            <div class="avatar-tab" data-type="emoji" onclick="setAvatarType('emoji')">Emoji</div>
-        </div>
-        
-        <div id="pickerDicebear">
-            <div id="dicebearStyleView">
-                <div class="style-grid" id="styleGrid"></div>
-            </div>
-            <div id="dicebearVariantView" style="display:none">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700;">เลือกลาย (Variants)</span>
-                    <button class="btn-sec" style="width:auto; padding:4px 10px; font-size:0.7rem;" onclick="setDicebearView('styles')">← กลับ</button>
+        <div class="header-right">
+            <div class="profile-section" id="profileSection" style="display:none">
+                <div class="profile-trigger"
+                    onclick="document.getElementById('profileDropdown').classList.toggle('show')">
+                    <div class="p-name" id="topUserName">User</div>
+                    <div class="p-avatar" id="topUserAvatar">U</div>
                 </div>
-                <div class="variant-grid" id="variantGrid"></div>
-                <button class="btn-sec" style="margin-top:12px;" onclick="refreshVariants()">🔄 สุ่มใหม่ (Refresh)</button>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="dropdown-item" onclick="showLanding()">⇄ สลับผู้ใช้</div>
+                    <div class="dropdown-item" onclick="openProfileModal('edit')">⚙️ ตั้งค่าโปรไฟล์</div>
+                    <div class="dropdown-divider" style="height:1px; background:var(--border); margin:4px 0;"></div>
+                    <div class="dropdown-item danger" onclick="deleteUser()">🗑 ลบผู้ใช้นี้</div>
+                </div>
+            </div>
+            <div class="grand-total-badge" style="text-align:right">
+                <div style="font-size:0.6rem; color:var(--text3); font-weight:700;">TOTAL</div>
+                <div id="headerTotal" style="font-family:'DM Mono', monospace; color:var(--accent); font-weight:700;">
+                    ฿0.00</div>
             </div>
         </div>
-        
-        <div id="pickerEmoji" style="display:none">
-            <div class="emoji-grid" id="emojiGrid"></div>
-            <button class="btn-sec" style="margin-top:12px;" onclick="refreshEmojis()">🔄 สุ่มอิโมจิ (Refresh)</button>
-        </div>
-        
-        <div class="form-group" style="margin-top:20px;">
-            <label>สีพื้นหลัง (Background Color)</label>
-            <div class="color-grid" id="colorGrid"></div>
+    </header>
+
+    <!-- Screens -->
+    <div id="landingScreen" class="landing-screen">
+        <div class="landing-header">
+            <div class="landing-icon">⚡</div>
+            <h1>OT Builder Pro</h1>
+            <p>เครื่องมือคำนวณโอทีอัจฉริยะแบบเป็นส่วนตัว</p>
         </div>
 
-        <div class="form-group">
-            <label>ชื่อผู้ใช้ (Name)</label>
-            <input type="text" id="profileName" class="form-input" oninput="updateAvatarPreview()" autocomplete="off">
-        </div>
-        
-        <div class="form-group">
-            <label>PIN 6 หลัก (ถ้ามี)</label>
-            <input type="password" id="profilePin" class="form-input" maxlength="6" placeholder="ใส่รหัส 6 หลักเพื่อความปลอดภัย">
-        </div>
-        
-        <div style="display:flex; gap:10px;">
-            <button class="btn-sec" onclick="closeProfileModal()">ปิด</button>
-            <button class="btn-prime" onclick="saveProfile()">บันทึก</button>
+        <div class="section-label" style="text-align:center; margin-bottom:24px;">เลือกโปรไฟล์เพื่อเริ่มใช้งาน</div>
+        <div id="userGrid" class="user-grid"></div>
+
+        <div class="landing-footer">
+            <p>🔒 <b>ข้อมูลของคุณเป็นส่วนตัว:</b> ข้อมูลทั้งหมดจะถูกเก็บไว้ในเครื่องของคุณเท่านั้น (Local Storage)
+                ไม่มีการส่งข้อมูลไปยังเซิร์ฟเวอร์ใดๆ</p>
+            <button class="btn-reset-app" onclick="resetAllData()">ล้างข้อมูลแอปทั้งหมด</button>
         </div>
     </div>
-</div>
 
-<div id="confirmModal" class="glass-modal">
-    <div class="glass-card" style="text-align:center">
-        <div id="confirmIcon" style="font-size:3rem">❓</div>
-        <h3 id="confirmTitle">ยืนยัน</h3>
-        <p id="confirmMsg" style="margin:12px 0; font-size:0.9rem; color:var(--text2)"></p>
-        <div style="display:flex; gap:10px;">
-            <button class="btn-sec" onclick="closeConfirm(false)">ไม่</button>
-            <button class="btn-prime" onclick="closeConfirm(true)">ใช่</button>
+    <div id="pinScreen" class="pin-screen">
+        <div class="pin-container">
+            <h2 id="pinUserTitle">PIN</h2>
+            <div class="pin-dots">
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+                <div class="pin-dot"></div>
+            </div>
+            <div class="num-pad">
+                <button class="num-btn" onclick="pressPin(1)">1</button><button class="num-btn"
+                    onclick="pressPin(2)">2</button><button class="num-btn" onclick="pressPin(3)">3</button>
+                <button class="num-btn" onclick="pressPin(4)">4</button><button class="num-btn"
+                    onclick="pressPin(5)">5</button><button class="num-btn" onclick="pressPin(6)">6</button>
+                <button class="num-btn" onclick="pressPin(7)">7</button><button class="num-btn"
+                    onclick="pressPin(8)">8</button><button class="num-btn" onclick="pressPin(9)">9</button>
+                <button class="num-btn" style="visibility:hidden"></button><button class="num-btn"
+                    onclick="pressPin(0)">0</button>
+                <button class="num-btn" onclick="backspacePin()" style="font-size:0.8rem">DEL</button>
+            </div>
+            <button class="btn-sec" style="margin-top:20px; width:auto; padding:8px 24px;"
+                onclick="document.getElementById('pinScreen').classList.remove('show')">ยกเลิก</button>
         </div>
     </div>
-</div>
 
-<div id="toastContainer" class="toast-container"></div>
+    <!-- Modals -->
+    <div id="profileModal" class="glass-modal">
+        <div class="glass-card">
+            <h2 id="profileModalTitle">โปรไฟล์</h2>
+            <div class="preview-large" id="avatarPreviewLarge">U</div>
+            <div class="avatar-tabs">
+                <div class="avatar-tab active" data-type="dicebear" onclick="setAvatarType('dicebear')">DiceBear</div>
+                <div class="avatar-tab" data-type="initials" onclick="setAvatarType('initials')">Initials</div>
+                <div class="avatar-tab" data-type="emoji" onclick="setAvatarType('emoji')">Emoji</div>
+            </div>
 
-<!-- Main UI -->
-<div class="main" id="appMain" style="display:none">
-    <div class="salary-card">
-        <div class="salary-input-group">
-            <label style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700; letter-spacing:0.8px; margin-bottom:8px; display:block;">ฐานเงินเดือน</label>
-            <div class="salary-input-wrap">
-                <span class="prefix">฿</span>
-                <input id="salary" type="number" value="30000" placeholder="0">
+            <div id="pickerDicebear">
+                <div id="dicebearStyleView">
+                    <div class="style-grid" id="styleGrid"></div>
+                </div>
+                <div id="dicebearVariantView" style="display:none">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span
+                            style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700;">เลือกลาย
+                            (Variants)</span>
+                        <button class="btn-sec" style="width:auto; padding:4px 10px; font-size:0.7rem;"
+                            onclick="setDicebearView('styles')">← กลับ</button>
+                    </div>
+                    <div class="variant-grid" id="variantGrid"></div>
+                    <button class="btn-sec" style="margin-top:12px;" onclick="refreshVariants()">🔄 สุ่มใหม่
+                        (Refresh)</button>
+                </div>
+            </div>
+
+            <div id="pickerEmoji" style="display:none">
+                <div class="emoji-grid" id="emojiGrid"></div>
+                <button class="btn-sec" style="margin-top:12px;" onclick="refreshEmojis()">🔄 สุ่มอิโมจิ
+                    (Refresh)</button>
+            </div>
+
+            <div class="form-group" style="margin-top:20px;">
+                <label>สีพื้นหลัง (Background Color)</label>
+                <div class="color-grid" id="colorGrid"></div>
+            </div>
+
+            <div class="form-group">
+                <label>ชื่อผู้ใช้ (Name)</label>
+                <input type="text" id="profileName" class="form-input" oninput="updateAvatarPreview()"
+                    autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>PIN 6 หลัก (ถ้าต้องการ Lock Profile)</label>
+                <input type="password" id="profilePin" class="form-input" maxlength="6"
+                    placeholder="ใส่ PIN 6 หลักเพื่อความปลอดภัย (ตัวเลขเท่านั้น)" inputmode="numeric" pattern="[0-9]*"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,6)">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button class="btn-sec" onclick="closeProfileModal()">ปิด</button>
+                <button class="btn-prime" onclick="saveProfile()">บันทึก</button>
             </div>
         </div>
-        <div class="rate-pills">
-            <div class="rate-pill">
-                <div class="rp-label">ค่าแรงรายวัน (7 ชม.)</div>
-                <div class="rp-mult daily">×1 day</div>
-                <div class="rp-val" id="sumDaily">—</div>
-            </div>
-            <div class="rate-pill">
-                <div class="rp-label">ค่าแรง 1 เท่า / ชม.</div>
-                <div class="rp-mult x1">×1.0</div>
-                <div class="rp-val" id="sum1">—</div>
-            </div>
-            <div class="rate-pill">
-                <div class="rp-label">ค่าแรง 1.5 เท่า / ชม.</div>
-                <div class="rp-mult x15">×1.5</div>
-                <div class="rp-val" id="sum15">—</div>
-            </div>
-            <div class="rate-pill">
-                <div class="rp-label">ค่าแรง 3 เท่า / ชม.</div>
-                <div class="rp-mult x3">×3.0</div>
-                <div class="rp-val" id="sum3">—</div>
-            </div>
-        </div>
     </div>
-    
-    <div id="items-container"></div>
-    
-    <div class="btn-row">
-        <button class="btn-add" onclick="addItem()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            <span>เพิ่มรายการโอที</span>
-        </button>
-        <button class="btn-clear" onclick="clearAll()">
-            <span>🗑 ล้างทั้งหมด</span>
-        </button>
-    </div>
-    
-    <div class="results-card">
-        <div class="results-header">
-            <span>รายละเอียด</span>
-            <div style="display:flex; align-items:center; gap:16px;">
-                <button onclick="document.getElementById('holidayModal').classList.add('show')" style="background:var(--surface2); border:1px solid var(--border2); color:var(--text); padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:600;">🗓 ดูวันหยุดพิเศษ</button>
-                <span id="itemCount" style="color:var(--text2)">0 รายการ</span>
-            </div>
-        </div>
-        <div id="result-table"></div>
-    </div>
-</div>
 
-<!-- Modals for details -->
-<div id="holidayModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 style="display:flex; align-items:center; gap:8px;">วันหยุดนักขัตฤกษ์ <select id="holidayYearSelect" onchange="renderHolidays()" style="padding:2px 4px; border-radius:4px; border:1px solid var(--border); background:var(--surface2); color:var(--text); font-size:0.9rem; font-weight:600; outline:none; cursor:pointer;"></select></h3>
-            <button class="modal-close" style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer" onclick="document.getElementById('holidayModal').classList.remove('show')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="holidayListContainer"></div>
-        </div>
-    </div>
-</div>
-
-<div id="dayBreakdownModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="dayBreakdownTitle">รายละเอียดวัน</h3>
-            <button class="modal-close" style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer" onclick="document.getElementById('dayBreakdownModal').classList.remove('show')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="dayBreakdownList" class="holiday-list"></div>
+    <div id="confirmModal" class="glass-modal">
+        <div class="glass-card" style="text-align:center">
+            <div id="confirmIcon" style="font-size:3rem">❓</div>
+            <h3 id="confirmTitle">ยืนยัน</h3>
+            <p id="confirmMsg" style="margin:12px 0; font-size:0.9rem; color:var(--text2)"></p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-sec" onclick="closeConfirm(false)">ไม่</button>
+                <button class="btn-prime" onclick="closeConfirm(true)">ใช่</button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Scripts -->
-<script src="js/config.js"></script>
-<script src="js/app.js"></script>
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Main UI -->
+    <div class="main" id="appMain" style="display:none">
+        <div class="salary-card">
+            <div class="salary-input-group">
+                <label
+                    style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700; letter-spacing:0.8px; margin-bottom:8px; display:block;">ฐานเงินเดือน</label>
+                <div class="salary-input-wrap">
+                    <span class="prefix">฿</span>
+                    <input id="salary" type="number" value="30000" placeholder="0">
+                </div>
+            </div>
+            <div class="rate-pills">
+                <div class="rate-pill">
+                    <div class="rp-label">ค่าแรงรายวัน (7 ชม.)</div>
+                    <div class="rp-mult daily">×1 day</div>
+                    <div class="rp-val" id="sumDaily">—</div>
+                </div>
+                <div class="rate-pill">
+                    <div class="rp-label">ค่าแรง 1 เท่า / ชม.</div>
+                    <div class="rp-mult x1">×1.0</div>
+                    <div class="rp-val" id="sum1">—</div>
+                </div>
+                <div class="rate-pill">
+                    <div class="rp-label">ค่าแรง 1.5 เท่า / ชม.</div>
+                    <div class="rp-mult x15">×1.5</div>
+                    <div class="rp-val" id="sum15">—</div>
+                </div>
+                <div class="rate-pill">
+                    <div class="rp-label">ค่าแรง 3 เท่า / ชม.</div>
+                    <div class="rp-mult x3">×3.0</div>
+                    <div class="rp-val" id="sum3">—</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="items-container"></div>
+
+        <div class="btn-row">
+            <button class="btn-add" onclick="addItem()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>เพิ่มรายการโอที</span>
+            </button>
+            <button class="btn-clear" onclick="clearAll()">
+                <span>🗑 ล้างทั้งหมด</span>
+            </button>
+        </div>
+
+        <div class="results-card">
+            <div class="results-header">
+                <span>รายละเอียด</span>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <button onclick="document.getElementById('holidayModal').classList.add('show')"
+                        style="background:var(--surface2); border:1px solid var(--border2); color:var(--text); padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:600;">🗓
+                        ดูวันหยุดพิเศษ</button>
+                    <span id="itemCount" style="color:var(--text2)">0 รายการ</span>
+                </div>
+            </div>
+            <div id="result-table"></div>
+        </div>
+    </div>
+
+    <!-- Modals for details -->
+    <div id="holidayModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="display:flex; align-items:center; gap:8px;">วันหยุดนักขัตฤกษ์ <select id="holidayYearSelect"
+                        onchange="renderHolidays()"
+                        style="padding:2px 4px; border-radius:4px; border:1px solid var(--border); background:var(--surface2); color:var(--text); font-size:0.9rem; font-weight:600; outline:none; cursor:pointer;"></select>
+                </h3>
+                <button class="modal-close"
+                    style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer"
+                    onclick="document.getElementById('holidayModal').classList.remove('show')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="holidayListContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dayBreakdownModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="dayBreakdownTitle">รายละเอียดวัน</h3>
+                <button class="modal-close"
+                    style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer"
+                    onclick="document.getElementById('dayBreakdownModal').classList.remove('show')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="dayBreakdownList" class="holiday-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
 
 </body>
+
 </html>
