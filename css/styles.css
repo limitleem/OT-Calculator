@@ -586,8 +586,9 @@ body {
 }
 
 .color-opt.active {
-    border: 2px solid var(--text);
-    box-shadow: 0 0 0 2px var(--bg);
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+    transform: scale(1.15);
 }
 
 .toast-container {
@@ -1018,7 +1019,7 @@ input:disabled {
 
 /* Tablets */
 @media (max-width: 768px) {
-    .main { padding: 15px; }
+    .main { padding: 90px 15px 24px; } /* header ~70px + breathing room */
     .header-wrap { padding: 15px 20px; }
     
     .salary-card { grid-template-columns: 1fr; }
@@ -1046,6 +1047,9 @@ input:disabled {
         padding: 12px 16px;
         gap: 10px;
     }
+
+    /* Push content below the shorter mobile header (~55px) */
+    .main { padding-top: 80px; }
 
     .header-text h1 {
         font-size: 1.1rem;
