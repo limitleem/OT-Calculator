@@ -787,26 +787,27 @@ function calculate() {
         if (wdRes && hdRes) {
             itemTotal = wdRes.total + hdRes.total;
             rows += `
-            <tr>
-                <td rowspan="2"><span style="font-weight:600;font-size:0.85rem">${name}</span></td>
-                <td>${wdRes.timeHtml}</td>
-                <td style="white-space:nowrap">${wdRes.ratesHtml}</td>
-                <td class="text-center mono" style="color:var(--text2)">${wdRes.daysDisplay}</td>
-                <td class="text-right">฿${fm(wdRes.total)}</td>
-                <td rowspan="2" class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td>
+            <tr class="result-group-first">
+                <td rowspan="2" data-label="รายการ"><span style="font-weight:600;font-size:0.85rem">${name}</span></td>
+                <td data-label="เวลา">${wdRes.timeHtml}</td>
+                <td data-label="เรต" class="td-rates">${wdRes.ratesHtml}</td>
+                <td data-label="จำนวน" class="text-center mono" style="color:var(--text2)">${wdRes.daysDisplay}</td>
+                <td data-label="รวม" class="text-right">฿${fm(wdRes.total)}</td>
+                <td rowspan="2" data-label="สรุปรายวัน" class="text-right td-daily td-daily-desktop" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td>
             </tr>
-            <tr>
-                <td>${hdRes.timeHtml}</td>
-                <td style="white-space:nowrap">${hdRes.ratesHtml}</td>
-                <td class="text-center mono" style="color:var(--text2)">${hdRes.daysDisplay}</td>
-                <td class="text-right">฿${fm(hdRes.total)}</td>
+            <tr class="result-group-last">
+                <td data-label="เวลา">${hdRes.timeHtml}</td>
+                <td data-label="เรต" class="td-rates">${hdRes.ratesHtml}</td>
+                <td data-label="จำนวน" class="text-center mono" style="color:var(--text2)">${hdRes.daysDisplay}</td>
+                <td data-label="รวม" class="text-right">฿${fm(hdRes.total)}</td>
+                <td data-label="สรุปรายวัน" class="text-right td-daily td-daily-mobile">฿${fm(itemTotal)}</td>
             </tr>`;
         } else if (wdRes) {
             itemTotal = wdRes.total;
-            rows += `<tr><td><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td>${wdRes.timeHtml}</td><td style="white-space:nowrap">${wdRes.ratesHtml}</td><td class="text-center mono" style="color:var(--text2)">${wdRes.daysDisplay}</td><td class="text-right">฿${fm(wdRes.total)}</td><td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
+            rows += `<tr><td data-label="รายการ"><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td data-label="เวลา">${wdRes.timeHtml}</td><td data-label="เรต" class="td-rates">${wdRes.ratesHtml}</td><td data-label="จำนวน" class="text-center mono" style="color:var(--text2)">${wdRes.daysDisplay}</td><td data-label="รวม" class="text-right">฿${fm(wdRes.total)}</td><td data-label="สรุป" class="text-right td-daily" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
         } else if (hdRes) {
             itemTotal = hdRes.total;
-            rows += `<tr><td><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td>${hdRes.timeHtml}</td><td style="white-space:nowrap">${hdRes.ratesHtml}</td><td class="text-center mono" style="color:var(--text2)">${hdRes.daysDisplay}</td><td class="text-right">฿${fm(hdRes.total)}</td><td class="text-right" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
+            rows += `<tr><td data-label="รายการ"><span style="font-weight:600;font-size:0.85rem">${name}</span></td><td data-label="เวลา">${hdRes.timeHtml}</td><td data-label="เรต" class="td-rates">${hdRes.ratesHtml}</td><td data-label="จำนวน" class="text-center mono" style="color:var(--text2)">${hdRes.daysDisplay}</td><td data-label="รวม" class="text-right">฿${fm(hdRes.total)}</td><td data-label="สรุป" class="text-right td-daily" style="border-left:1px solid var(--border); background:rgba(240,192,64,0.03); font-weight:700;">฿${fm(itemTotal)}</td></tr>`;
         }
 
         item.querySelector(".item-amount").innerText = `฿${fm(itemTotal)}`;

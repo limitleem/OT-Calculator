@@ -113,7 +113,8 @@ body {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .landing-screen {
@@ -796,6 +797,11 @@ table {
     margin-top: 20px;
 }
 
+/* Text alignment utilities */
+.text-right  { text-align: right; }
+.text-center { text-align: center; }
+.text-left   { text-align: left; }
+
 th {
     background: var(--surface2);
     padding: 16px 20px;
@@ -996,9 +1002,321 @@ input:disabled {
     border-color: var(--border) !important;
 }
 
-@media(max-width:580px) {
+/* Layout Constraints */
+.col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Grid Layouts */
+.ot-grid {
+    display: grid;
+    grid-template-columns: 65px 100px 100px 1fr;
+    gap: 16px;
+    align-items: flex-end;
+    margin-bottom: 16px;
+}
+
+/* --- Responsive Design --- */
+
+/* Tablets */
+@media (max-width: 768px) {
+    .main { padding: 15px; }
+    .header-wrap { padding: 15px 20px; }
+    
+    .salary-card { grid-template-columns: 1fr; }
+    
+    .rate-pills {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .ot-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    /* Ensure type and summary take full width on tablets */
+    .ot-grid .field:first-child,
+    .ot-grid .field:last-child {
+        grid-column: span 2;
+    }
+}
+
+/* Mobile Devices */
+@media (max-width: 480px) {
+    .header-wrap {
+        padding: 12px 16px;
+        gap: 10px;
+    }
+
+    .header-text h1 {
+        font-size: 1.1rem;
+    }
+
+    .header-text p {
+        font-size: 0.65rem;
+        display: none; /* Hide subtitle on tiny screens to save space */
+    }
+
+    .profile-trigger {
+        padding: 4px 8px;
+    }
+
+    .p-name {
+        font-size: 0.8rem;
+    }
+
+    .header-right {
+        gap: 8px;
+    }
+    
+    .rate-pills {
+        grid-template-columns: 1fr 1fr; /* Keep 2 columns on mobile to save vertical space */
+        gap: 8px;
+    }
+
+    .rate-pill {
+        padding: 10px;
+    }
+
+    .rp-label {
+        font-size: 0.6rem;
+    }
+
+    .rp-val {
+        font-size: 0.85rem;
+    }
+    
+    .btn-row {
+        flex-direction: row;
+        gap: 8px;
+    }
+    
+    .btn-add {
+        font-size: 0.8rem;
+        padding: 10px;
+    }
+
+    .btn-row .btn-clear {
+        min-width: 0;
+        width: auto;
+        padding: 10px 15px;
+        font-size: 0.8rem;
+    }
+    
+    .ot-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .ot-grid .field:nth-child(1) { grid-column: span 2; } /* Checkbox type */
+    .ot-grid .field:nth-child(2) { grid-column: span 1; } /* Start */
+    .ot-grid .field:nth-child(3) { grid-column: span 1; } /* End */
+    .ot-grid .field:nth-child(4) { grid-column: span 2; } /* Summary */
+
+    /* Item Header Fixes */
+    .item-header {
+        padding: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .item-name {
+        font-size: 0.85rem;
+        flex-basis: 100%; /* Take full width to prevent overlap with amount */
+        order: 1;
+    }
+
+    .item-meta {
+        order: 2;
+        margin-left: 28px; /* Align with name start */
+    }
+
+    .item-amount {
+        font-size: 0.9rem;
+    }
+    
     .col-2 {
         grid-template-columns: 1fr;
+    }
+    
+    .results-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .results-card {
+        padding: 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+        min-width: 650px; /* Minimum width to prevent data overlap */
+    }
+    
+    .salary-input-wrap input {
+        font-size: 1.2rem;
+    }
+
+    /* Modal adjustments for small screens */
+    .glass-card {
+        padding: 20px;
+        width: 95%;
+    }
+}
+
+/* Default (desktop): hide the mobile-only daily cell */
+.td-daily-mobile { display: none; }
+
+/* ============================================
+   MOBILE CARD TABLE — activated ≤ 600px
+   Converts table rows into stacked cards with
+   inline labels from the data-label attribute.
+   ============================================ */
+@media (max-width: 600px) {
+    /* Remove the horizontal-scroll forced table width */
+    .results-card {
+        overflow-x: unset;
+    }
+
+    table {
+        min-width: unset;
+    }
+
+    /* Hide desktop table headers */
+    table thead {
+        display: none;
+    }
+
+    /* Each row becomes a card block */
+    table tbody tr {
+        display: block;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        overflow: hidden;
+        background: var(--surface2);
+    }
+
+    /* When WD+HD rows are grouped, connect them visually */
+    table tbody tr.result-group-first {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom: none;
+    }
+
+    table tbody tr.result-group-last {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        border-top: 1px dashed var(--border2);
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+
+    /* Each cell becomes a labeled row */
+    table tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.85rem;
+        /* Allow text-right / text-center classes to still work */
+    }
+
+    /* Right-aligned cells: label stays left, value aligns right */
+    table tbody td.text-right {
+        text-align: right;
+    }
+
+    table tbody td.text-center {
+        text-align: right; /* In card mode treat center like right for readability */
+    }
+
+    table tbody td:last-child {
+        border-bottom: none;
+    }
+
+    /* The rowspan desktop daily total — hidden on mobile */
+    table tbody td.td-daily-desktop {
+        display: none;
+    }
+
+    /* The mobile daily total — shown after the last HD row */
+    table tbody td.td-daily-mobile {
+        display: flex;
+    }
+
+    /* Hide rowspan-based name cells that would duplicate on grouped rows */
+    table tbody td[rowspan] {
+        background: rgba(255, 255, 255, 0.03);
+        font-weight: 700;
+        font-size: 0.9rem;
+        border-bottom: 1px solid var(--border2);
+    }
+
+    /* Inline label from data-label attribute */
+    table tbody td::before {
+        content: attr(data-label);
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        color: var(--text3);
+        flex-shrink: 0;
+        margin-right: 10px;
+    }
+
+    /* Rate chips: allow them to wrap to the next line */
+    table tbody td.td-rates {
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: flex-start;
+        padding: 10px 14px;
+    }
+
+    table tbody td.td-rates::before {
+        width: 100%;
+        margin-bottom: 4px;
+        flex-basis: 100%;
+    }
+
+    /* Daily total — make it prominent */
+    table tbody td.td-daily {
+        background: rgba(240,192,64,0.05) !important;
+        border-left: none !important;
+        color: var(--accent);
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    /* Footer total row */
+    table tfoot tr {
+        display: block;
+        background: var(--surface2);
+        border-radius: 10px;
+        border: 1px solid var(--border2);
+        padding: 14px;
+        margin-top: 14px;
+    }
+
+    table tfoot td {
+        display: inline;
+        border: none;
+        padding: 0;
+    }
+
+    table tfoot td:first-child {
+        color: var(--text2);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    table tfoot td:last-child {
+        float: right;
+        color: var(--accent);
+        font-size: 1.1rem;
+        font-weight: 800;
     }
 }
 
