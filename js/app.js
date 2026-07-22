@@ -1177,6 +1177,46 @@ function openQuotaModal() {
         `;
     }
 
+    // --- Build holiday list grouped by month (2-column) ---
+    const allHolidays2026 = APP_CONFIG.HOLIDAYS_2569.filter(h => h.date.startsWith("2026-"));
+    const monthGroups = {};
+    allHolidays2026.forEach(h => {
+        const d = new Date(h.date);
+        const mon = d.getMonth();
+        if (!monthGroups[mon]) monthGroups[mon] = [];
+        monthGroups[mon].push(h);
+    });
+
+    let holidayColumnsHtml = '';
+    for (let m = 0; m < 12; m++) {
+        const items = monthGroups[m];
+        if (!items || items.length === 0) continue;
+        const itemsHtml = items.map(h => {
+            const fd = formatThaiDate(h.date);
+            return `
+                <div style="background:#1e1e2e; border-radius:8px; padding:10px 12px; margin-bottom:6px;">
+                    <div style="font-size:0.82rem; font-weight:600; color:#e2e8f0;">${fd.full}</div>
+                    <div style="font-size:0.72rem; color:#f0c040; margin-top:2px;">${h.title}</div>
+                </div>`;
+        }).join('');
+        holidayColumnsHtml += `
+            <div style="break-inside:avoid; margin-bottom:12px;">
+                <div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; border-bottom:1px solid #2d2d3d; padding-bottom:4px; margin-bottom:8px;">${THAI_MONTHS_FULL[m]}</div>
+                ${itemsHtml}
+            </div>`;
+    }
+
+    const holidaySectionHtml = `
+        <div style="margin-top:28px; background:#12121e; border-radius:12px; padding:20px;">
+            <div style="font-size:0.8rem; color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:0.6px; margin-bottom:14px; display:flex; align-items:center; gap:6px;">
+                🗓 รายละเอียดวันหยุดนักขัตฤกษ์ ปี 2569
+            </div>
+            <div style="column-count:2; column-gap:16px;">
+                ${holidayColumnsHtml}
+            </div>
+            <div style="font-size:0.68rem; color:#64748b; margin-top:10px;">* รวมวันหยุดทั้งหมด ${allHolidays2026.length} วัน (รวมวันเข้าพรรษา)</div>
+        </div>`;
+
     const container = document.getElementById("quotaTableContainer");
     container.innerHTML = `
         <div class="quota-title">จำนวนวันหยุดค่าวิชาชีพ ปี 2569</div>
@@ -1203,6 +1243,7 @@ function openQuotaModal() {
             </tbody>
         </table>
         <div class="quota-footnote">*กรณีวันหยุดพิเศษมากกว่า 3 วัน ลบ 110 ชั่วโมง นอกนั้นลบ 120 ชั่วโมง</div>
+        ${holidaySectionHtml}
     `;
 
     document.getElementById("quotaModal").classList.add("show");
@@ -1217,7 +1258,7 @@ function saveQuotaAsImage() {
     html2canvas(container, {
         scale: 2,
         useCORS: true,
-        backgroundColor: "#ffffff"
+        backgroundColor: "#0f0f1a"
     }).then(canvas => {
         const link = document.createElement("a");
         link.download = "โควต้าวันลา_2569.png";
