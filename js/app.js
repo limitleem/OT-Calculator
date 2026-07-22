@@ -1050,3 +1050,104 @@ const renderHolidays = () => {
     });
     list.innerHTML = html || `<div style="text-align:center; padding:20px; color:var(--text3)">${APP_CONFIG.TEXT.NO_HOLIDAY_DATA}</div>`;
 };
+
+function openQuotaModal() {
+    const year = 2026;
+    const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+    // Exclude "วันเข้าพรรษา" from calculations as requested
+    const holidays = APP_CONFIG.HOLIDAYS_2569.filter(h => h.title !== "วันเข้าพรรษา" && h.date.startsWith("2026-")).map(h => h.date);
+
+    let tableRowsHtml = "";
+    for (let m = 0; m < 12; m++) {
+        let totalMonFri = 0;
+        let specialHolidays = 0;
+        const daysInMonth = new Date(year, m + 1, 0).getDate();
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const dateObj = new Date(year, m, d);
+            const dayOfWeek = dateObj.getDay();
+            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                totalMonFri++;
+                if (holidays.includes(dateStr)) {
+                    specialHolidays++;
+                }
+            }
+        }
+
+        const workingDays = totalMonFri - specialHolidays;
+        const workingHours = workingDays * 7;
+        const subtractHours = specialHolidays > 3 ? 110 : 120;
+        const allowableLeaveHours = workingHours - subtractHours;
+        const leaveQuota = allowableLeaveHours / 7;
+        const roundedLeaveQuota = Number(leaveQuota.toFixed(2));
+        const professionFee = Math.floor(leaveQuota * 2) / 2;
+        const smartDeviceFee = workingDays - 17;
+
+        tableRowsHtml += `
+            <tr>
+                <td class="row-num">${m + 1}</td>
+                <td class="month-name">${thaiMonths[m]}</td>
+                <td class="val-red">${workingDays}</td>
+                <td>${workingHours}</td>
+                <td class="val-red">${specialHolidays}</td>
+                <td>${subtractHours}</td>
+                <td>${allowableLeaveHours}</td>
+                <td>${roundedLeaveQuota.toFixed(2)}</td>
+                <td class="val-bold">${professionFee.toFixed(1)}</td>
+                <td class="val-bold">${smartDeviceFee}</td>
+            </tr>
+        `;
+    }
+
+    const container = document.getElementById("quotaTableContainer");
+    container.innerHTML = `
+        <div class="quota-title">จำนวนวันหยุดค่าวิชาชีพ ปี 2569</div>
+        <table class="quota-spreadsheet">
+            <thead>
+                <tr>
+                    <th rowspan="2" class="num-col"></th>
+                    <th rowspan="2" class="month-col">เดือน</th>
+                    <th rowspan="2" class="work-days-col">วันที่ทำการ</th>
+                    <th rowspan="2" class="work-hours-col">ชั่วโมงที่ทำการ</th>
+                    <th rowspan="2" class="holiday-col">วันหยุดพิเศษ</th>
+                    <th rowspan="2" class="minus-hours-col">ชั่วโมงที่ลบ</th>
+                    <th rowspan="2" class="leave-hours-col">ชั่วโมงที่หยุดได้</th>
+                    <th rowspan="2" class="quota-col">โควต้าหยุด</th>
+                    <th colspan="2" class="earned-col">หยุดแล้วยังได้</th>
+                </tr>
+                <tr>
+                    <th class="fee-col">ค่าวิชา</th>
+                    <th class="smart-col">ค่า Smart Device</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tableRowsHtml}
+            </tbody>
+        </table>
+        <div class="quota-footnote">*กรณีวันหยุดพิเศษมากกว่า 3 วัน ลบ 110 ชั่วโมง นอกนั้นลบ 120 ชั่วโมง</div>
+    `;
+
+    document.getElementById("quotaModal").classList.add("show");
+}
+
+function saveQuotaAsImage() {
+    const container = document.getElementById("quotaTableContainer");
+    if (!container) return;
+
+    showToast("กำลังประมวลผลรูปภาพ...", "info");
+
+    html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff"
+    }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "โควต้าวันลา_2569.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        showToast("บันทึกรูปภาพสำเร็จ", "success");
+    }).catch(err => {
+        console.error("Save image error:", err);
+        showToast("เกิดข้อผิดพลาดในการบันทึกรูปภาพ", "error");
+    });
+}

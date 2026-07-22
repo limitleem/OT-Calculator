@@ -862,7 +862,7 @@ tfoot td {
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 1000;
+    z-index: 3000;
     display: none;
     align-items: center;
     justify-content: center;
@@ -1640,4 +1640,130 @@ input:disabled {
 .btn-reset-app:hover {
     color: var(--red);
     opacity: 1;
+}
+
+/* Quota landing page button */
+.btn-quota-landing {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1.5px solid rgba(240, 192, 64, 0.4);
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    font-family: inherit;
+    z-index: 2500;
+}
+
+.btn-quota-landing:hover {
+    background: var(--accent);
+    color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(240, 192, 64, 0.2);
+}
+
+/* Quota spreadsheet styling */
+#quotaTableContainer {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 8px;
+    color: #000000;
+    font-family: 'Noto Sans Thai', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.quota-title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #000000;
+    font-family: 'Noto Sans Thai', 'Segoe UI', sans-serif;
+}
+
+.quota-spreadsheet {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    color: #000000;
+    background: #ffffff;
+}
+
+.quota-spreadsheet th,
+.quota-spreadsheet td {
+    border: 1px solid #000000 !important;
+    padding: 8px 10px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: 0.9rem !important;
+    font-family: 'Noto Sans Thai', 'Segoe UI', sans-serif !important;
+    color: #000000 !important;
+    background: transparent;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: normal;
+}
+
+/* Headers */
+.quota-spreadsheet th {
+    font-weight: bold !important;
+}
+
+.quota-spreadsheet th.num-col,
+.quota-spreadsheet th.month-col {
+    background-color: #ebf1e6 !important;
+}
+
+.quota-spreadsheet th.work-days-col,
+.quota-spreadsheet th.work-hours-col {
+    background-color: #ddebf7 !important;
+}
+
+.quota-spreadsheet th.holiday-col,
+.quota-spreadsheet th.minus-hours-col {
+    background-color: #fff2cc !important;
+}
+
+.quota-spreadsheet th.leave-hours-col,
+.quota-spreadsheet th.quota-col {
+    background-color: #fce4d6 !important;
+}
+
+.quota-spreadsheet th.earned-col,
+.quota-spreadsheet th.fee-col,
+.quota-spreadsheet th.smart-col {
+    background-color: #fff2cc !important;
+}
+
+/* Specific alignments & text styles */
+.quota-spreadsheet td.row-num {
+    font-weight: bold !important;
+}
+
+.quota-spreadsheet td.month-name {
+    font-weight: bold !important;
+    text-align: left !important;
+    padding-left: 15px !important;
+}
+
+.quota-spreadsheet td.val-red {
+    color: #ff3b30 !important;
+    font-weight: bold !important;
+}
+
+.quota-spreadsheet td.val-bold {
+    font-weight: bold !important;
+}
+
+.quota-footnote {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: #555555;
+    font-style: italic;
+    text-align: left;
+    font-family: 'Noto Sans Thai', 'Segoe UI', sans-serif;
 }

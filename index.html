@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="css/styles.css">
@@ -54,6 +55,7 @@
 
     <!-- Screens -->
     <div id="landingScreen" class="landing-screen">
+        <button class="btn-quota-landing" onclick="openQuotaModal()">ดูโควต้าวันลา</button>
         <div class="landing-header">
             <div class="landing-icon">⚡</div>
             <h1>OT Builder Pro</h1>
@@ -264,6 +266,28 @@
             </div>
             <div class="modal-body">
                 <div id="dayBreakdownList" class="holiday-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quota Modal -->
+    <div id="quotaModal" class="modal-overlay" onclick="if(event.target===this) this.classList.remove('show')">
+        <div class="modal-content" style="max-width: 960px; width: 95%; max-height: 90vh;">
+            <div class="modal-header">
+                <h3 style="font-weight: 700;">จำนวนวันหยุดค่าวิชาชีพ ปี 2569</h3>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn-prime" onclick="saveQuotaAsImage()" style="width:auto; padding:8px 16px; font-size:0.85rem; display:flex; align-items:center; gap:6px; background:var(--accent); color:#000; border-radius:8px; border:none; cursor:pointer; font-weight:700;">
+                        📷 บันทึกเป็นรูปภาพ
+                    </button>
+                    <button class="modal-close"
+                        style="background:none; border:none; color:var(--text3); font-size:1.5rem; cursor:pointer"
+                        onclick="document.getElementById('quotaModal').classList.remove('show')">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body" style="overflow: auto; padding: 20px;">
+                <div id="quotaTableContainer">
+                    <!-- The table will be generated here -->
+                </div>
             </div>
         </div>
     </div>
