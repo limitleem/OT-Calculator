@@ -1051,7 +1051,7 @@ const renderHolidays = () => {
 
     // --- Leave Quota Section (grouped by month) ---
     const quotaHolidays = APP_CONFIG.HOLIDAYS_2569
-        .filter(h => h.title !== 'วันเข้าพรรษา' && h.date.startsWith(filterYear + '-'))
+        .filter(h => h.date.startsWith(filterYear + '-'))
         .map(h => h.date);
 
     let quotaHtml = '';
@@ -1122,7 +1122,7 @@ const renderHolidays = () => {
             </div>
             ${quotaHtml}
             <div style="font-size:0.7rem; color:var(--text3); margin-top:6px; line-height:1.6; padding:0 4px;">
-                * หยุดพิเศษ &gt; 3 วัน ลบ 110 ชม. · นอกนั้นลบ 120 ชม. · ไม่รวมวันเข้าพรรษา
+                * หยุดพิเศษ &gt; 3 วัน ลบ 110 ชม. · นอกนั้นลบ 120 ชม.
             </div>
         </div>`;
 
@@ -1132,10 +1132,10 @@ const renderHolidays = () => {
 function openQuotaModal() {
     const year = 2026;
     const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-    // Exclude "วันเข้าพรรษา" from calculations as requested
-    const holidays = APP_CONFIG.HOLIDAYS_2569.filter(h => h.title !== "วันเข้าพรรษา" && h.date.startsWith("2026-")).map(h => h.date);
+    const holidays = APP_CONFIG.HOLIDAYS_2569.filter(h => h.date.startsWith("2026-")).map(h => h.date);
 
     let tableRowsHtml = "";
+
     for (let m = 0; m < 12; m++) {
         let totalMonFri = 0;
         let specialHolidays = 0;
@@ -1177,8 +1177,12 @@ function openQuotaModal() {
         `;
     }
 
-    // --- Build holiday list grouped by month (2-column) ---
-    const allHolidays2026 = APP_CONFIG.HOLIDAYS_2569.filter(h => h.date.startsWith("2026-"));
+    // --- Build holiday list grouped by month (2-column) — weekdays only ---
+    const allHolidays2026 = APP_CONFIG.HOLIDAYS_2569.filter(h => {
+        if (!h.date.startsWith("2026-")) return false;
+        const day = new Date(h.date).getDay();
+        return day !== 0 && day !== 6; // exclude Sun (0) and Sat (6)
+    });
     const monthGroups = {};
     allHolidays2026.forEach(h => {
         const d = new Date(h.date);
@@ -1214,7 +1218,7 @@ function openQuotaModal() {
             <div style="column-count:2; column-gap:16px;">
                 ${holidayColumnsHtml}
             </div>
-            <div style="font-size:0.68rem; color:#64748b; margin-top:10px;">* รวมวันหยุดทั้งหมด ${allHolidays2026.length} วัน (รวมวันเข้าพรรษา)</div>
+            <div style="font-size:0.68rem; color:#64748b; margin-top:10px;">* รวมวันหยุดทั้งหมด ${allHolidays2026.length} วัน</div>
         </div>`;
 
     const container = document.getElementById("quotaTableContainer");
@@ -1242,7 +1246,7 @@ function openQuotaModal() {
                 ${tableRowsHtml}
             </tbody>
         </table>
-        <div class="quota-footnote">*กรณีวันหยุดพิเศษมากกว่า 3 วัน ลบ 110 ชั่วโมง นอกนั้นลบ 120 ชั่วโมง</div>
+        <div class="quota-footnote">*กรณีวันหยุดพิเศษมากกว่า 3 วัน ลบ 110 ชั่วโมง นอกนั้นลบ 120 ชั่วโมง<br>* smart device ต้องมาทำงาน 17 วัน (ไม่รวม OT) หรือถ้าเดือนนั้นมีวันทำงานไม่ถึง 17 วันต้องไม่หยุดเลย</div>
         ${holidaySectionHtml}
     `;
 
