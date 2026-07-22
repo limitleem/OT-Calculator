@@ -1192,35 +1192,98 @@ function openQuotaModal() {
     });
 
     let holidayColumnsHtml = '';
+
     for (let m = 0; m < 12; m++) {
         const items = monthGroups[m];
         if (!items || items.length === 0) continue;
+
         const itemsHtml = items.map(h => {
             const fd = formatThaiDate(h.date);
+
             return `
-                <div style="background:#1e1e2e; border-radius:8px; padding:10px 12px; margin-bottom:6px;">
-                    <div style="font-size:0.82rem; font-weight:600; color:#e2e8f0;">${fd.full}</div>
-                    <div style="font-size:0.72rem; color:#f0c040; margin-top:2px;">${h.title}</div>
-                </div>`;
-        }).join('');
-        holidayColumnsHtml += `
-            <div style="break-inside:avoid; margin-bottom:12px;">
-                <div style="font-size:0.7rem; color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:0.5px; border-bottom:1px solid #2d2d3d; padding-bottom:4px; margin-bottom:8px;">${THAI_MONTHS_FULL[m]}</div>
-                ${itemsHtml}
+            <div style="
+                border:1px solid #d8dee9;
+                border-left:4px solid #2563eb;
+                border-radius:8px;
+                padding:10px 12px;
+                margin-bottom:8px;
+                background:#ffffff;
+            ">
+                <div style="
+                    font-size:0.83rem;
+                    font-weight:600;
+                    color:#1e293b;
+                ">
+                    ${fd.full}
+                </div>
+
+                <div style="
+                    font-size:0.74rem;
+                    color:#475569;
+                    margin-top:3px;
+                    line-height:1.35;
+                ">
+                    ${h.title}
+                </div>
             </div>`;
+        }).join('');
+
+        holidayColumnsHtml += `
+        <div style="break-inside:avoid; margin-bottom:16px;">
+            <div style="
+                font-size:0.75rem;
+                font-weight:700;
+                color:#1e3a8a;
+                text-transform:uppercase;
+                padding-bottom:5px;
+                margin-bottom:10px;
+                border-bottom:2px solid #cbd5e1;
+            ">
+                ${THAI_MONTHS_FULL[m]}
+            </div>
+
+            ${itemsHtml}
+        </div>`;
     }
 
     const holidaySectionHtml = `
-        <div style="margin-top:28px; background:#12121e; border-radius:12px; padding:20px;">
-            <div style="font-size:0.8rem; color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:0.6px; margin-bottom:14px; display:flex; align-items:center; gap:6px;">
-                🗓 รายละเอียดวันหยุดนักขัตฤกษ์ ปี 2569
-            </div>
-            <div style="column-count:4; column-gap:16px;">
-                ${holidayColumnsHtml}
-            </div>
-            <div style="font-size:0.68rem; color:#64748b; margin-top:10px;">* รวมวันหยุดทั้งหมด ${allHolidays2026.length} วัน</div>
-        </div>`;
+<div style="
+    margin-top:28px;
+    border:1px solid #d6dce5;
+    border-radius:12px;
+    background:#fafafa;
+    padding:22px;
+">
+    <div style="
+        font-size:0.82rem;
+        font-weight:700;
+        color:#1f2937;
+        margin-bottom:18px;
+        display:flex;
+        align-items:center;
+        gap:8px;
+    ">
+        📅 รายละเอียดวันหยุดนักขัตฤกษ์ ปี 2569
+    </div>
 
+    <div style="
+        column-count:4;
+        column-gap:18px;
+    ">
+        ${holidayColumnsHtml}
+    </div>
+
+    <div style="
+        margin-top:14px;
+        padding-top:10px;
+        border-top:1px solid #d1d5db;
+        font-size:0.72rem;
+        color:#6b7280;
+        text-align:right;
+    ">
+        รวมวันหยุดทั้งหมด <strong>${allHolidays2026.length}</strong> วัน
+    </div>
+</div>`;
     const container = document.getElementById("quotaTableContainer");
     container.innerHTML = `
         <div class="quota-title">จำนวนวันหยุดค่าวิชาชีพ ปี 2569</div>
