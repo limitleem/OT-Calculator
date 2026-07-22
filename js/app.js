@@ -1215,7 +1215,7 @@ function openQuotaModal() {
             <div style="font-size:0.8rem; color:#94a3b8; text-transform:uppercase; font-weight:700; letter-spacing:0.6px; margin-bottom:14px; display:flex; align-items:center; gap:6px;">
                 🗓 รายละเอียดวันหยุดนักขัตฤกษ์ ปี 2569
             </div>
-            <div style="column-count:2; column-gap:16px;">
+            <div style="column-count:4; column-gap:16px;">
                 ${holidayColumnsHtml}
             </div>
             <div style="font-size:0.68rem; color:#64748b; margin-top:10px;">* รวมวันหยุดทั้งหมด ${allHolidays2026.length} วัน</div>
