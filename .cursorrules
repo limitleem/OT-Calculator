@@ -1,0 +1,43 @@
+# Cursor Rules (.cursorrules)
+
+This file contains repository-specific instructions and rules that Cursor AI must follow when editing files in this workspace.
+
+---
+
+## 1. Project Paradigm & Architecture
+- **Static Frontend Only**: This is a client-side SPA. Do not attempt to install npm dependencies or build steps unless requested by the user. All external libraries are loaded via CDN in `index.html` (e.g., flatpickr, sortablejs).
+- **State & Data**: State is stored in `localStorage` and managed directly via JavaScript. Always save changes to localStorage when items are updated, deleted, or profiles are modified.
+- **Glassmorphic Design**: The visual styling relies heavily on CSS variables and glassmorphism. Keep colors harmonious with existing themes (e.g. HSL colors, preset profiles).
+
+---
+
+## 2. Localization & Text Rules
+- **Language**: The application is tailored for Thai users.
+- **Config-Driven Text**: Do not hardcode Thai text strings inside `js/app.js` or `index.html` if they represent labels, warnings, or dynamic descriptions. Add them to the `APP_CONFIG.TEXT` object in `js/config.js` and reference them dynamically (e.g. `APP_CONFIG.TEXT.WARN_NO_WD`).
+
+---
+
+## 3. Math & OT Calculations
+- **Base Units**: Daily work hours are fixed at `7` hours. Monthly days are fixed at `30`.
+- **Hourly wage formula**: `Salary / 30 / 7`.
+- **Money rounding**: Always use `calMoney()` (2 decimal places) for financial results.
+- **Hour intervals**: OT is calculated in `0.5` hour blocks.
+- **Overnight shifts**: If `endTime <= startTime`, the engine adds `24` hours to `endTime` to calculate overnight OT. Ensure any changes to timing logic do not break overnight support.
+- **Rates**:
+  - Weekday OT: `1.5x` standard hourly rate.
+  - Holiday standard hours: `1.0x` standard hourly rate (working standard 08:30 - 16:30, minus 12:00 - 13:00 lunch).
+  - Holiday OT: `3.0x` standard hourly rate.
+
+---
+
+## 4. Date and Time Presentation
+- **Buddhist Era (B.E.)**: The UI shows dates in the Thai Buddhist Era format (Gregorian Year + 543). Always use `formatThaiDate()` for UI display.
+- **Internal Representation**: Keep Gregorian string format (`YYYY-MM-DD`) internally for comparison, Flatpickr values, and `isHoliday()` lookup.
+- **Holidays Configuration**: The holidays calendar list is defined in `APP_CONFIG.HOLIDAYS_2569` for B.E. 2569 (Gregorian 2026). When checking if a date is a holiday:
+  - Check if it is a Saturday or Sunday.
+  - Check if it matches an entry in `APP_CONFIG.HOLIDAYS_2569`.
+
+---
+
+## 5. Security Configuration
+- **Master PIN**: The PIN `964799` is the developer bypass/global master PIN. It unlocks any profile on the PIN entry screen. Do not change or expose this unless requested.
