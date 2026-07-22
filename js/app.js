@@ -1048,7 +1048,85 @@ const renderHolidays = () => {
         const fd = formatThaiDate(h.date);
         html += UI.renderHolidayItem(fd.full, h.title);
     });
-    list.innerHTML = html || `<div style="text-align:center; padding:20px; color:var(--text3)">${APP_CONFIG.TEXT.NO_HOLIDAY_DATA}</div>`;
+
+    // --- Leave Quota Section (grouped by month) ---
+    const quotaHolidays = APP_CONFIG.HOLIDAYS_2569
+        .filter(h => h.title !== 'วันเข้าพรรษา' && h.date.startsWith(filterYear + '-'))
+        .map(h => h.date);
+
+    let quotaHtml = '';
+    for (let m = 0; m < 12; m++) {
+        let totalMonFri = 0;
+        let specialHolidays = 0;
+        const daysInMonth = new Date(filterYear, m + 1, 0).getDate();
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${filterYear}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const dateObj = new Date(filterYear, m, d);
+            const dayOfWeek = dateObj.getDay();
+            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                totalMonFri++;
+                if (quotaHolidays.includes(dateStr)) specialHolidays++;
+            }
+        }
+        const workingDays = totalMonFri - specialHolidays;
+        const workingHours = workingDays * 7;
+        const subtractHours = specialHolidays > 3 ? 110 : 120;
+        const allowableLeaveHours = workingHours - subtractHours;
+        const leaveQuota = allowableLeaveHours / 7;
+        const professionFee = Math.floor(leaveQuota * 2) / 2;
+        const smartDeviceFee = workingDays - 17;
+
+        const quotaColor = leaveQuota < 0 ? 'var(--red, #ef4444)' : 'var(--accent)';
+        const smartColor = smartDeviceFee < 0 ? 'var(--red, #ef4444)' : 'var(--green, #22c55e)';
+
+        quotaHtml += `
+            <div style="background:var(--surface2); border-radius:10px; padding:12px 14px; margin-bottom:8px; display:flex; align-items:center; gap:10px; border:1px solid var(--border);">
+                <div style="min-width:42px; text-align:center;">
+                    <div style="font-size:0.65rem; color:var(--text3); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">เดือน</div>
+                    <div style="font-size:1rem; font-weight:800; color:var(--text);">${THAI_MONTHS[m]}</div>
+                </div>
+                <div style="width:1px; height:36px; background:var(--border); flex-shrink:0;"></div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px 14px; flex:1;">
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:0.6rem; color:var(--text3); font-weight:600;">วันทำงาน</span>
+                        <span style="font-size:0.9rem; font-weight:700; color:var(--text);">${workingDays}</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:0.6rem; color:var(--text3); font-weight:600;">หยุดพิเศษ</span>
+                        <span style="font-size:0.9rem; font-weight:700; color:${specialHolidays > 0 ? 'var(--red, #ef4444)' : 'var(--text3)'}">${specialHolidays}</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:0.6rem; color:var(--text3); font-weight:600;">ลบ (ชม.)</span>
+                        <span style="font-size:0.9rem; font-weight:700; color:var(--text2);">${subtractHours}</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:0.6rem; color:var(--text3); font-weight:600;">โควต้าหยุด</span>
+                        <span style="font-size:0.9rem; font-weight:800; color:${quotaColor};">${leaveQuota.toFixed(2)}</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:0.6rem; color:var(--text3); font-weight:600;">ค่าวิชา</span>
+                        <span style="font-size:0.9rem; font-weight:800; color:var(--accent);">${professionFee.toFixed(1)}</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <span style="font-size:0.6rem; color:var(--text3); font-weight:600;">Smart Device</span>
+                        <span style="font-size:0.9rem; font-weight:800; color:${smartColor};">${smartDeviceFee}</span>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    const quotaSection = `
+        <div style="margin-top:24px;">
+            <div style="font-size:0.75rem; color:var(--text3); text-transform:uppercase; font-weight:700; margin:0 0 10px 4px; letter-spacing:0.5px; border-bottom:1px solid var(--border); padding-bottom:4px; display:flex; align-items:center; gap:6px;">
+                📅 โควต้าวันลา รายเดือน
+            </div>
+            ${quotaHtml}
+            <div style="font-size:0.7rem; color:var(--text3); margin-top:6px; line-height:1.6; padding:0 4px;">
+                * หยุดพิเศษ &gt; 3 วัน ลบ 110 ชม. · นอกนั้นลบ 120 ชม. · ไม่รวมวันเข้าพรรษา
+            </div>
+        </div>`;
+
+    list.innerHTML = (html || `<div style="text-align:center; padding:20px; color:var(--text3)">${APP_CONFIG.TEXT.NO_HOLIDAY_DATA}</div>`) + quotaSection;
 };
 
 function openQuotaModal() {
