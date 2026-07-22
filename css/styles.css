@@ -799,9 +799,17 @@ table {
 }
 
 /* Text alignment utilities */
-.text-right  { text-align: right; }
-.text-center { text-align: center; }
-.text-left   { text-align: left; }
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
 
 th {
     background: var(--surface2);
@@ -843,9 +851,20 @@ tfoot td {
     margin-right: 6px;
 }
 
-.hours-chip.x1 { background: var(--blue-dim); color: var(--blue); }
-.hours-chip.x15 { background: var(--accent-dim); color: var(--accent); }
-.hours-chip.x3 { background: var(--green-dim); color: var(--green); }
+.hours-chip.x1 {
+    background: var(--blue-dim);
+    color: var(--blue);
+}
+
+.hours-chip.x15 {
+    background: var(--accent-dim);
+    color: var(--accent);
+}
+
+.hours-chip.x3 {
+    background: var(--green-dim);
+    color: var(--green);
+}
 
 .badge {
     font-size: 0.6rem;
@@ -854,8 +873,16 @@ tfoot td {
     border-radius: 4px;
     letter-spacing: 0.5px;
 }
-.badge-wd { background: var(--blue-dim); color: var(--blue); }
-.badge-hd { background: var(--accent-dim); color: var(--accent); }
+
+.badge-wd {
+    background: var(--blue-dim);
+    color: var(--blue);
+}
+
+.badge-hd {
+    background: var(--accent-dim);
+    color: var(--accent);
+}
 
 .modal-overlay {
     position: fixed;
@@ -985,7 +1012,8 @@ tfoot td {
     height: 38px;
 }
 
-.ot-row-info b, .ot-row-info .c-cnt {
+.ot-row-info b,
+.ot-row-info .c-cnt {
     color: var(--accent);
     font-weight: 800;
 }
@@ -1004,7 +1032,11 @@ input:disabled {
 }
 
 /* Layout Constraints */
-.col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.col-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
 
 /* Grid Layouts */
 .ot-grid {
@@ -1019,21 +1051,29 @@ input:disabled {
 
 /* Tablets */
 @media (max-width: 768px) {
-    .main { padding: 90px 15px 24px; } /* header ~70px + breathing room */
-    .header-wrap { padding: 15px 20px; }
-    
-    .salary-card { grid-template-columns: 1fr; }
-    
+    .main {
+        padding: 90px 15px 24px;
+    }
+
+    /* header ~70px + breathing room */
+    .header-wrap {
+        padding: 15px 20px;
+    }
+
+    .salary-card {
+        grid-template-columns: 1fr;
+    }
+
     .rate-pills {
         grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
-    
+
     .ot-grid {
         grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
-    
+
     /* Ensure type and summary take full width on tablets */
     .ot-grid .field:first-child,
     .ot-grid .field:last-child {
@@ -1049,7 +1089,9 @@ input:disabled {
     }
 
     /* Push content below the shorter mobile header (~55px) */
-    .main { padding-top: 80px; }
+    .main {
+        padding-top: 80px;
+    }
 
     .header-text h1 {
         font-size: 1.1rem;
@@ -1057,7 +1099,8 @@ input:disabled {
 
     .header-text p {
         font-size: 0.65rem;
-        display: none; /* Hide subtitle on tiny screens to save space */
+        display: none;
+        /* Hide subtitle on tiny screens to save space */
     }
 
     .profile-trigger {
@@ -1071,9 +1114,10 @@ input:disabled {
     .header-right {
         gap: 8px;
     }
-    
+
     .rate-pills {
-        grid-template-columns: 1fr 1fr; /* Keep 2 columns on mobile to save vertical space */
+        grid-template-columns: 1fr 1fr;
+        /* Keep 2 columns on mobile to save vertical space */
         gap: 8px;
     }
 
@@ -1088,12 +1132,12 @@ input:disabled {
     .rp-val {
         font-size: 0.85rem;
     }
-    
+
     .btn-row {
         flex-direction: row;
         gap: 8px;
     }
-    
+
     .btn-add {
         font-size: 0.8rem;
         padding: 10px;
@@ -1105,16 +1149,32 @@ input:disabled {
         padding: 10px 15px;
         font-size: 0.8rem;
     }
-    
+
     .ot-grid {
         grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
-    
-    .ot-grid .field:nth-child(1) { grid-column: span 2; } /* Checkbox type */
-    .ot-grid .field:nth-child(2) { grid-column: span 1; } /* Start */
-    .ot-grid .field:nth-child(3) { grid-column: span 1; } /* End */
-    .ot-grid .field:nth-child(4) { grid-column: span 2; } /* Summary */
+
+    .ot-grid .field:nth-child(1) {
+        grid-column: span 2;
+    }
+
+    /* Checkbox type */
+    .ot-grid .field:nth-child(2) {
+        grid-column: span 1;
+    }
+
+    /* Start */
+    .ot-grid .field:nth-child(3) {
+        grid-column: span 1;
+    }
+
+    /* End */
+    .ot-grid .field:nth-child(4) {
+        grid-column: span 2;
+    }
+
+    /* Summary */
 
     /* Item Header Fixes */
     .item-header {
@@ -1125,39 +1185,42 @@ input:disabled {
 
     .item-name {
         font-size: 0.85rem;
-        flex-basis: 100%; /* Take full width to prevent overlap with amount */
+        flex-basis: 100%;
+        /* Take full width to prevent overlap with amount */
         order: 1;
     }
 
     .item-meta {
         order: 2;
-        margin-left: 28px; /* Align with name start */
+        margin-left: 28px;
+        /* Align with name start */
     }
 
     .item-amount {
         font-size: 0.9rem;
     }
-    
+
     .col-2 {
         grid-template-columns: 1fr;
     }
-    
+
     .results-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
-    
+
     .results-card {
         padding: 12px;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     table {
-        min-width: 650px; /* Minimum width to prevent data overlap */
+        min-width: 650px;
+        /* Minimum width to prevent data overlap */
     }
-    
+
     .salary-input-wrap input {
         font-size: 1.2rem;
     }
@@ -1170,7 +1233,9 @@ input:disabled {
 }
 
 /* Default (desktop): hide the mobile-only daily cell */
-.td-daily-mobile { display: none; }
+.td-daily-mobile {
+    display: none;
+}
 
 /* ============================================
    MOBILE CARD TABLE — activated ≤ 600px
@@ -1178,6 +1243,7 @@ input:disabled {
    inline labels from the data-label attribute.
    ============================================ */
 @media (max-width: 600px) {
+
     /* Remove the horizontal-scroll forced table width */
     .results-card {
         overflow-x: unset;
@@ -1234,7 +1300,8 @@ input:disabled {
     }
 
     table tbody td.text-center {
-        text-align: right; /* In card mode treat center like right for readability */
+        text-align: right;
+        /* In card mode treat center like right for readability */
     }
 
     table tbody td:last-child {
@@ -1287,7 +1354,7 @@ input:disabled {
 
     /* Daily total — make it prominent */
     table tbody td.td-daily {
-        background: rgba(240,192,64,0.05) !important;
+        background: rgba(240, 192, 64, 0.05) !important;
         border-left: none !important;
         color: var(--accent);
         font-size: 1rem;
@@ -1683,6 +1750,23 @@ input:disabled {
     margin-bottom: 20px;
     color: #000000;
     font-family: 'Noto Sans Thai', 'Segoe UI', sans-serif;
+}
+
+.quota-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.quota-header-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.quota-header-subtitle {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 14px;
 }
 
 .quota-spreadsheet {

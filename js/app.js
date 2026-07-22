@@ -1286,7 +1286,7 @@ function openQuotaModal() {
 </div>`;
     const container = document.getElementById("quotaTableContainer");
     container.innerHTML = `
-        <div class="quota-title">จำนวนวันหยุดค่าวิชาชีพ ปี 2569</div>
+        <div class="quota-title">📊 จำนวนวันหยุดค่าวิชาชีพ ปี 2569</div>
         <table class="quota-spreadsheet">
             <thead>
                 <tr>
