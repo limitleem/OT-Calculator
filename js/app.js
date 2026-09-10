@@ -30,7 +30,7 @@ const fmtT = dec => {
 };
 const isHoliday = dStr => {
     const d = new Date(dStr);
-    return d.getDay() === 0 || d.getDay() === 6 || APP_CONFIG.HOLIDAYS_2569.some(h => h.date === dStr);
+    return d.getDay() === 0 || d.getDay() === 6 || APP_CONFIG.HOLIDAYS.some(h => h.date === dStr);
 };
 const hexToHsl = (hex) => {
     let r = parseInt(hex.slice(1, 3), 16) / 255;
@@ -976,7 +976,7 @@ const groupDatesToRanges = (dates) => {
         let curr = new Date(sDate);
         while (curr <= e) {
             const dStr = curr.toISOString().split('T')[0];
-            const h = APP_CONFIG.HOLIDAYS_2569.find(x => x.date === dStr);
+            const h = APP_CONFIG.HOLIDAYS.find(x => x.date === dStr);
             if (h) hList.push(`${curr.getDate()} - ${h.title}`);
             curr.setDate(curr.getDate() + 1);
         }
@@ -1022,18 +1022,21 @@ const renderHolidays = () => {
     const select = document.getElementById("holidayYearSelect");
     if (!list) return;
 
-    const years = [...new Set(APP_CONFIG.HOLIDAYS_2569.map(h => new Date(h.date).getFullYear()))].sort();
+    const years = [...new Set(APP_CONFIG.HOLIDAYS.map(h => new Date(h.date).getFullYear()))].sort();
     if (select && select.options.length === 0) {
         years.forEach(y => {
             const opt = document.createElement("option");
             opt.value = y; opt.text = y + 543;
             select.appendChild(opt);
         });
-        if (years.length > 0) select.value = years[0];
+        if (years.length > 0) {
+            const currentYear = new Date().getFullYear();
+            select.value = years.includes(currentYear) ? currentYear : years[years.length - 1];
+        }
     }
 
     const filterYear = select ? parseInt(select.value) : (years[0] || new Date().getFullYear());
-    const filtered = APP_CONFIG.HOLIDAYS_2569.filter(h => new Date(h.date).getFullYear() === filterYear);
+    const filtered = APP_CONFIG.HOLIDAYS.filter(h => new Date(h.date).getFullYear() === filterYear);
 
     let html = '';
     let currentMonth = -1;
@@ -1050,7 +1053,7 @@ const renderHolidays = () => {
     });
 
     // --- Leave Quota Section (grouped by month) ---
-    const quotaHolidays = APP_CONFIG.HOLIDAYS_2569
+    const quotaHolidays = APP_CONFIG.HOLIDAYS
         .filter(h => h.date.startsWith(filterYear + '-'))
         .map(h => h.date);
 
@@ -1130,9 +1133,27 @@ const renderHolidays = () => {
 };
 
 function openQuotaModal() {
-    const year = 2026;
+    const select = document.getElementById("quotaYearSelect");
+    const years = [...new Set(APP_CONFIG.HOLIDAYS.map(h => Number(h.date.slice(0, 4))))].sort((a, b) => a - b);
+    const currentYear = new Date().getFullYear();
+    select.innerHTML = years.map(year => '<option value="' + year + '">' + (year + 543) + '</option>').join('');
+    select.value = years.includes(currentYear) ? currentYear : (years[years.length - 1] || '');
+    select.disabled = years.length === 0;
+    renderQuotaTable();
+    document.getElementById("quotaModal").classList.add("show");
+}
+
+function renderQuotaTable() {
+    const year = Number(document.getElementById("quotaYearSelect").value);
+    const container = document.getElementById("quotaTableContainer");
+    container.dataset.year = year || '';
+    document.getElementById("saveQuotaImageButton").disabled = !year;
+    if (!year) {
+        container.textContent = APP_CONFIG.TEXT.NO_HOLIDAY_DATA;
+        return;
+    }
     const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-    const holidays = APP_CONFIG.HOLIDAYS_2569.filter(h => h.date.startsWith("2026-")).map(h => h.date);
+    const holidays = APP_CONFIG.HOLIDAYS.filter(h => h.date.startsWith(`${year}-`)).map(h => h.date);
 
     let tableRowsHtml = "";
 
@@ -1178,13 +1199,13 @@ function openQuotaModal() {
     }
 
     // --- Build holiday list grouped by month (2-column) — weekdays only ---
-    const allHolidays2026 = APP_CONFIG.HOLIDAYS_2569.filter(h => {
-        if (!h.date.startsWith("2026-")) return false;
+    const yearHolidays = APP_CONFIG.HOLIDAYS.filter(h => {
+        if (!h.date.startsWith(`${year}-`)) return false;
         const day = new Date(h.date).getDay();
         return day !== 0 && day !== 6; // exclude Sun (0) and Sat (6)
     });
     const monthGroups = {};
-    allHolidays2026.forEach(h => {
+    yearHolidays.forEach(h => {
         const d = new Date(h.date);
         const mon = d.getMonth();
         if (!monthGroups[mon]) monthGroups[mon] = [];
@@ -1263,7 +1284,7 @@ function openQuotaModal() {
         align-items:center;
         gap:8px;
     ">
-        📅 รายละเอียดวันหยุดนักขัตฤกษ์ ปี 2569
+        📅 รายละเอียดวันหยุดนักขัตฤกษ์ ปี ${year + 543}
     </div>
 
     <div style="
@@ -1281,12 +1302,11 @@ function openQuotaModal() {
         color:#6b7280;
         text-align:right;
     ">
-        รวมวันหยุดทั้งหมด <strong>${allHolidays2026.length}</strong> วัน
+        รวมวันหยุดทั้งหมด <strong>${yearHolidays.length}</strong> วัน
     </div>
 </div>`;
-    const container = document.getElementById("quotaTableContainer");
     container.innerHTML = `
-        <div class="quota-title">📊 จำนวนวันหยุดค่าวิชาชีพ ปี 2569</div>
+        <div class="quota-title">📊 จำนวนวันหยุดค่าวิชาชีพ ปี ${year + 543}</div>
         <table class="quota-spreadsheet">
             <thead>
                 <tr>
@@ -1313,12 +1333,12 @@ function openQuotaModal() {
         ${holidaySectionHtml}
     `;
 
-    document.getElementById("quotaModal").classList.add("show");
 }
 
 function saveQuotaAsImage() {
     const container = document.getElementById("quotaTableContainer");
-    if (!container) return;
+    if (!container || !container.dataset.year) return;
+    const buddhistYear = Number(container.dataset.year) + 543;
 
     showToast("กำลังประมวลผลรูปภาพ...", "info");
 
@@ -1328,7 +1348,7 @@ function saveQuotaAsImage() {
         backgroundColor: "#0f0f1a"
     }).then(canvas => {
         const link = document.createElement("a");
-        link.download = "โควต้าวันลา_2569.png";
+        link.download = `โควต้าวันลา_${buddhistYear}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
         showToast("บันทึกรูปภาพสำเร็จ", "success");

@@ -65,7 +65,8 @@ const APP_CONFIG = {
         //{ id: "icons", name: "Icons" },
         //{ id: "shapes", name: "Shapes" }
     ],
-    HOLIDAYS_2569: [
+    // Add holidays for any year here; dropdowns use the years in these dates.
+    HOLIDAYS: [
         { "date": "2026-01-01", "title": "วันขึ้นปีใหม่" },
         { "date": "2026-01-02", "title": "วันหยุดกรณีพิเศษ" },
         { "date": "2026-03-03", "title": "วันมาฆบูชา" },
